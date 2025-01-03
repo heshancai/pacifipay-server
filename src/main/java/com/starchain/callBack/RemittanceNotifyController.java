@@ -2,10 +2,12 @@ package com.starchain.callBack;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.starchain.config.PacificPayConfig;
 import com.starchain.constants.CardUrlConstants;
 import com.starchain.util.RSA2048Encrypt;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,13 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 public class RemittanceNotifyController {
-
+    @Autowired
+    private PacificPayConfig pacificPayConfig;
     @ApiOperation(value = "申请汇款通知")
     @PostMapping(value = "/cardRemitNotify")
     public String cardRemitNotify(@RequestBody String jsonObject) {
         String decrypt = null;
         try {
-            decrypt = RSA2048Encrypt.decrypt(jsonObject, RSA2048Encrypt.getPrivateKey(CardUrlConstants.PRIVATEKEY));
+            decrypt = RSA2048Encrypt.decrypt(jsonObject, RSA2048Encrypt.getPrivateKey(pacificPayConfig.getPrivateKey()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -43,7 +46,7 @@ public class RemittanceNotifyController {
     public String remitCancelNotify(@RequestBody String jsonObject) {
         String decrypt = null;
         try {
-            decrypt = RSA2048Encrypt.decrypt(jsonObject, RSA2048Encrypt.getPrivateKey(CardUrlConstants.PRIVATEKEY));
+            decrypt = RSA2048Encrypt.decrypt(jsonObject, RSA2048Encrypt.getPrivateKey(pacificPayConfig.getPrivateKey()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

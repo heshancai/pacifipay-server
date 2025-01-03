@@ -13,6 +13,7 @@ import com.starchain.enums.CardCodeEnum;
 import com.starchain.exception.StarChainException;
 import com.starchain.service.ICardHolderService;
 import com.starchain.util.TpyshUtils;
+import com.starchain.util.UUIDUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,12 +45,13 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
 
         String token = null;
         try {
-            token = TpyshUtils.getToken(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(),pacificPayConfig.getPrivateKey());
+            token = TpyshUtils.getToken(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
             System.out.println("token=>" + token);
             CardHolder cardHolder = new CardHolder();
             cardHolder.setCardCode(CardCodeEnum.TPY_MDN6.getCardCode());
-            // 生成 商户申请创建持卡人的唯一值
-            cardHolder.setMerchantCardHolderId(cardHolder.getMerchantCardHolderId());
+            String merchantCardHolderId = cardHolderDto.getChannelId() + cardHolder.getUserId() + cardHolder.getCardCode() + UUIDUtil.generate8CharUUID();
+            //商户申请创建持卡人的唯一值
+            cardHolder.setMerchantCardHolderId(merchantCardHolderId);
             cardHolder.setFirstName(cardHolder.getFirstName());
             cardHolder.setLastName(cardHolder.getLastName());
             cardHolder.setPhoneCountry(cardHolder.getPhoneCountry());
@@ -65,7 +67,7 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
 
             this.save(cardHolder);
             // 公钥加密传输 数据  我的私钥解密接收到的数据
-            String str = TpyshUtils.doPost(CardUrlConstants.BASEURL + CardUrlConstants.addCardHolder,
+            String str = TpyshUtils.doPost(pacificPayConfig.getBaseUrl() + CardUrlConstants.addCardHolder,
                     token, JSONObject.toJSONString(cardHolder), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             CardHolder returnCardHolder = JSON.parseObject(str, CardHolder.class);
             System.out.println("返回的数据：" + returnCardHolder);

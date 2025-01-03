@@ -41,11 +41,11 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     public JSONObject mchInfo() {
         String token = null;
         try {
-            token = TpyshUtils.getToken(CardUrlConstants.BASEURL, CardUrlConstants.APPID, CardUrlConstants.APPSECRET, pacificPayConfig.getPrivateKey());
+            token = TpyshUtils.getToken(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        String str = TpyshUtils.doPost(CardUrlConstants.BASEURL + CardUrlConstants.mchInfo, token, "", pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+        String str = TpyshUtils.doPost(pacificPayConfig.getBaseUrl() + CardUrlConstants.mchInfo, token, "", pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
         System.out.println("返回的数据：" + str);
         return JSON.parseObject(str);
     }
@@ -69,7 +69,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     public Card addCard(CardHolder cardHolder) {
         String token = null;
         try {
-            token = TpyshUtils.getToken(CardUrlConstants.BASEURL, CardUrlConstants.APPID, CardUrlConstants.APPSECRET, pacificPayConfig.getPrivateKey());
+            token = TpyshUtils.getToken(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -85,7 +85,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         // 卡状态为激活中
         card.setCardStatus(CardStatusEnum.ACTIVATING.getCardStatus());
         this.save(card);
-        String str = TpyshUtils.doPost(CardUrlConstants.BASEURL + CardUrlConstants.addCard, token, JSONObject.toJSONString(card), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+        String str = TpyshUtils.doPost(pacificPayConfig.getBaseUrl() + CardUrlConstants.addCard, token, JSONObject.toJSONString(card), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
         System.out.println("返回的数据：" + str);
         Card returnCard = JSON.parseObject(str, Card.class);
         BeanUtils.copyProperties(returnCard, card);

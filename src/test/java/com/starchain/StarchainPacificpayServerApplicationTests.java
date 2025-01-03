@@ -16,8 +16,8 @@ class StarchainPacificpayServerApplicationTests {
     @Test
     void contextLoads() {
         CardHolderDto cardHolder=new CardHolderDto();
-        cardHolder.setCardCode(CardCodeEnum.TPY_MDN6.getCardCode());
-        cardHolder.setMerchantCardHolderId("MC123456789");
+        cardHolder.setUserId(10000L);
+        cardHolder.setUserId(100000L);
         cardHolder.setFirstName("张");
         cardHolder.setLastName("三");
         cardHolder.setPhoneCountry("+86");

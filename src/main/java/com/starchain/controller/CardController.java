@@ -53,8 +53,8 @@ public class CardController {
     /**
      * 创建持卡人 同时创建卡
      */
-    @ApiOperation(value = "创建持卡人并且创建卡")
-    @PostMapping("/addCardAndHolder")
+    @ApiOperation(value = "创建持卡人")
+    @PostMapping("/addCardHolder")
     public ClientResponse addCardHolder(@RequestBody CardHolderDto cardHolderDto) {
         if (ObjectUtils.isEmpty(cardHolderDto.getUserId())) {
             return ResultGenerator.genFailResult("dto不能为空");
@@ -63,7 +63,7 @@ public class CardController {
         if (ObjectUtils.isEmpty(cardHolderDto.getChannelId())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
-        // 是否创建持卡人
+        // 每个用户只能创建一个持卡人
         LambdaQueryWrapper<CardHolder> cardHolderLambdaQueryWrapper = new LambdaQueryWrapper<>();
         cardHolderLambdaQueryWrapper.eq(CardHolder::getUserId, cardHolderDto.getUserId());
         cardHolderLambdaQueryWrapper.eq(CardHolder::getChannelId, cardHolderDto.getChannelId());
@@ -71,46 +71,28 @@ public class CardController {
         if (cardHolder == null) {
             // 创建持卡人
             cardHolder = cardHolderService.addCardHolder(cardHolderDto);
-            // 保存卡数据
-            Card card = cardService.addCard(cardHolder);
-            return ResultGenerator.genSuccessResult("申请创卡成功，正在审核中");
+
+            return ResultGenerator.genSuccessResult(cardHolder);
         }
-        // 检查当前用户卡数量是否超过 4张
-        Integer holderCardNum = cardService.checkCardNum(cardHolder.getId(), cardHolder.getChannelId(), cardHolder.getCardCode());
-        if (holderCardNum >= 4) {
-            return ResultGenerator.genFailResult("当前用户卡数量超过4张，无法创建新卡");
-        }
-        // 保存卡数据
-        Card card = cardService.addCard(cardHolder);
-        return ResultGenerator.genSuccessResult("申请创卡成功，正在审核中");
+        return ResultGenerator.genSuccessResult(cardHolder);
+
     }
 
     /**
      * 创建卡
      */
     @ApiOperation(value = "根据持卡人创建卡")
-    @PostMapping("/addCardHolder")
-    public void addCard() {
-        String token = null;
-        try {
-            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    @PostMapping("/addCard")
+    public ClientResponse addCard(@RequestBody CardHolderDto cardHolderDto) {
+        // 检查当前用户卡数量是否超过 4张
+        Integer holderCardNum = cardService.checkCardNum(cardHolderDto.getId(), cardHolderDto.getChannelId(), cardHolderDto.getCardCode());
+        if (holderCardNum >= 4) {
+            return ResultGenerator.genFailResult("当前用户卡数量超过4张，无法创建新卡");
         }
         // 创建卡
-        System.out.println("token=>" + token);
-        Card card = new Card();
-        card.setCardCode("TpyMDN6");
-        card.setSaveOrderId("ORDER789012");
-        card.setSaveAmount(new BigDecimal("10.00"));
-        //  TPYSH持卡人ID
-        card.setTpyshCardHolderId("20241224173541da328");
+        Card card = cardService.addCard(cardHolderDto);
 
-        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.addCard, token, JSONObject.toJSONString(card),
-                pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
-        System.out.println("返回的数据：" + str);
-        Card card1 = JSON.parseObject(str, Card.class);
-        BeanUtils.copyProperties(card, card1);
+        return ResultGenerator.genSuccessResult(card);
     }
 
 
@@ -126,7 +108,7 @@ public class CardController {
             throw new RuntimeException(e);
         }
         // 创建卡
-        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl()+ CardUrlConstants.mchInfo, token, "", pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.mchInfo, token, "", pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
         JSONObject jsonObject = JSON.parseObject(str);
         // 查询商户余额：{"amount":523.70,"freeze":210.45}
         System.out.println("查询商户余额：" + jsonObject);

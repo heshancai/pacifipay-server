@@ -51,18 +51,21 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
             CardHolder cardHolder = new CardHolder();
             cardHolder.setCardCode(CardCodeEnum.TPY_MDN6.getCardCode());
             //商户申请创建持卡人的唯一值
-            String merchantCardHolderId = cardHolderDto.getChannelId() + cardHolder.getUserId() + cardHolder.getCardCode() + UUIDUtil.generate8CharUUID();
+            String merchantCardHolderId = String.valueOf(cardHolderDto.getChannelId()) + cardHolderDto.getUserId() + cardHolder.getCardCode() + UUIDUtil.generate8CharUUID();
             cardHolder.setMerchantCardHolderId(merchantCardHolderId);
 
-            cardHolder.setFirstName(cardHolder.getFirstName());
-            cardHolder.setLastName(cardHolder.getLastName());
-            cardHolder.setPhoneCountry(cardHolder.getPhoneCountry());
-            cardHolder.setPhoneNumber(cardHolder.getPhoneNumber());
-            cardHolder.setIdAccount(cardHolder.getIdAccount());
-            cardHolder.setEmail(cardHolder.getEmail());
-            cardHolder.setAddress(cardHolder.getAddress());
-            cardHolder.setGender(cardHolder.getGender());
-            cardHolder.setBirthday(cardHolder.getBirthday());
+            cardHolder.setUserId(cardHolderDto.getUserId());
+            cardHolder.setChannelId(cardHolderDto.getChannelId());
+
+            cardHolder.setFirstName(cardHolderDto.getFirstName());
+            cardHolder.setLastName(cardHolderDto.getLastName());
+            cardHolder.setPhoneCountry(cardHolderDto.getPhoneCountry());
+            cardHolder.setPhoneNumber(cardHolderDto.getPhoneNumber());
+            cardHolder.setIdAccount(cardHolderDto.getIdAccount());
+            cardHolder.setEmail(cardHolderDto.getEmail());
+            cardHolder.setAddress(cardHolderDto.getAddress());
+            cardHolder.setGender(cardHolderDto.getGender());
+            cardHolder.setBirthday(cardHolderDto.getBirthday());
             cardHolder.setStatus(0);
             cardHolder.setCreateTime(LocalDateTime.now());
             cardHolder.setUpdateTime(LocalDateTime.now());
@@ -73,7 +76,7 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
                     token, JSONObject.toJSONString(cardHolder), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             CardHolder returnCardHolder = JSON.parseObject(str, CardHolder.class);
             System.out.println("返回的数据：" + returnCardHolder);
-            BeanUtils.copyProperties(returnCardHolder, cardHolder);
+            cardHolder.setTpyshCardHolderId(returnCardHolder.getTpyshCardHolderId());
             cardHolder.setUpdateTime(LocalDateTime.now());
             cardHolder.setStatus(1);
             this.updateById(cardHolder);

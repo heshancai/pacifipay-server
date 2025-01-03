@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -39,16 +40,16 @@ public class UserWallet {
     @ApiModelProperty(value = "USDT 钱包地址", example = "1AaBbCcDdEeFfGgHh12345")
     private String usdtAddress;
 
-    @ApiModelProperty(value = "USDT 支持的网络类型：1=TRC20, 2=BEP20, 3=ERC20", example = "1")
+    @ApiModelProperty(value = "USDT 支持的网络类型：1=TRC20, 2=BEP20", example = "1")
     private Integer usdtNetwork;
 
-    @ApiModelProperty(value = "该地址的可用总余额", example = "100.123456789012345678")
-    private String totalAmt;
+    @ApiModelProperty(value = "地址余额", example = "100.123456789012345678")
+    private BigDecimal balance;
 
-    @ApiModelProperty(value = "钱包货币地址类型", example = "USDT")
-    private String coinType;
+    @ApiModelProperty(value = "币种符号 ", example = " USDT-TRC20,USDT-BEP20")
+    private String coinId;
 
-    @ApiModelProperty(value = "状态", example = "1")
+    @ApiModelProperty(value = "状态", example = "状态：1:有效,0:无效")
     private Integer status;
 
     @ApiModelProperty(value = "创建时间", example = "2025-01-01T12:00:00")

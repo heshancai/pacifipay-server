@@ -11,6 +11,8 @@ import com.starchain.entity.Card;
 import com.starchain.entity.CardHolder;
 import com.starchain.enums.CardStatusEnum;
 import com.starchain.service.ICardService;
+import com.starchain.util.HttpUtils;
+import com.starchain.util.OrderNumberUtils;
 import com.starchain.util.TpyshUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -41,11 +43,11 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     public JSONObject mchInfo() {
         String token = null;
         try {
-            token = TpyshUtils.getToken(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        String str = TpyshUtils.doPost(pacificPayConfig.getBaseUrl() + CardUrlConstants.mchInfo, token, "", pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.mchInfo, token, "", pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
         System.out.println("返回的数据：" + str);
         return JSON.parseObject(str);
     }
@@ -69,23 +71,26 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     public Card addCard(CardHolder cardHolder) {
         String token = null;
         try {
-            token = TpyshUtils.getToken(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         // 创建卡
         System.out.println("token=>" + token);
+
+        // 部分数据先入库
         Card card = new Card();
         card.setCardCode(cardHolder.getCardCode());
-        card.setSaveOrderId("ORDER789012");
-        card.setSaveAmount(new BigDecimal("10.00"));
+        card.setCardHolderId(cardHolder.getId());
+        //  生成一个唯一的订单号
+        card.setSaveOrderId(OrderNumberUtils.getOrderId("starChain"));
         card.setTpyshCardHolderId(cardHolder.getTpyshCardHolderId());
         card.setLocalCreateTime(LocalDateTime.now());
         card.setLocalUpdateTime(LocalDateTime.now());
         // 卡状态为激活中
         card.setCardStatus(CardStatusEnum.ACTIVATING.getCardStatus());
         this.save(card);
-        String str = TpyshUtils.doPost(pacificPayConfig.getBaseUrl() + CardUrlConstants.addCard, token, JSONObject.toJSONString(card), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.addCard, token, JSONObject.toJSONString(card), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
         System.out.println("返回的数据：" + str);
         Card returnCard = JSON.parseObject(str, Card.class);
         BeanUtils.copyProperties(returnCard, card);

@@ -2,6 +2,7 @@ package com.starchain.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.starchain.entity.UserWallet;
+import com.starchain.entity.dto.UserWalletDto;
 
 /**
  * @author
@@ -9,4 +10,11 @@ import com.starchain.entity.UserWallet;
  * @Description
  */
 public interface IUserWalletService extends IService<UserWallet> {
+
+    /**
+     * 获取钱包地址
+     * @param userWalletDto
+     * @return
+     */
+    UserWallet findWalletAddress(UserWalletDto userWalletDto);
 }

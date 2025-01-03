@@ -45,18 +45,18 @@ public class RSA2048Encrypt {
             System.out.println("私钥 => " + privateKey + "\n");
             System.out.println("公钥 =>" + publicKey + "\n");
 
-            // RSA加密
+            // 公钥RSA加密
             String data = "123456";
             String encryptData = encrypt(data, getPublicKey(publicKey));
             System.out.println("加密后内容 => " + encryptData + "\n");
-            // RSA解密
+            // 私钥RSA解密
             String decryptData = decrypt(encryptData, getPrivateKey(privateKey));
             System.out.println("解密后内容 => " + decryptData + "\n");
 
 
-            // RSA签名
+            // 私钥RSA签名
             String sign = sign(data, getPrivateKey(privateKey));
-            // RSA验签
+            // 公钥RSA验签
             boolean result = verify(data, getPublicKey(publicKey), sign);
             System.out.println("验签结果 => " + result + "\n");
 

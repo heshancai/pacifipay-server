@@ -14,7 +14,7 @@ import com.starchain.result.ClientResponse;
 import com.starchain.result.ResultGenerator;
 import com.starchain.service.ICardHolderService;
 import com.starchain.service.ICardService;
-import com.starchain.service.impl.CardHolderServiceImpl;
+import com.starchain.util.HttpUtils;
 import com.starchain.util.TpyshUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -93,7 +93,7 @@ public class CardController {
     public void addCard() {
         String token = null;
         try {
-            token = TpyshUtils.getToken(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -106,7 +106,7 @@ public class CardController {
         //  TPYSH持卡人ID
         card.setTpyshCardHolderId("20241224173541da328");
 
-        String str = TpyshUtils.doPost(pacificPayConfig.getBaseUrl() + CardUrlConstants.addCard, token, JSONObject.toJSONString(card),
+        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.addCard, token, JSONObject.toJSONString(card),
                 pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
         System.out.println("返回的数据：" + str);
         Card card1 = JSON.parseObject(str, Card.class);
@@ -121,12 +121,12 @@ public class CardController {
     public void mchInfo() {
         String token = null;
         try {
-            token = TpyshUtils.getToken(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         // 创建卡
-        String str = TpyshUtils.doPost(pacificPayConfig.getBaseUrl()+ CardUrlConstants.mchInfo, token, "", pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl()+ CardUrlConstants.mchInfo, token, "", pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
         JSONObject jsonObject = JSON.parseObject(str);
         // 查询商户余额：{"amount":523.70,"freeze":210.45}
         System.out.println("查询商户余额：" + jsonObject);
@@ -139,7 +139,7 @@ public class CardController {
     public void tradeDetail() {
         String token = null;
         try {
-            token = TpyshUtils.getToken(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -147,7 +147,7 @@ public class CardController {
         tradeDetailPage.setPageNum(1);
         tradeDetailPage.setPageSize(10);
         // 创建卡
-        String str = TpyshUtils.doPost(pacificPayConfig.getBaseUrl() + CardUrlConstants.tradeDetail, token, JSONObject.toJSONString(tradeDetailPage),
+        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.tradeDetail, token, JSONObject.toJSONString(tradeDetailPage),
                 pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
         List<JSONObject> jsonObjects = JSON.parseArray(str, JSONObject.class);
         // 查询商户余额：{"amount":523.70,"freeze":210.45}

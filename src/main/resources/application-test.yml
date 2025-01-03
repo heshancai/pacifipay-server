@@ -21,3 +21,5 @@ app:
   secret: "833b1abf3b4d9aab620ac3067bffe050"
   base-url: "http://42.194.129.4:8082/merchant-app-server/mch"
   server-public-key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwyJ/9AZq7wnOWxpu0b6LulsSEY2X98rSkqfNBzBYNBGsUIJDN9fv6HmfSLdrvSuqU89DSYP+ek11h60d3ZFKtM414dslWbIhzMkcGBboq2cyAER7iX9k5wuCcGpeejiICVFurx8MDKaMJBpuYYrVoyjW69bEHpkfrrr8WusqECbYSTDd2e5+uGELkRBY1bqyA2AWrTizNsU7Waflzi7ODc2h1bsZt+9bwahx107IA0mE6bQnX2e8TnN+9Ijjm5VoAeKuOLsd5Uu+/NLKmgYE0cUQismRon+mUPLB6JKKbrTGGOXRKb4Rb1zVvOxvtNnEIZZpSMjI+Do6ojZnkC/VKQIDAQAB"
+wallet:
+  base-url: ""

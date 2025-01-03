@@ -3,22 +3,28 @@ package com.starchain.controller;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.starchain.config.PacificPayConfig;
 import com.starchain.constants.CardUrlConstants;
 import com.starchain.entity.Card;
 import com.starchain.entity.CardHolder;
 import com.starchain.entity.TradeDetailPage;
-import com.starchain.enums.CardCodeEnum;
+import com.starchain.entity.dto.CardHolderDto;
 import com.starchain.result.ClientResponse;
 import com.starchain.result.ResultGenerator;
-import com.starchain.service.CardHolderService;
+import com.starchain.service.ICardHolderService;
+import com.starchain.service.ICardService;
+import com.starchain.service.impl.CardHolderServiceImpl;
 import com.starchain.util.TpyshUtils;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
@@ -29,35 +35,65 @@ import java.util.List;
  * @date 2024-12-20
  * @Description
  */
-@RestController("/card")
+@RestController
 @Slf4j
+@Api(value = "pacificPay银行卡相关api", tags = {"pacificPay银行卡相关api"})
+@RequestMapping("/card")
 public class CardController {
 
     @Autowired
     private PacificPayConfig pacificPayConfig;
 
     @Autowired
-    private CardHolderService cardHolderService;
+    private ICardHolderService cardHolderService;
+
+    @Autowired
+    private ICardService cardService;
 
     /**
-     * 创建持卡人
+     * 创建持卡人 同时创建卡
      */
     @ApiOperation(value = "创建持卡人并且创建卡")
-    @PostMapping("/addCardHolder")
-    public ClientResponse addCardHolder(@RequestBody CardHolder cardHolder) {
-        Boolean result = cardHolderService.addCardHolder(cardHolder);
-        return ResultGenerator.genSuccessResult(result);
+    @PostMapping("/addCardAndHolder")
+    public ClientResponse addCardHolder(@RequestBody CardHolderDto cardHolderDto) {
+        if (ObjectUtils.isEmpty(cardHolderDto.getUserId())) {
+            return ResultGenerator.genFailResult("dto不能为空");
+        }
+
+        if (ObjectUtils.isEmpty(cardHolderDto.getChannelId())) {
+            return ResultGenerator.genFailResult("dto不能为空");
+        }
+        // 是否创建持卡人
+        LambdaQueryWrapper<CardHolder> cardHolderLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        cardHolderLambdaQueryWrapper.eq(CardHolder::getUserId, cardHolderDto.getUserId());
+        cardHolderLambdaQueryWrapper.eq(CardHolder::getChannelId, cardHolderDto.getChannelId());
+        CardHolder cardHolder = cardHolderService.getOne(cardHolderLambdaQueryWrapper);
+        if (cardHolder == null) {
+            // 创建持卡人
+            cardHolder = cardHolderService.addCardHolder(cardHolderDto);
+            // 保存卡数据
+            Card card = cardService.addCard(cardHolder);
+            return ResultGenerator.genSuccessResult("申请创卡成功，正在审核中");
+        }
+        // 检查当前用户卡数量是否超过 4张
+        Integer holderCardNum = cardService.checkCardNum(cardHolder.getId(), cardHolder.getChannelId(), cardHolder.getCardCode());
+        if (holderCardNum >= 4) {
+            return ResultGenerator.genFailResult("当前用户卡数量超过4张，无法创建新卡");
+        }
+        // 保存卡数据
+        Card card = cardService.addCard(cardHolder);
+        return ResultGenerator.genSuccessResult("申请创卡成功，正在审核中");
     }
 
     /**
      * 创建卡
      */
     @ApiOperation(value = "根据持卡人创建卡")
-    @PostMapping("/addCard")
+    @PostMapping("/addCardHolder")
     public void addCard() {
         String token = null;
         try {
-            token = TpyshUtils.getToken(CardUrlConstants.BASEURL, CardUrlConstants.APPID, CardUrlConstants.APPSECRET);
+            token = TpyshUtils.getToken(CardUrlConstants.BASEURL, CardUrlConstants.APPID, CardUrlConstants.APPSECRET, pacificPayConfig.getPrivateKey());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -81,10 +117,11 @@ public class CardController {
     /**
      * 查询商户余额
      */
+    @ApiOperation(value = "查询商户余额")
     public void mchInfo() {
         String token = null;
         try {
-            token = TpyshUtils.getToken(CardUrlConstants.BASEURL, CardUrlConstants.APPID, CardUrlConstants.APPSECRET);
+            token = TpyshUtils.getToken(CardUrlConstants.BASEURL, CardUrlConstants.APPID, CardUrlConstants.APPSECRET, pacificPayConfig.getPrivateKey());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -99,10 +136,11 @@ public class CardController {
     /*
      * 查询交易明细
      */
+    @ApiOperation(value = "查询交易明细")
     public void tradeDetail() {
         String token = null;
         try {
-            token = TpyshUtils.getToken(CardUrlConstants.BASEURL, CardUrlConstants.APPID, CardUrlConstants.APPSECRET);
+            token = TpyshUtils.getToken(CardUrlConstants.BASEURL, CardUrlConstants.APPID, CardUrlConstants.APPSECRET, pacificPayConfig.getPrivateKey());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

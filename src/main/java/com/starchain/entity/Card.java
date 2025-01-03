@@ -36,6 +36,9 @@ public class Card {
     @ApiModelProperty(value = "卡预存额度", example = "1000.00")
     private BigDecimal saveAmount; // 卡预存额度
 
+    @ApiModelProperty(value = "持卡人Id card_holder的 iD", example = "1000.00")
+    private Long cardHolderId;
+
     @ApiModelProperty(value = "TPYSH持卡人ID,通过创建持卡人接口获取", example = "TPY123456")
     private String tpyshCardHolderId; // TPYSH持卡人ID
 

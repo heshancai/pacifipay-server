@@ -46,7 +46,7 @@ public class TpyshUtils {
      * @return
      * @throws Exception
      */
-    public static String getToken(String baseUrl, String appId, String appSecret) throws Exception {
+    public static String getToken(String baseUrl, String appId, String appSecret,String privateKey) throws Exception {
         // MD5 加签
         String macString = appId + "&" + appSecret;
         String md5Str = SecurityUtils.getMD5Str(macString, "utf-8");
@@ -130,9 +130,8 @@ public class TpyshUtils {
         System.out.println("速汇卡渠道发送：" + json);
         String res = null;
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            // 加密:服务端提供的公钥进行加密
-            String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAol0/Yo31fBUFp3tABkjVUiULt3l2u8OIhNfioilukKHWkKAmEFySPV+trCTKin6Kl5IVE0YNl6Z5JNW6hJse30/x2mQfPQSTuMVl5K4UJVf+4b+LKxEoodftSj5hX43wJ9N66zIhnC77I9yUqOBE9XjDS+Vd2CBhzrASERdFYzUKbWq1j3DQGMHDUDSDfN8RxV2ah8Dc7afoTu28Nv8YJsLogt3fT7rJiCBXc0ZgjQNBNSxtxJ+vLB7HNh+xSD0804p3fz1dcwyAOL4XCVbuYQV+QS8NSE/bvCBiiihIcxHYOaNe5P/N/x/23f7OfFCLfq+3YW9Nx0crv53k7ivwiQIDAQAB";
-            String encrypt = RSA2048Encrypt.encrypt(json, RSA2048Encrypt.getPublicKey(publicKey));
+            // 银行卡端公钥进行加密
+            String encrypt = RSA2048Encrypt.encrypt(json, RSA2048Encrypt.getPublicKey(serverPublicKey));
             // 加签
             String sign = TpyshUtils.sign(encrypt);
 
@@ -154,9 +153,9 @@ public class TpyshUtils {
                     throw new StarChainException(resultJson.getString("message"));
                 }
                 String dataEncrypt = resultJson.getString("data");
-                // 解密
+                // 私钥解密
 //                String decrypt = RSA2048Encrypt.decrypt(dataEncrypt, RSA2048Encrypt.getPrivateKey(PRIVATEKEY));
-                res = RSA2048Encrypt.decrypt(dataEncrypt, RSA2048Encrypt.getPrivateKey(PRIVATEKEY));
+                res = RSA2048Encrypt.decrypt(dataEncrypt, RSA2048Encrypt.getPrivateKey(privateKey));
                 // 解析对象的情况
 //                res = JSON.parseObject(decrypt);
                 // 解析List<T> 得情况

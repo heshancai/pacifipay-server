@@ -1,9 +1,9 @@
 package com.starchain;
 
 import com.starchain.entity.CardHolder;
+import com.starchain.entity.dto.CardHolderDto;
 import com.starchain.enums.CardCodeEnum;
-import com.starchain.service.CardHolderService;
-import com.starchain.service.CardService;
+import com.starchain.service.impl.CardHolderServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,10 +12,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 class StarchainPacificpayServerApplicationTests {
 
     @Autowired
-    private CardHolderService cardHolderService;
+    private CardHolderServiceImpl cardHolderServiceImpl;
     @Test
     void contextLoads() {
-        CardHolder cardHolder=new CardHolder();
+        CardHolderDto cardHolder=new CardHolderDto();
         cardHolder.setCardCode(CardCodeEnum.TPY_MDN6.getCardCode());
         cardHolder.setMerchantCardHolderId("MC123456789");
         cardHolder.setFirstName("张");
@@ -27,7 +27,7 @@ class StarchainPacificpayServerApplicationTests {
         cardHolder.setAddress("北京市朝阳区某某路123号");
         cardHolder.setGender("0");
         cardHolder.setBirthday("2000-01-01");
-        cardHolderService.addCardHolder(cardHolder);
+        cardHolderServiceImpl.addCardHolder(cardHolder);
     }
 
 }

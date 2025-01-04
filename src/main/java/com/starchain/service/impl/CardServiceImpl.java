@@ -84,7 +84,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         card.setCardHolderId(cardHolder.getId());
         //  生成一个唯一的订单号
         card.setSaveOrderId(OrderNumberUtils.getOrderId("starChain"));
-        // 太平洋的持卡人唯一值，后续使用此值进行交互 也是唯一性
+        // 太平洋的持卡人唯一值
         card.setTpyshCardHolderId(cardHolder.getTpyshCardHolderId());
         card.setLocalCreateTime(LocalDateTime.now());
         card.setLocalUpdateTime(LocalDateTime.now());

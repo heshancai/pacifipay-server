@@ -1,13 +1,18 @@
 package com.starchain;
 
 import com.starchain.controller.CardController;
+import com.starchain.controller.RemitCardController;
 import com.starchain.entity.CardHolder;
+import com.starchain.entity.RemitCard;
 import com.starchain.entity.dto.CardHolderDto;
 import com.starchain.enums.CardCodeEnum;
+import com.starchain.result.ClientResponse;
 import com.starchain.service.impl.CardHolderServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 class StarchainPacificpayServerApplicationTests {
@@ -18,9 +23,10 @@ class StarchainPacificpayServerApplicationTests {
 
     @Autowired
     private CardController cardController;
+
     @Test
     void contextLoads() {
-        CardHolderDto cardHolder=new CardHolderDto();
+        CardHolderDto cardHolder = new CardHolderDto();
         cardHolder.setChannelId(100000);
         cardHolder.setUserId(10000L);
         cardHolder.setFirstName("张");
@@ -37,7 +43,7 @@ class StarchainPacificpayServerApplicationTests {
 
     @Test
     void contextLoads1() {
-        CardHolderDto cardHolder=new CardHolderDto();
+        CardHolderDto cardHolder = new CardHolderDto();
         cardHolder.setChannelId(100000);
         cardHolder.setUserId(10000L);
         cardHolder.setFirstName("张");
@@ -53,4 +59,24 @@ class StarchainPacificpayServerApplicationTests {
     }
 
 
+    @Test
+    void tradeDetail() {
+        cardController.tradeDetail();
+    }
+
+    @Autowired
+    RemitCardController remitCardController;
+
+    @Test
+    void addRemitCard() {
+        RemitCard remitCard = new RemitCard();
+        remitCard.setUserId(123456L);
+        remitCard.setChannelId(987654L);
+        remitCard.setRemitFirstName("John");
+        remitCard.setRemitLastName("Doe");
+        remitCard.setRemitBankNo("1234567890");
+
+        ClientResponse response = remitCardController.addRemitCard(remitCard);
+
+    }
 }

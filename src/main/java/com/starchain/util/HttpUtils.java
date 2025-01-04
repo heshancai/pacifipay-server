@@ -31,6 +31,7 @@ public class HttpUtils {
      * @return
      */
     public static String doPostMiPay(String urlPath, String token, String json, String appId, String serverPublicKey, String privateKey) {
+        System.out.println("doPostMiPay urlPath:{}"+ urlPath);
         System.out.println("速汇卡渠道发送：" + json);
         String res = null;
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {

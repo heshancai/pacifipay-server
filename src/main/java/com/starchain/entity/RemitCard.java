@@ -22,49 +22,59 @@ import java.time.LocalDateTime;
 @TableName("remit_card")
 @ApiModel(value = "RemitCard", description = "收款卡记录表")
 public class RemitCard {
-    @TableId(value = "id", type = IdType.AUTO)
-    @ApiModelProperty(value = "主键ID", example = "1")
-    private Long id;
 
-    @ApiModelProperty(value = "用户Id 第三方传递过来")
+    @ApiModelProperty(value = "用户ID", example = "123456")
     private Long userId;
 
-    @ApiModelProperty(value = "汇款类型编码", example = "UQR")
+    @ApiModelProperty(value = "渠道ID", example = "987654")
+    private Long channelId;
+
+    @ApiModelProperty(value = "汇款类型编码", example = "LNR_IND")
     private String remitCode;
 
-    @ApiModelProperty(value = "汇款卡标识", example = "CARD12345")
+    @ApiModelProperty(value = "卡ID", example = "CARD123456789")
     private String cardId;
 
-    @ApiModelProperty(value = "名", example = "John")
-    private String remitFirstName;
-
-    @ApiModelProperty(value = "姓", example = "Doe")
-    private String remitLastName;
-
-    @ApiModelProperty(value = "银行卡号", example = "1234567890123456")
-    private String remitBankNo;
-
-    @ApiModelProperty(value = "额外参数", example = "{\"swiftCode\":\"ABCDEF123\"}")
-    private String extraParams;
-
-    @ApiModelProperty(value = "汇款卡ID", example = "TPY12345")
-    private String tpyCardId;
-
-    @ApiModelProperty(value = "状态", example = "IN REVIEW")
+    @ApiModelProperty(value = "状态", example = "SUCCESS")
     private String status;
 
-    @ApiModelProperty(value = "状态描述", example = "IN REVIEW")
+    @ApiModelProperty(value = "状态描述", example = "操作成功")
     private String statusDesc;
 
-    @ApiModelProperty(value = "银行币种", example = "USD")
+    // 以下为 extraParams 对应的字段
+    @ApiModelProperty(value = "Swift码", example = "ABCDEF123")
+    private String swiftCode;
+
+    @ApiModelProperty(value = "姓名", example = "John Doe")
+    private String remitName;
+
+    @ApiModelProperty(value = "银行编码", example = "BANK123")
+    private String bankCode;
+
+    @ApiModelProperty(value = "汇款银行名称", example = "Bank of America")
+    private String remitBank;
+
+    @ApiModelProperty(value = "汇款银行子行编码", example = "BRANCH123")
+    private String remitBankBranchCode;
+
+    @ApiModelProperty(value = "BSB码（澳大利亚）", example = "123456")
+    private String bsbCode;
+
+    @ApiModelProperty(value = "Sort Code（英国）", example = "12-34-56")
+    private String sortCode;
+
+    @ApiModelProperty(value = "ACH号码（美国）", example = "123456789")
+    private String achNumber;
+
+    @ApiModelProperty(value = "身份证号", example = "123456789012345678")
+    private String idNumber;
+
+    @ApiModelProperty(value = "汇款银行地址", example = "123 Main St, New York, NY 10001")
+    private String remitBankAddress;
+
+    @ApiModelProperty(value = "银行币种（ISO 3位代码）", example = "USD")
     private String toMoneyKind;
 
-    @ApiModelProperty(value = "银行所属国家", example = "US")
+    @ApiModelProperty(value = "银行所属国家（ISO 2位代码）", example = "US")
     private String toMoneyCountry2;
-
-    @ApiModelProperty(value = "创建时间", example = "2025-01-01T12:00:00")
-    private LocalDateTime createTime;
-
-    @ApiModelProperty(value = "更新时间", example = "2025-01-01T12:00:00")
-    private LocalDateTime updateTime;
 }

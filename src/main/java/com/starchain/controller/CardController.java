@@ -10,16 +10,16 @@ import com.starchain.entity.Card;
 import com.starchain.entity.CardHolder;
 import com.starchain.entity.TradeDetailPage;
 import com.starchain.entity.dto.CardHolderDto;
+import com.starchain.entity.response.TradeDetailResponse;
+import com.starchain.enums.OrderTypeEnum;
 import com.starchain.result.ClientResponse;
 import com.starchain.result.ResultGenerator;
 import com.starchain.service.ICardHolderService;
 import com.starchain.service.ICardService;
 import com.starchain.util.HttpUtils;
-import com.starchain.util.TpyshUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -59,7 +58,6 @@ public class CardController {
         if (ObjectUtils.isEmpty(cardHolderDto.getUserId())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
-
         if (ObjectUtils.isEmpty(cardHolderDto.getChannelId())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
@@ -71,10 +69,9 @@ public class CardController {
         if (cardHolder == null) {
             // 创建持卡人
             cardHolder = cardHolderService.addCardHolder(cardHolderDto);
-
-            return ResultGenerator.genSuccessResult(cardHolder);
         }
         return ResultGenerator.genSuccessResult(cardHolder);
+
 
     }
 
@@ -91,7 +88,6 @@ public class CardController {
         }
         // 创建卡
         Card card = cardService.addCard(cardHolderDto);
-
         return ResultGenerator.genSuccessResult(card);
     }
 
@@ -107,7 +103,6 @@ public class CardController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        // 创建卡
         String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.mchInfo, token, "", pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
         JSONObject jsonObject = JSON.parseObject(str);
         // 查询商户余额：{"amount":523.70,"freeze":210.45}
@@ -115,7 +110,7 @@ public class CardController {
     }
 
     /*
-     * 查询交易明细
+     * 查询商户交易明细
      */
     @ApiOperation(value = "查询交易明细")
     public void tradeDetail() {
@@ -128,11 +123,11 @@ public class CardController {
         TradeDetailPage tradeDetailPage = new TradeDetailPage();
         tradeDetailPage.setPageNum(1);
         tradeDetailPage.setPageSize(10);
+        // 查询开卡费
+        tradeDetailPage.setOrderType(OrderTypeEnum.CARD_FEE.getOrderType());
         // 创建卡
-        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.tradeDetail, token, JSONObject.toJSONString(tradeDetailPage),
-                pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
-        List<JSONObject> jsonObjects = JSON.parseArray(str, JSONObject.class);
-        // 查询商户余额：{"amount":523.70,"freeze":210.45}
+        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.tradeDetail, token, JSONObject.toJSONString(tradeDetailPage), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+        List<TradeDetailResponse> jsonObjects = JSON.parseArray(str, TradeDetailResponse.class);
         System.out.println("查询交易明细：" + jsonObjects);
     }
 

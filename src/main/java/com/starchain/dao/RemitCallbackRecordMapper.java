@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 /**
  * @author
  * @date 2025-01-06
- * @Description
+ * @Description 申请汇款通知
  */
 @Mapper
 public interface RemitCallbackRecordMapper extends BaseMapper<RemitCallbackRecord> {

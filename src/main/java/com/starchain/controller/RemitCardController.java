@@ -29,8 +29,6 @@ public class RemitCardController {
     @Autowired
     private IRemitCardService remitCardService;
 
-
-
     /**
      * 添加收款卡
      */

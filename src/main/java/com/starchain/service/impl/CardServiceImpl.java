@@ -112,6 +112,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     @Override
     public void callBack(MiPayCardNotifyResponse miPayCardNotifyResponse) {
         // 判断回调记录是否存在
+        
         // 判断卡信息是否存在
         // 成功修改卡装填
         // 失败进行返回

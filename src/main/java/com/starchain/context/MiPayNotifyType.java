@@ -1,4 +1,4 @@
-package com.starchain.enums;
+package com.starchain.context;
 
 /**
  * @author
@@ -9,34 +9,34 @@ public enum MiPayNotifyType {
     /**
      * 卡开通通知
      */
-    CardOpen("CardOpen", "cardService"),
+    CardOpen("CardOpen", "cardServiceImpl"),
     /**
      * 卡充值通知
      */
-    CardRecharge("CardRecharge", "cardService"),
+    CardRecharge("CardRecharge", "cardServiceImpl"),
 
     /**
      * 卡提现通知
      */
-    CardWithdraw("CardWithdraw", "cardService"),
+    CardWithdraw("CardWithdraw", "cardServiceImpl"),
 
     /**
      * 卡预存通知
      */
-    Presave("Presave", "cardService"),
+    Presave("Presave", "cardServiceImpl"),
 
     /**
      * 卡流水通知
      */
-    CardTrade("CardTrade", "cardService"),
+    CardTrade("CardTrade", "cardServiceImpl"),
     /**
      * 销卡通知
      */
-    CardCancel("CardCancel", "cardService"),
+    CardCancel("CardCancel", "cardServiceImpl"),
     /**
      * 卡验证码通知
      */
-    VerifyCode("VerifyCode", "cardService"),
+    VerifyCode("VerifyCode", "cardServiceImpl"),
 
     /**
      * 申请汇款卡审核通知

@@ -43,7 +43,7 @@ public class MiPayCardNotifyResponse extends BaseMiPayNotifyResponse{
     private BigDecimal balance;
     @ApiModelProperty(value = "商户名 上游定义的商户名",example = "卡流水 特有字段")
     private String merchantName;
-    @ApiModelProperty(value = "验证码 通常3分钟有效",example = "卡验验证码特有字段")
+    @ApiModelProperty(value = "验证码 通常3分钟有效",example = "卡验证码特有字段")
     private String verifyCode;
     @ApiModelProperty(value = "金额信息列表", example = "[{\"actual\": 10.50}]")
     private List<JSONObject> amount;

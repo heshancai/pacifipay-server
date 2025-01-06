@@ -45,7 +45,7 @@ public class RemitCard {
     @ApiModelProperty(name = "汇款类型编码", example = "LNR_IND")
     private String remitCode;
 
-    @ApiModelProperty(name = "卡ID", example = "CARD123456789")
+    @ApiModelProperty(name = "汇款卡标识", example = "客户汇款卡唯一标识，唯一标识至少填写一个")
     private String cardId;
 
     @ApiModelProperty(name = "状态", example = "SUCCESS")

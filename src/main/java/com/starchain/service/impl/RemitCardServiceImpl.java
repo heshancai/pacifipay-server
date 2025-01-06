@@ -7,9 +7,11 @@ import com.starchain.constants.CardRemittanceUrlConstants;
 import com.starchain.constants.CardUrlConstants;
 import com.starchain.dao.RemitCardMapper;
 import com.starchain.entity.RemitCard;
+import com.starchain.entity.response.MiPayCardNotifyResponse;
 import com.starchain.entity.response.RemitCardResponse;
 import com.starchain.enums.RemitCodeEnum;
 import com.starchain.exception.StarChainException;
+import com.starchain.service.IMiPayNotifyService;
 import com.starchain.service.IRemitCardService;
 import com.starchain.util.HttpUtils;
 import com.starchain.util.UUIDUtil;
@@ -28,7 +30,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service("remitCardServiceImpl")
-public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard> implements IRemitCardService {
+public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard> implements IRemitCardService, IMiPayNotifyService {
 
     @Autowired
     private PacificPayConfig pacificPayConfig;
@@ -36,23 +38,24 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
     @Override
     public Boolean addRemitCard(RemitCard remitCard) {
         // 设置 remitCode 和 cardId
-        remitCard.setRemitCode(RemitCodeEnum.LNR_IND.getRemitCode());
-        remitCard.setCardId(String.valueOf(remitCard.getChannelId()) + remitCard.getUserId() + remitCard.getRemitCode() + UUIDUtil.generate8CharUUID());
-
+        remitCard.setRemitCode(RemitCodeEnum.UQR_CNH.getRemitCode());
+        String cardId = String.valueOf(remitCard.getChannelId()) + remitCard.getUserId() + remitCard.getRemitCode() + UUIDUtil.generate8CharUUID();
+        remitCard.setCardId(cardId);
+        log.info("汇款卡唯一标识生成,{}", cardId);
         try {
             log.info("开始添加汇款卡，请求参数：{}", remitCard);
 
             // 获取 Token
             String token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
-            log.debug("成功获取 Token：{}", token);
+            log.info("成功获取 Token：{}", token);
 
             // 发送请求并获取响应
             String requestUrl = pacificPayConfig.getBaseUrl() + CardRemittanceUrlConstants.addRemitCard;
             String requestBody = JSONObject.toJSONString(remitCard);
-            log.debug("发送请求，URL：{}，请求体：{}", requestUrl, requestBody);
+            log.info("发送请求，URL：{}，请求体：{}", requestUrl, requestBody);
 
             String responseStr = HttpUtils.doPostMiPay(requestUrl, token, requestBody, pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
-            log.debug("收到响应：{}", responseStr);
+            log.info("收到响应：{}", responseStr);
 
             // 解析响应
             RemitCardResponse returnRemitCard = JSONObject.parseObject(responseStr, RemitCardResponse.class);
@@ -93,5 +96,14 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
         }
 
         return true;
+    }
+
+    /**
+     * 申请汇款卡审核通知
+     * @param miPayCardNotifyResponse
+     */
+    @Override
+    public void callBack(MiPayCardNotifyResponse miPayCardNotifyResponse) {
+
     }
 }

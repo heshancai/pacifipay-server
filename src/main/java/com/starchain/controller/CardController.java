@@ -8,7 +8,7 @@ import com.starchain.config.PacificPayConfig;
 import com.starchain.constants.CardUrlConstants;
 import com.starchain.entity.Card;
 import com.starchain.entity.CardHolder;
-import com.starchain.entity.TradeDetailPage;
+import com.starchain.entity.dto.TradeDetailDto;
 import com.starchain.entity.dto.CardHolderDto;
 import com.starchain.entity.response.TradeDetailResponse;
 import com.starchain.enums.OrderTypeEnum;
@@ -96,7 +96,8 @@ public class CardController {
      * 查询商户余额
      */
     @ApiOperation(value = "查询商户余额")
-    public void mchInfo() {
+    @PostMapping("/mchInfo")
+    public ClientResponse mchInfo() {
         String token = null;
         try {
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
@@ -105,28 +106,25 @@ public class CardController {
         }
         String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.mchInfo, token, "", pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
         JSONObject jsonObject = JSON.parseObject(str);
-        // 查询商户余额：{"amount":523.70,"freeze":210.45}
-        System.out.println("查询商户余额：" + jsonObject);
+        return ResultGenerator.genSuccessResult(jsonObject);
     }
 
     /*
-     * 查询商户交易明细
+     * 查询商户交易明细 支持查询多种类型数据
      */
     @ApiOperation(value = "查询交易明细")
-    public void tradeDetail() {
+    @PostMapping("/tradeDetail")
+    public void tradeDetail(@RequestBody TradeDetailDto tradeDetailDto ) {
         String token = null;
         try {
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        TradeDetailPage tradeDetailPage = new TradeDetailPage();
-        tradeDetailPage.setPageNum(1);
-        tradeDetailPage.setPageSize(10);
         // 查询开卡费
-        tradeDetailPage.setOrderType(OrderTypeEnum.CARD_FEE.getOrderType());
+
         // 创建卡
-        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.tradeDetail, token, JSONObject.toJSONString(tradeDetailPage), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.tradeDetail, token, JSONObject.toJSONString(tradeDetailDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
         List<TradeDetailResponse> jsonObjects = JSON.parseArray(str, TradeDetailResponse.class);
         System.out.println("查询交易明细：" + jsonObjects);
     }

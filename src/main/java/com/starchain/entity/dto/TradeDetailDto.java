@@ -1,4 +1,4 @@
-package com.starchain.entity;
+package com.starchain.entity.dto;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -10,12 +10,10 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors
-public class TradeDetailPage {
+public class TradeDetailDto extends PageDto{
     private String orderType;
     private String billsTimeStart;
     private String billsTimeEnd;
-    private Integer pageNum;
-    private Integer pageSize;
     private String orderBy;
 
 }

@@ -5,6 +5,7 @@ import com.starchain.controller.RemitCardController;
 import com.starchain.entity.CardHolder;
 import com.starchain.entity.RemitCard;
 import com.starchain.entity.dto.CardHolderDto;
+import com.starchain.entity.dto.TradeDetailDto;
 import com.starchain.enums.CardCodeEnum;
 import com.starchain.result.ClientResponse;
 import com.starchain.service.impl.CardHolderServiceImpl;
@@ -61,7 +62,8 @@ class StarchainPacificpayServerApplicationTests {
 
     @Test
     void tradeDetail() {
-        cardController.tradeDetail();
+        TradeDetailDto tradeDetailDto=new TradeDetailDto();
+        cardController.tradeDetail(tradeDetailDto);
     }
 
     @Autowired

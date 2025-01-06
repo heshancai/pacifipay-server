@@ -45,6 +45,12 @@ public class RemitCardNotify {
     @ApiModelProperty(value = "创建时间", example = "2025-01-01T12:00:00")
     private LocalDateTime createTime;
 
+    @ApiModelProperty(value = "是否成功状描述", example = "CardOpen success")
+    private Integer successConfirm;
+
+    @ApiModelProperty(value = "确认次数", example = "CardOpen success")
+    private Integer confirmCount;
+
     @ApiModelProperty(value = "更新时间", example = "2025-01-01T12:00:00")
     private LocalDateTime updateTime;
 }

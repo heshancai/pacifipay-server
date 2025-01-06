@@ -57,6 +57,8 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             RemitCardResponse returnRemitCard = JSONObject.parseObject(responseStr, RemitCardResponse.class);
             remitCard.setStatus(returnRemitCard.getStatus());
             remitCard.setStatusDesc(returnRemitCard.getStatusDesc());
+            // 返回的收款卡唯一标识
+            remitCard.setTpyCardId(returnRemitCard.getTpyCardId());
 
             // 如果 extraParams 不为空，设置相关字段到 remitCard 对象中
             List<JSONObject> extraParams = returnRemitCard.getExtraParams();
@@ -82,7 +84,7 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
                 log.info("额外参数设置完成：{}", remitCard);
             }
 
-            log.info("汇款卡添加成功，最终 remitCard 对象：{}", remitCard);
+            log.info("发起申请汇款卡，最终 remitCard 对象：{}", remitCard);
             this.save(remitCard);
         } catch (Exception e) {
             log.error("添加汇款卡时发生异常", e);

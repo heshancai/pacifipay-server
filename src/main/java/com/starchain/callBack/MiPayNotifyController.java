@@ -2,6 +2,7 @@ package com.starchain.callBack;
 
 import com.alibaba.fastjson2.JSON;
 import com.starchain.config.PacificPayConfig;
+import com.starchain.context.MiPayNotifyContext;
 import com.starchain.entity.RemitCardNotify;
 import com.starchain.entity.response.MiPayCardNotifyResponse;
 import com.starchain.service.ICardService;
@@ -30,16 +31,10 @@ public class MiPayNotifyController {
 
 
     @Autowired
-    private IRemitCardNotifyService remitCardNotifyService;
-
-    @Autowired
     private PacificPayConfig pacificPayConfig;
 
     @Autowired
-    private IMiPayNotifyService miPayNotifyService;
-
-    @Autowired
-    private ICardService cardService;
+    private MiPayNotifyContext miPayNotifyContext;
 
     @ApiOperation(value = "密付异步通知api")
     @PostMapping(value = "/miPayNotify")
@@ -52,43 +47,26 @@ public class MiPayNotifyController {
             return "fail";
         }
         MiPayCardNotifyResponse miPayNotifyResponse = JSON.parseObject(decrypt, MiPayCardNotifyResponse.class);
+        // 参数检验
         checkRecharge(miPayNotifyResponse);
-        RemitCardNotify remitCardNotify = remitCardNotifyService.checkDepositRecordIsExist(miPayNotifyResponse);
-
-
-        // 检查数据信息
-        switch (miPayNotifyResponse.getBusinessType()) {
-            case "CardOpen": //卡开通通知
-                miPayNotifyService.callBack(miPayNotifyResponse);
-                break;
-            case "CardRecharge": //卡充值通知
-                break;
-            case "CardWithdraw": // 卡提现通知
-                break;
-            case "Presave": //卡预存通知
-                break;
-            case "CardTrade": //卡流水通知
-                break;
-            case "CardCancel": //销卡通知
-                break;
-            case "VerifyCode": //卡验证码通知
-                break;
-            case "RemitCard": //申请汇款卡审核通知
-                break;
-            case "Remit": //申请汇款通知
-                break;
-            case "RemitCancel": //汇款撤销通知
-                break;
-            default:
-                break;
-        }
-
-        // 修改数据状态
         log.info("pacificPayNotify:{}", miPayNotifyResponse);
+        if ("SUCCESS".equals(miPayNotifyResponse.getStatus())) {
+            // 根据 businessType 获取对应的策略实现类
+            IMiPayNotifyService miPayNotifyService = miPayNotifyContext.getMiPayNotifyService(miPayNotifyResponse.getBusinessType());
+            miPayNotifyService.callBack(miPayNotifyResponse);
+        } else {
+            // 记录失败原因
+            return "fail";
+        }
         System.out.println(miPayNotifyResponse);
         return "success";
     }
 
+    /**
+     * 参数校验
+     *
+     * @param miPayNotifyResponse
+     */
     private void checkRecharge(MiPayCardNotifyResponse miPayNotifyResponse) {
         Assert.notNull(miPayNotifyResponse, "回调信息为空");
         Assert.hasText(miPayNotifyResponse.getNotifyId(), "通知ID不能为空");

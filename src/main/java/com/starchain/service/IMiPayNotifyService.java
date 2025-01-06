@@ -1,5 +1,6 @@
 package com.starchain.service;
 
+import com.starchain.entity.RemitCardNotify;
 import com.starchain.entity.response.MiPayCardNotifyResponse;
 
 /**
@@ -12,4 +13,5 @@ public interface IMiPayNotifyService {
      * 结果回调
      */
     void callBack(MiPayCardNotifyResponse miPayCardNotifyResponse);
+
 }

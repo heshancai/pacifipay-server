@@ -9,6 +9,9 @@ import io.swagger.annotations.ApiModel;
  */
 @ApiModel(value="汇款类型编码", description="汇款类型编码")
 public enum RemitCodeEnum {
+    UQR_CNH("UQR_CNH", "中国"),
+    UQR_HKD("UQR_HKD", "香港"),
+    UQR_SGD("UQR_SGD", "新加坡"),
     ELR("ELR", "太平洋中国汇款"),
     LNR_IND("LNR_IND", "太平洋印度汇款");
 

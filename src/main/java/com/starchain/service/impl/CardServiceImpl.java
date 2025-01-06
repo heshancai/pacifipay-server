@@ -9,8 +9,11 @@ import com.starchain.constants.CardUrlConstants;
 import com.starchain.dao.CardMapper;
 import com.starchain.entity.Card;
 import com.starchain.entity.CardHolder;
+import com.starchain.entity.RemitCardNotify;
+import com.starchain.entity.response.MiPayCardNotifyResponse;
 import com.starchain.enums.CardStatusEnum;
 import com.starchain.service.ICardService;
+import com.starchain.service.IMiPayNotifyService;
 import com.starchain.util.HttpUtils;
 import com.starchain.util.OrderNumberUtils;
 import com.starchain.util.TpyshUtils;
@@ -29,8 +32,8 @@ import java.time.LocalDateTime;
  * @Description
  */
 @Slf4j
-@Service
-public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements ICardService {
+@Service("cardServiceImpl") // 注意这里的 Bean 名称与 MiPayNotifyType 中的 serviceName 一致
+public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements ICardService, IMiPayNotifyService {
 
     @Autowired
     private PacificPayConfig pacificPayConfig;
@@ -99,5 +102,18 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         this.updateById(card);
         log.info("发起创建卡成功:{}", card);
         return card;
+    }
+
+    /**
+     * 卡开通回调
+     *
+     * @param miPayCardNotifyResponse
+     */
+    @Override
+    public void callBack(MiPayCardNotifyResponse miPayCardNotifyResponse) {
+        // 判断回调记录是否存在
+        // 判断卡信息是否存在
+        // 成功修改卡装填
+        // 失败进行返回
     }
 }

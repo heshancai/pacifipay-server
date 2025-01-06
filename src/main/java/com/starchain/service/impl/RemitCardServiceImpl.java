@@ -9,6 +9,7 @@ import com.starchain.dao.RemitCardMapper;
 import com.starchain.entity.RemitCard;
 import com.starchain.entity.response.RemitCardResponse;
 import com.starchain.enums.RemitCodeEnum;
+import com.starchain.exception.StarChainException;
 import com.starchain.service.IRemitCardService;
 import com.starchain.util.HttpUtils;
 import com.starchain.util.UUIDUtil;
@@ -26,7 +27,7 @@ import java.util.Map;
  * @Description
  */
 @Slf4j
-@Service
+@Service("remitCardServiceImpl")
 public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard> implements IRemitCardService {
 
     @Autowired
@@ -88,7 +89,7 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             this.save(remitCard);
         } catch (Exception e) {
             log.error("添加汇款卡时发生异常", e);
-            throw new RuntimeException("添加汇款卡失败", e);
+            throw new StarChainException("添加汇款卡失败");
         }
 
         return true;

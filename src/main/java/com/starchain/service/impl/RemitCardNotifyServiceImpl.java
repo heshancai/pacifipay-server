@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
-public class RemitCardNotifyServiceImpl  extends ServiceImpl<RemitCardNotifyMapper, RemitCardNotify> implements IRemitCardNotifyService {
+public class RemitCardNotifyServiceImpl extends ServiceImpl<RemitCardNotifyMapper, RemitCardNotify> implements IRemitCardNotifyService {
     @Override
     public RemitCardNotify checkDepositRecordIsExist(MiPayCardNotifyResponse miPayNotifyResponse) {
         log.info("检查数据是否存在: {}", JSON.toJSONString(miPayNotifyResponse));
@@ -27,10 +27,11 @@ public class RemitCardNotifyServiceImpl  extends ServiceImpl<RemitCardNotifyMapp
         queryWrapper.eq(RemitCardNotify::getBusinessType, miPayNotifyResponse.getBusinessType());
         RemitCardNotify remitCardNotify = this.getOne(queryWrapper);
         if (remitCardNotify == null) {
+            log.info("回调记录不存在，创建新的回调记录");
             remitCardNotify = new RemitCardNotify();
-            BeanUtils.copyProperties(miPayNotifyResponse,remitCardNotify);
+            BeanUtils.copyProperties(miPayNotifyResponse, remitCardNotify);
         }
         this.save(remitCardNotify);
-        return null;
+        return remitCardNotify;
     }
 }

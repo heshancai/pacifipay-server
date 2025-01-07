@@ -2,11 +2,14 @@ package com.starchain;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.starchain.controller.CardController;
+import com.starchain.controller.CardHolderController;
 import com.starchain.controller.RemitCardController;
 import com.starchain.entity.RemitCard;
 import com.starchain.entity.dto.CardHolderDto;
 import com.starchain.entity.dto.RemitApplicationRecordDto;
+import com.starchain.entity.dto.RemitCardDto;
 import com.starchain.entity.dto.TradeDetailDto;
+import com.starchain.enums.RemitCodeEnum;
 import com.starchain.result.ClientResponse;
 import com.starchain.service.IRemitApplicationRecordService;
 import com.starchain.service.impl.CardHolderServiceImpl;
@@ -29,6 +32,10 @@ class StarchainPacificpayServerApplicationTests {
 
     @Autowired
     private CardController cardController;
+
+
+    @Autowired
+    private CardHolderController cardHolderController;
 
     @Test
     void contextLoads() {
@@ -61,7 +68,7 @@ class StarchainPacificpayServerApplicationTests {
         cardHolder.setAddress("北京市朝阳区某某路123号");
         cardHolder.setGender("0");
         cardHolder.setBirthday("2000-01-01");
-        cardController.addCardHolder(cardHolder);
+        cardHolderController.addCardHolder(cardHolder);
     }
 
 
@@ -76,13 +83,13 @@ class StarchainPacificpayServerApplicationTests {
 
     @Test
     void addRemitCard() {
-        RemitCard remitCard = new RemitCard();
-        remitCard.setUserId(123456L);
-        remitCard.setChannelId(987654L);
+        RemitCardDto remitCard = new RemitCardDto();
+        remitCard.setUserId(10000L);
+        remitCard.setChannelId(1000001L);
         remitCard.setRemitFirstName("Progressive");
         remitCard.setRemitLastName("Solutions");
-        remitCard.setRemitBankNo("1234567890");
-
+        remitCard.setRemitBankNo("GB55TCCL12345618629629");
+        remitCard.setRemitCode(RemitCodeEnum.UQR_CNH.getRemitCode());
         ClientResponse response = remitCardController.addRemitCard(remitCard);
 
     }

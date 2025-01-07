@@ -2,13 +2,18 @@ package com.starchain.controller;
 
 import com.starchain.entity.RemitCard;
 import com.starchain.entity.dto.RemitApplicationRecordDto;
+import com.starchain.entity.dto.RemitCardDto;
 import com.starchain.entity.dto.RemitRateDto;
+import com.starchain.enums.RemitCodeEnum;
 import com.starchain.result.ClientResponse;
 import com.starchain.result.ResultGenerator;
 import com.starchain.service.IRemitApplicationRecordService;
 import com.starchain.service.IRemitCardService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -25,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(value = "PacificPay汇款相关api", tags = {"PacificPay汇款相关api"})
 @RestController
 @RequestMapping("/remit")
+@Slf4j
 public class RemitCardController {
 
 
@@ -39,25 +45,15 @@ public class RemitCardController {
      */
     @ApiOperation(value = "添加收款卡信息")
     @PostMapping("/addRemitCard")
-    public ClientResponse addRemitCard(@RequestBody RemitCard remitCard) {
-        if (ObjectUtils.isEmpty(remitCard.getUserId())) {
-            return ResultGenerator.genFailResult("dto不能为空");
-        }
-        if (ObjectUtils.isEmpty(remitCard.getChannelId())) {
-            return ResultGenerator.genFailResult("dto不能为空");
-        }
-        if (!StringUtils.hasText(remitCard.getRemitFirstName())) {
-            return ResultGenerator.genFailResult("dto不能为空");
-        }
-        if (!StringUtils.hasText(remitCard.getRemitLastName())) {
-            return ResultGenerator.genFailResult("dto不能为空");
-        }
-        if (!StringUtils.hasText(remitCard.getRemitBankNo())) {
-            return ResultGenerator.genFailResult("dto不能为空");
-        }
+    public ClientResponse addRemitCard(@RequestBody RemitCardDto remitCardDto) {
 
-        Boolean result = remitCardService.addRemitCard(remitCard);
-        return ResultGenerator.genSuccessResult(result);
+        try {
+            Boolean result = remitCardService.addRemitCard(remitCardDto);
+            return ResultGenerator.genSuccessResult(result);
+        } catch (Exception e) {
+            log.error("服务异常", e);
+            return ResultGenerator.genFailResult("服务异常");
+        }
     }
 
     /**

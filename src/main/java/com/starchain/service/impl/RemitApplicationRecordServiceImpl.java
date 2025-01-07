@@ -38,6 +38,12 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
     @Autowired
     private PacificPayConfig pacificPayConfig;
 
+
+    /**
+     * 申请汇款
+     * @param remitApplicationRecordDto
+     * @return
+     */
     @Override
     public Boolean applyRemit(RemitApplicationRecordDto remitApplicationRecordDto) {
         try {

@@ -43,37 +43,12 @@ public class CardController {
     @Autowired
     private PacificPayConfig pacificPayConfig;
 
-    @Autowired
-    private ICardHolderService cardHolderService;
+
 
     @Autowired
     private ICardService cardService;
 
-    /**
-     * 创建持卡人 同时创建卡
-     */
-    @ApiOperation(value = "创建持卡人")
-    @PostMapping("/addCardHolder")
-    public ClientResponse addCardHolder(@RequestBody CardHolderDto cardHolderDto) {
-        if (ObjectUtils.isEmpty(cardHolderDto.getUserId())) {
-            return ResultGenerator.genFailResult("dto不能为空");
-        }
-        if (ObjectUtils.isEmpty(cardHolderDto.getChannelId())) {
-            return ResultGenerator.genFailResult("dto不能为空");
-        }
-        // 每个用户只能创建一个持卡人
-        LambdaQueryWrapper<CardHolder> cardHolderLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        cardHolderLambdaQueryWrapper.eq(CardHolder::getUserId, cardHolderDto.getUserId());
-        cardHolderLambdaQueryWrapper.eq(CardHolder::getChannelId, cardHolderDto.getChannelId());
-        CardHolder cardHolder = cardHolderService.getOne(cardHolderLambdaQueryWrapper);
-        if (cardHolder == null) {
-            // 创建持卡人
-            cardHolder = cardHolderService.addCardHolder(cardHolderDto);
-        }
-        return ResultGenerator.genSuccessResult(cardHolder);
 
-
-    }
 
     /**
      * 创建卡
@@ -114,19 +89,17 @@ public class CardController {
      */
     @ApiOperation(value = "查询交易明细")
     @PostMapping("/tradeDetail")
-    public void tradeDetail(@RequestBody TradeDetailDto tradeDetailDto ) {
+    public ClientResponse tradeDetail(@RequestBody TradeDetailDto tradeDetailDto) {
         String token = null;
         try {
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        // 查询开卡费
-
-        // 创建卡
         String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.tradeDetail, token, JSONObject.toJSONString(tradeDetailDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
-        List<TradeDetailResponse> jsonObjects = JSON.parseArray(str, TradeDetailResponse.class);
-        System.out.println("查询交易明细：" + jsonObjects);
+        List<TradeDetailResponse> tradeDetailResponseList = JSON.parseArray(str, TradeDetailResponse.class);
+        System.out.println("查询交易明细：" + tradeDetailResponseList);
+        return ResultGenerator.genSuccessResult(tradeDetailResponseList);
     }
 
 }

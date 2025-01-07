@@ -22,6 +22,7 @@ public class HttpUtils {
 
     /**
      * 与miPay接口交互
+     *
      * @param urlPath
      * @param token
      * @param json
@@ -31,7 +32,7 @@ public class HttpUtils {
      * @return
      */
     public static String doPostMiPay(String urlPath, String token, String json, String appId, String serverPublicKey, String privateKey) {
-        System.out.println("doPostMiPay urlPath:{}"+ urlPath);
+        System.out.println("doPostMiPay urlPath:{}" + urlPath);
         System.out.println("速汇卡渠道发送：" + json);
         String res = null;
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
@@ -77,7 +78,7 @@ public class HttpUtils {
      * @return
      * @throws Exception
      */
-    public static String getTokenByMiPay(String baseUrl, String appId, String appSecret,String privateKey) throws Exception {
+    public static String getTokenByMiPay(String baseUrl, String appId, String appSecret, String privateKey) throws Exception {
         // MD5 加签
         String macString = appId + "&" + appSecret;
         String md5Str = SecurityUtils.getMD5Str(macString, "utf-8");
@@ -88,12 +89,12 @@ public class HttpUtils {
             httpPost.addHeader("Content-Type", "application/json");
             httpPost.addHeader("Authorization", "auth " + md5Str);
             httpPost.addHeader("TPYSH-APP-ID", appId);
-            System.out.println("md5Str:" + md5Str);
+            System.out.println("md5Str==>:" + md5Str);
             // 执行请求并获取响应
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 HttpEntity entity = response.getEntity();
                 String resultJsonString = EntityUtils.toString(entity);
-                System.err.println("速汇卡渠道返回--------------" + resultJsonString);
+                System.err.println("速汇卡渠道返回-------------->" + resultJsonString);
 
                 JSONObject resultJson = JSON.parseObject(resultJsonString);
                 if (!resultJson.getString("code").equals("1000")) {
@@ -114,10 +115,11 @@ public class HttpUtils {
 
     /**
      * 获取钱包地址
+     *
      * @param urlPath
-     * @param json 要发送的json数据
+     * @param json            要发送的json数据
      * @param serverPublicKey 钱包端公钥
-     * @param privateKey 我的私钥
+     * @param privateKey      我的私钥
      * @return
      */
     public static String doPostWalletAddress(String urlPath, String json, String serverPublicKey, String privateKey) {

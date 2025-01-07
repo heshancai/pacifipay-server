@@ -12,6 +12,6 @@ public interface IMiPayNotifyService {
     /**
      * 结果回调
      */
-    void callBack(MiPayCardNotifyResponse miPayCardNotifyResponse);
+    Boolean callBack(MiPayCardNotifyResponse miPayCardNotifyResponse);
 
 }

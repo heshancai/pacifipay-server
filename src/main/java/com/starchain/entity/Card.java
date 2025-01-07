@@ -80,6 +80,9 @@ public class Card {
     @ApiModelProperty(value = "SO123456", example = "预存款客户订单号同saveOrderId 保持一致")
     private String saveTradeId;
 
+    @ApiModelProperty(value = "卡状态创建状态", example = "卡创建状态：0 创建中 1 创建成功 2 创建失败")
+    private Integer status;
+
     @ApiModelProperty(value = "卡状态-银行卡端返回", example = "normal initFail unactivated activating freezing cancelled")
     private String cardStatus;
 
@@ -90,7 +93,7 @@ public class Card {
 
     @ApiModelProperty(value = "完成时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime finishTime;
+    private LocalDateTime localFinishTime;
 
 
     @ApiModelProperty(value = "数据更新时间")

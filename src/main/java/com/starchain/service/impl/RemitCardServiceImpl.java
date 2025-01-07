@@ -30,7 +30,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service("remitCardServiceImpl")
-public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard> implements IRemitCardService, IMiPayNotifyService {
+public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard> implements IRemitCardService {
 
     @Autowired
     private PacificPayConfig pacificPayConfig;
@@ -96,14 +96,5 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
         }
 
         return true;
-    }
-
-    /**
-     * 申请汇款卡审核通知
-     * @param miPayCardNotifyResponse
-     */
-    @Override
-    public void callBack(MiPayCardNotifyResponse miPayCardNotifyResponse) {
-
     }
 }

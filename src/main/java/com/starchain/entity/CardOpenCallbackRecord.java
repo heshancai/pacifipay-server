@@ -56,11 +56,20 @@ public class CardOpenCallbackRecord {
     @ApiModelProperty(value = "开卡手续费金额")
     private BigDecimal actual;
 
-    @ApiModelProperty(value = "创建时间")
+    @ApiModelProperty(value = "重试次数")
+    private Integer retries;
+
+
+
+    @ApiModelProperty(value = "卡创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime createTime;
+    private LocalDateTime localCreateTime;
 
     @ApiModelProperty(value = "更新时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime updateTime;
+    private LocalDateTime localUpdateTime;
+
+    @ApiModelProperty(value = "卡开通时间-回调得到")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime localFinishTime;
 }

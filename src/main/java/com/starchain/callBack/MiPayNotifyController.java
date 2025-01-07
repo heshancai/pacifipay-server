@@ -42,24 +42,22 @@ public class MiPayNotifyController {
         String decrypt = null;
         try {
             decrypt = RSA2048Encrypt.decrypt(jsonObject, RSA2048Encrypt.getPrivateKey(pacificPayConfig.getPrivateKey()));
-        } catch (Exception e) {
-            log.error("数据解密异常,{}", e.getMessage());
-            return "fail";
-        }
-        MiPayCardNotifyResponse miPayNotifyResponse = JSON.parseObject(decrypt, MiPayCardNotifyResponse.class);
-        // 参数检验
-        checkRecharge(miPayNotifyResponse);
-        log.info("pacificPayNotify:{}", miPayNotifyResponse);
-        if ("SUCCESS".equals(miPayNotifyResponse.getStatus())) {
+            MiPayCardNotifyResponse miPayNotifyResponse = JSON.parseObject(decrypt, MiPayCardNotifyResponse.class);
+            // 参数检验
+            checkRecharge(miPayNotifyResponse);
+            log.info("pacificPayNotify:{}", miPayNotifyResponse);
             // 根据 businessType 获取对应的策略实现类
             IMiPayNotifyService miPayNotifyService = miPayNotifyContext.getMiPayNotifyService(miPayNotifyResponse.getBusinessType());
-            miPayNotifyService.callBack(miPayNotifyResponse);
-        } else {
-            // 记录失败原因
+            Boolean callBack = miPayNotifyService.callBack(miPayNotifyResponse);
+            if (callBack) {
+                return "success";
+            }
+            return "fail";
+        } catch (Exception e) {
+            log.error("数据异常,{}", e.getMessage());
             return "fail";
         }
-        System.out.println(miPayNotifyResponse);
-        return "success";
+        // 记录失败原因
     }
 
     /**

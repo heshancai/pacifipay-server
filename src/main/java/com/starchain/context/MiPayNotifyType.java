@@ -9,7 +9,7 @@ public enum MiPayNotifyType {
     /**
      * 卡开通通知
      */
-    CardOpen("CardOpen", "cardServiceImpl"),
+    CardOpen("CardOpen", "cardOpenCallbackRecordServiceImpl"),
     /**
      * 卡充值通知
      */

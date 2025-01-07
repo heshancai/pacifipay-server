@@ -6,9 +6,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.config.PacificPayConfig;
 import com.starchain.constants.CardUrlConstants;
+import com.starchain.context.MiPayNotifyType;
 import com.starchain.dao.CardMapper;
 import com.starchain.entity.Card;
 import com.starchain.entity.CardHolder;
+import com.starchain.entity.CardOpenCallbackRecord;
 import com.starchain.entity.RemitCardNotify;
 import com.starchain.entity.response.MiPayCardNotifyResponse;
 import com.starchain.enums.CardStatusEnum;
@@ -22,8 +24,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -33,7 +35,7 @@ import java.time.LocalDateTime;
  */
 @Slf4j
 @Service("cardServiceImpl") // 注意这里的 Bean 名称与 MiPayNotifyType 中的 serviceName 一致
-public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements ICardService, IMiPayNotifyService {
+public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements ICardService {
 
     @Autowired
     private PacificPayConfig pacificPayConfig;
@@ -89,10 +91,11 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         card.setSaveOrderId(OrderNumberUtils.getOrderId("starChain"));
         // 太平洋的持卡人唯一值
         card.setTpyshCardHolderId(cardHolder.getTpyshCardHolderId());
+        card.setCardStatus(CardStatusEnum.ACTIVATING.getCardStatus());
+        card.setStatus(0);
         card.setLocalCreateTime(LocalDateTime.now());
         card.setLocalUpdateTime(LocalDateTime.now());
         // 卡状态为激活中
-        card.setCardStatus(CardStatusEnum.ACTIVATING.getCardStatus());
         this.save(card);
         String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.addCard, token, JSONObject.toJSONString(card), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
         System.out.println("返回的数据：" + str);
@@ -104,17 +107,5 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         return card;
     }
 
-    /**
-     * 卡开通回调
-     *
-     * @param miPayCardNotifyResponse
-     */
-    @Override
-    public void callBack(MiPayCardNotifyResponse miPayCardNotifyResponse) {
-        // 判断回调记录是否存在
-        
-        // 判断卡信息是否存在
-        // 成功修改卡装填
-        // 失败进行返回
-    }
+
 }

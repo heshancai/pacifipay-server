@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 public class RemitCard {
 
     @ApiModelProperty(name = "用户ID", example = "123456")
+    @TableId(value = "id", type = IdType.AUTO)
     private Long userId;
 
     @ApiModelProperty(name = "渠道ID", example = "987654")

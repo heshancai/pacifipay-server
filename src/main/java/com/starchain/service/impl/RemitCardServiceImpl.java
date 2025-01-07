@@ -5,12 +5,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.config.PacificPayConfig;
 import com.starchain.constants.CardRemittanceUrlConstants;
 import com.starchain.constants.CardUrlConstants;
+import com.starchain.context.MiPayNotifyType;
 import com.starchain.dao.RemitCardMapper;
 import com.starchain.entity.RemitCard;
+import com.starchain.entity.dto.RemitRateDto;
 import com.starchain.entity.response.MiPayCardNotifyResponse;
 import com.starchain.entity.response.RemitCardResponse;
 import com.starchain.enums.RemitCodeEnum;
 import com.starchain.exception.StarChainException;
+import com.starchain.result.ResultGenerator;
 import com.starchain.service.IMiPayNotifyService;
 import com.starchain.service.IRemitCardService;
 import com.starchain.util.HttpUtils;
@@ -18,7 +21,9 @@ import com.starchain.util.UUIDUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -39,7 +44,7 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
     public Boolean addRemitCard(RemitCard remitCard) {
         // 设置 remitCode 和 cardId
         remitCard.setRemitCode(RemitCodeEnum.UQR_CNH.getRemitCode());
-        String cardId = String.valueOf(remitCard.getChannelId()) + remitCard.getUserId() + remitCard.getRemitCode() + UUIDUtil.generate8CharUUID();
+        String cardId = String.valueOf(remitCard.getChannelId()) + remitCard.getUserId() + remitCard.getRemitCode() + UUIDUtil.generate8CharUUID(8);
         remitCard.setCardId(cardId);
         log.info("汇款卡唯一标识生成,{}", cardId);
         try {
@@ -96,5 +101,34 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
         }
 
         return true;
+    }
+
+    /**
+     * 获取汇款汇率
+     *
+     * @param remitRateDto
+     * @return
+     */
+    @Override
+    public RemitRateDto getRemitRate(String token,RemitRateDto remitRateDto) {
+
+        Assert.notNull(remitRateDto.getRemitCode(), "汇款类型编码不能为空");
+        Assert.notNull(remitRateDto.getToMoneyKind(), "汇款目标币种编码不能为空");
+
+        // 获取 Token
+//        String token = null;
+        try {
+//            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            // 发送请求并获取响应
+            String requestUrl = pacificPayConfig.getBaseUrl() + CardRemittanceUrlConstants.getRemitRate;
+            String requestBody = JSONObject.toJSONString(remitRateDto);
+            log.info("发送请求，URL：{}，请求体：{}", requestUrl, requestBody);
+            String responseStr = HttpUtils.doPostMiPay(requestUrl, token, requestBody, pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            log.info("收到响应：{}", responseStr);
+            return JSONObject.parseObject(responseStr, RemitRateDto.class);
+        } catch (Exception e) {
+            log.error("添加汇款卡时发生异常", e);
+            throw new StarChainException("添加汇款卡失败");
+        }
     }
 }

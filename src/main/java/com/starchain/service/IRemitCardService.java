@@ -3,6 +3,7 @@ package com.starchain.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.starchain.entity.RemitCard;
 import com.starchain.entity.RemitCardNotify;
+import com.starchain.entity.dto.RemitRateDto;
 
 /**
  * @author
@@ -16,4 +17,13 @@ public interface IRemitCardService extends IService<RemitCard> {
      * @return
      */
     Boolean addRemitCard(RemitCard remitCard);
+
+    /**
+     * 获取汇款汇率
+     * @param remitRateDto
+     * @return
+     */
+    RemitRateDto getRemitRate(String token,RemitRateDto remitRateDto);
+
+
 }

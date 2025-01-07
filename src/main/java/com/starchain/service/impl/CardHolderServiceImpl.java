@@ -51,7 +51,7 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
             CardHolder cardHolder = new CardHolder();
             cardHolder.setCardCode(CardCodeEnum.TPY_MDN6.getCardCode());
             //商户申请创建持卡人的唯一值
-            String merchantCardHolderId = String.valueOf(cardHolderDto.getChannelId()) + cardHolderDto.getUserId() + cardHolder.getCardCode() + UUIDUtil.generate8CharUUID();
+            String merchantCardHolderId = String.valueOf(cardHolderDto.getChannelId()) + cardHolderDto.getUserId() + cardHolder.getCardCode() + UUIDUtil.generate8CharUUID(8);
             cardHolder.setMerchantCardHolderId(merchantCardHolderId);
 
             cardHolder.setUserId(cardHolderDto.getUserId());

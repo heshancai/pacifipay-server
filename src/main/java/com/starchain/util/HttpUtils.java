@@ -59,12 +59,7 @@ public class HttpUtils {
                 }
                 String dataEncrypt = resultJson.getString("data");
                 // 私钥解密
-//                String decrypt = RSA2048Encrypt.decrypt(dataEncrypt, RSA2048Encrypt.getPrivateKey(PRIVATEKEY));
                 res = RSA2048Encrypt.decrypt(dataEncrypt, RSA2048Encrypt.getPrivateKey(privateKey));
-                // 解析对象的情况
-//                res = JSON.parseObject(decrypt);
-                // 解析List<T> 得情况
-//                List<JSONObject> jsonObjects = JSON.parseArray(decrypt, JSONObject.class);
                 System.out.println(res);
             }
         } catch (Exception e) {

@@ -1,17 +1,22 @@
 package com.starchain;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.starchain.controller.CardController;
 import com.starchain.controller.RemitCardController;
-import com.starchain.entity.CardHolder;
 import com.starchain.entity.RemitCard;
 import com.starchain.entity.dto.CardHolderDto;
+import com.starchain.entity.dto.RemitApplicationRecordDto;
 import com.starchain.entity.dto.TradeDetailDto;
-import com.starchain.enums.CardCodeEnum;
 import com.starchain.result.ClientResponse;
+import com.starchain.service.IRemitApplicationRecordService;
 import com.starchain.service.impl.CardHolderServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -62,7 +67,7 @@ class StarchainPacificpayServerApplicationTests {
 
     @Test
     void tradeDetail() {
-        TradeDetailDto tradeDetailDto=new TradeDetailDto();
+        TradeDetailDto tradeDetailDto = new TradeDetailDto();
         cardController.tradeDetail(tradeDetailDto);
     }
 
@@ -74,11 +79,34 @@ class StarchainPacificpayServerApplicationTests {
         RemitCard remitCard = new RemitCard();
         remitCard.setUserId(123456L);
         remitCard.setChannelId(987654L);
-        remitCard.setRemitFirstName("John");
-        remitCard.setRemitLastName("Doe");
+        remitCard.setRemitFirstName("Progressive");
+        remitCard.setRemitLastName("Solutions");
         remitCard.setRemitBankNo("1234567890");
 
         ClientResponse response = remitCardController.addRemitCard(remitCard);
+
+    }
+
+    @Autowired
+    IRemitApplicationRecordService remitApplicationRecord;
+
+    // 申请汇款
+    @Test
+    void applyRemit() {
+        /**
+         * Account holder name: Progressive Solutions
+         * Account number:  GB55TCCL12345618629629
+         * Swift code: TCCLGB3L
+         * Bank name: The Currency Cloud Limited
+         * Bank address: 12 Steward Street, The Steward Building, London, E1 6FQ, GB
+         */
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("remitName", "Progressive Solutions");
+        jsonObject.put("remitLastName", "Progressive");
+        jsonObject.put("remitFirstName", "Solutions");
+        jsonObject.put("remitBankNo", "GB55TCCL12345618629629");
+        RemitApplicationRecordDto build = RemitApplicationRecordDto.builder().toAmount(BigDecimal.valueOf(10)).userId(123456L).channelId(987654L).extraParams(jsonObject).build();
+        remitApplicationRecord.applyRemit(build);
 
     }
 }

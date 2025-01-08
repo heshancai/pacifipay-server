@@ -51,7 +51,7 @@ public class CardController {
 
 
     /**
-     * 创建卡
+     * 创建卡 每种类型限制一张
      */
     @ApiOperation(value = "根据持卡人创建卡")
     @PostMapping("/addCard")

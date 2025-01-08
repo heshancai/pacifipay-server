@@ -9,6 +9,7 @@ import com.starchain.entity.dto.CardHolderDto;
 import com.starchain.entity.dto.RemitApplicationRecordDto;
 import com.starchain.entity.dto.RemitCardDto;
 import com.starchain.entity.dto.TradeDetailDto;
+import com.starchain.enums.MoneyKindEnum;
 import com.starchain.enums.RemitCodeEnum;
 import com.starchain.result.ClientResponse;
 import com.starchain.service.IRemitApplicationRecordService;
@@ -105,7 +106,10 @@ class StarchainPacificpayServerApplicationTests {
         jsonObject.put("remitName", "Progressive Solutions");
         jsonObject.put("remitBank", "The Currency Cloud Limited");
         jsonObject.put("remitBankAddress", "12 Steward Street, The Steward Building, London, E1 6FQ, GB");
-        jsonObject.put("toMoneyKind", RemitCodeEnum.UQR_CNH.getRemitCode());
+        jsonObject.put("toMoneyKind", MoneyKindEnum.CNY.getMoneyKindCode());
+        jsonObject.put("toMoneyCountry2", "CN");
+        jsonObject.put("idNumber", "GB55TCCL12345618629629");
+        jsonObject.put("remitBankBranchCode", "1234567891011"); // 13位数字
         remitCard.setExtraParams(jsonObject);
         ClientResponse response = remitCardController.addRemitCard(remitCard);
         System.out.println(response);

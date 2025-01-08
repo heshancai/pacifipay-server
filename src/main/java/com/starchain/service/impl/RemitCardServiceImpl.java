@@ -48,10 +48,10 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
     public Boolean addRemitCard(RemitCardDto remitCardDto) {
         try {
             // 参数检查
-//            validateRemitCardDto(remitCardDto);
+            validateRemitCardDto(remitCardDto);
 
             // 设置 remitCode 和 cardId
-            String cardId = OrderIdGenerator.generateOrderId(String.valueOf(remitCardDto.getChannelId()), String.valueOf(remitCardDto.getUserId()), 6);
+            String cardId = OrderIdGenerator.generateOrderId("", "", 6);
             remitCardDto.setCardId(cardId);
             log.info("汇款卡唯一标识生成,{}", cardId);
 
@@ -192,6 +192,9 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
                 case "UQR_CNH":
                     if (!StringUtils.hasText((String) extraParams.get("idNumber"))) {
                         throw new IllegalArgumentException("idNumber不能为空");
+                    }
+                    if (!StringUtils.hasText((String) extraParams.get("remitBankBranchCode"))) {
+                        throw new IllegalArgumentException("remitBankBranchCode不能为空");
                     }
                     break;
                 default:

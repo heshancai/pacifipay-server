@@ -3,6 +3,7 @@ package com.starchain.service.impl;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.config.PacificPayConfig;
 import com.starchain.constants.CardUrlConstants;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * @author
@@ -46,9 +48,9 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
      */
     public CardHolder addCardHolder(CardHolderDto cardHolderDto) {
 
-        String token = null;
+
         try {
-            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            String token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
             System.out.println("token=>" + token);
             CardHolder cardHolder = new CardHolder();
             cardHolder.setCardCode(CardCodeEnum.TPY_MDN6.getCardCode());
@@ -76,7 +78,7 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
             // 公钥加密传输 数据  我的私钥解密接收到的数据
             String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.addCardHolder,
                     token, JSONObject.toJSONString(cardHolder), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
-            log.info("创建持卡人返回的数据：{}",str);
+            log.info("创建持卡人返回的数据：{}", str);
             CardHolder returnCardHolder = JSON.parseObject(str, CardHolder.class);
             cardHolder.setTpyshCardHolderId(returnCardHolder.getTpyshCardHolderId());
             cardHolder.setUpdateTime(LocalDateTime.now());
@@ -92,6 +94,57 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
     }
 
     @Override
+    public CardHolder updateCardHolder(CardHolderDto cardHolderDto) {
+        LambdaUpdateWrapper<CardHolder> cardHolderLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        // 不可修改
+        cardHolderLambdaUpdateWrapper.eq(CardHolder::getCardCode, cardHolderDto.getCardCode());
+        cardHolderLambdaUpdateWrapper.eq(CardHolder::getId, cardHolderDto.getId());
+        cardHolderLambdaUpdateWrapper.eq(CardHolder::getMerchantCardHolderId, cardHolderDto.getMerchantCardHolderId());
+        cardHolderLambdaUpdateWrapper.eq(CardHolder::getTpyshCardHolderId, cardHolderDto.getTpyshCardHolderId());
+        cardHolderLambdaUpdateWrapper.eq(CardHolder::getChannelId, cardHolderDto.getChannelId());
+
+        // 设置 firstName
+        Optional.ofNullable(cardHolderDto.getFirstName()).ifPresent(firstName -> cardHolderLambdaUpdateWrapper.set(CardHolder::getFirstName, firstName));
+
+        // 设置 lastName
+        Optional.ofNullable(cardHolderDto.getLastName()).ifPresent(lastName -> cardHolderLambdaUpdateWrapper.set(CardHolder::getLastName, lastName));
+
+        // 设置 phoneCountry
+        Optional.ofNullable(cardHolderDto.getPhoneCountry()).ifPresent(phoneCountry -> cardHolderLambdaUpdateWrapper.set(CardHolder::getPhoneCountry, phoneCountry));
+
+        // 设置 phoneNumber
+        Optional.ofNullable(cardHolderDto.getPhoneNumber()).ifPresent(phoneNumber -> cardHolderLambdaUpdateWrapper.set(CardHolder::getPhoneNumber, phoneNumber));
+
+        // 设置 idAccount
+        Optional.ofNullable(cardHolderDto.getIdAccount()).ifPresent(idAccount -> cardHolderLambdaUpdateWrapper.set(CardHolder::getIdAccount, idAccount));
+
+        // 设置 email
+        Optional.ofNullable(cardHolderDto.getEmail()).ifPresent(email -> cardHolderLambdaUpdateWrapper.set(CardHolder::getEmail, email));
+
+        // 设置 address
+        Optional.ofNullable(cardHolderDto.getAddress()).ifPresent(address -> cardHolderLambdaUpdateWrapper.set(CardHolder::getAddress, address));
+
+        // 设置 gender
+        Optional.ofNullable(cardHolderDto.getGender()).ifPresent(gender -> cardHolderLambdaUpdateWrapper.set(CardHolder::getGender, gender));
+
+        // 设置 birthday
+        Optional.ofNullable(cardHolderDto.getBirthday()).ifPresent(birthday -> cardHolderLambdaUpdateWrapper.set(CardHolder::getBirthday, birthday));
+
+        String token = null;
+        try {
+            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            System.out.println("token=>" + token);
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.editCardHolder, token, JSONObject.toJSONString(cardHolderDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            CardHolder returnCardHolder = JSON.parseObject(str, CardHolder.class);
+            cardHolderLambdaUpdateWrapper.set(CardHolder::getUpdateTime, LocalDateTime.now());
+            this.update(cardHolderLambdaUpdateWrapper);
+            return this.getById(cardHolderDto.getId());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public boolean isExitHolder(Long userId, Integer channelId) {
         LambdaQueryWrapper<CardHolder> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(CardHolder::getUserId, userId);
@@ -101,6 +154,19 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
             return true;
         }
         return false;
+    }
+
+    @Override
+    public CardHolder getCardHolder(CardHolderDto cardHolderDto) {
+        String token = null;
+        try {
+            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            System.out.println("token=>" + token);
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.getCardHolder, token, JSONObject.toJSONString(cardHolderDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            return JSON.parseObject(str, CardHolder.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

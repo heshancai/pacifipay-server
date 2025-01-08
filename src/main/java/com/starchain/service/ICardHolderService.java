@@ -26,4 +26,19 @@ public interface ICardHolderService extends IService<CardHolder> {
      * @return
      */
     CardHolder addCardHolder(CardHolderDto cardHolderDto);
+
+
+    /**
+     * 修改持卡人
+     * @param cardHolderDto
+     * @return
+     */
+    CardHolder updateCardHolder(CardHolderDto cardHolderDto);
+
+    /**
+     * 查询持卡人
+     * @param cardHolderDto
+     * @return
+     */
+    CardHolder getCardHolder(CardHolderDto cardHolderDto);
 }

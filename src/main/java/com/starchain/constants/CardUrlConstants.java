@@ -12,6 +12,9 @@ public class CardUrlConstants {
     // 修改持卡人
     public static final String editCardHolder = "/apiMerchant/editCardHolder";
 
+    // 修改持卡人
+    public static final String getCardHolder = "/apiMerchant/getCardHolder";
+
     // 创建卡
     public static final String addCard = "/apiMerchant/addCard";
 

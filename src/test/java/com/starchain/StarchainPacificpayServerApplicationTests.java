@@ -58,21 +58,29 @@ class StarchainPacificpayServerApplicationTests {
     }
 
     @Test
-    void contextLoads1() {
-        CardHolderDto cardHolder = new CardHolderDto();
-        cardHolder.setChannelId(100000);
-        cardHolder.setUserId(10000L);
-        cardHolder.setFirstName("张");
-        cardHolder.setLastName("三");
-        cardHolder.setPhoneCountry("+86");
-        cardHolder.setPhoneNumber("13800138000");
-        cardHolder.setIdAccount("123456789012345678");
-        cardHolder.setEmail("zhangsan@example.com");
-        cardHolder.setAddress("北京市朝阳区某某路123号");
-        cardHolder.setGender("0");
-        cardHolder.setBirthday("2000-01-01");
-        cardHolderController.addCardHolder(cardHolder);
+    void getCardHolder() {
+        CardHolderDto cardHolderDto = new CardHolderDto();
+        cardHolderDto.setMerchantCardHolderId("2025010811491392234e378");
+        cardHolderDto.setCardCode("TpyMDN6");
+        cardHolderDto.setTpyshCardHolderId("2025010811491487397");
+        ClientResponse cardHolder1 = cardHolderController.getCardHolder(cardHolderDto);
+        System.out.println(cardHolder1);
     }
+    @Test
+    void editCardHolder() {
+        CardHolderDto cardHolder = new CardHolderDto();
+        cardHolder.setMerchantCardHolderId("2025010811491392234e378");
+        cardHolder.setCardCode("TpyMDN8");
+        cardHolder.setTpyshCardHolderId("2025010811491487397");
+        cardHolder.setUserId(10000L);
+        cardHolder.setChannelId(100000);
+        cardHolder.setFirstName("hsc");
+        cardHolder.setLastName("starChain");
+        cardHolder.setId(13L);
+        ClientResponse cardHolder1 = cardHolderController.updateCardHolder(cardHolder);
+        System.out.println(cardHolder1);
+    }
+
 
 
     @Test
@@ -84,6 +92,9 @@ class StarchainPacificpayServerApplicationTests {
     @Autowired
     RemitCardController remitCardController;
 
+    /**
+     * 申请汇款
+     */
     @Test
     void addRemitCard() {
         /**

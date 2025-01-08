@@ -48,7 +48,7 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
     public Boolean addRemitCard(RemitCardDto remitCardDto) {
         try {
             // 参数检查
-            validateRemitCardDto(remitCardDto);
+//            validateRemitCardDto(remitCardDto);
 
             // 设置 remitCode 和 cardId
             String cardId = OrderIdGenerator.generateOrderId(String.valueOf(remitCardDto.getChannelId()), String.valueOf(remitCardDto.getUserId()), 6);
@@ -97,7 +97,7 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             }
 
             log.info("发起申请汇款卡，最终 remitCard 对象：{}", remitCard);
-            this.save(remitCard);
+            return this.save(remitCard);
         } catch (IllegalArgumentException e) {
             log.error("参数检查失败：{}", e.getMessage());
             throw new StarChainException(e.getMessage());
@@ -105,8 +105,6 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             log.error("添加汇款卡时发生异常", e);
             throw new StarChainException("添加汇款卡失败");
         }
-
-        return true;
     }
 
     /**
@@ -165,6 +163,9 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             // 特定 UQR 类型必填字段
             switch (remitCode) {
                 case "UQR_HKD":
+                    if (!StringUtils.hasText((String) extraParams.get("bankCode"))) {
+                        throw new IllegalArgumentException("bankCode不能为空");
+                    }
                 case "UQR_CAD":
                     if (!StringUtils.hasText((String) extraParams.get("bankCode"))) {
                         throw new IllegalArgumentException("bankCode不能为空");
@@ -210,12 +211,7 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
 
         Assert.notNull(remitRateDto.getRemitCode(), "汇款类型编码不能为空");
         Assert.notNull(remitRateDto.getToMoneyKind(), "汇款目标币种编码不能为空");
-
-        // 获取 Token
-//        String token = null;
         try {
-//            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
-            // 发送请求并获取响应
             String requestUrl = pacificPayConfig.getBaseUrl() + CardRemittanceUrlConstants.getRemitRate;
             String requestBody = JSONObject.toJSONString(remitRateDto);
             log.info("发送请求，URL：{}，请求体：{}", requestUrl, requestBody);
@@ -226,5 +222,15 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             log.error("添加汇款卡时发生异常", e);
             throw new StarChainException("添加汇款卡失败");
         }
+    }
+
+    /**
+     * 申请汇款卡审核通知
+     * @param miPayCardNotifyResponse
+     * @return
+     */
+    @Override
+    public Boolean callBack(MiPayCardNotifyResponse miPayCardNotifyResponse) {
+        return null;
     }
 }

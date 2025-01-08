@@ -37,11 +37,12 @@ class StarchainPacificpayServerApplicationTests {
     @Autowired
     private CardHolderController cardHolderController;
 
+
     @Test
     void contextLoads() {
         CardHolderDto cardHolder = new CardHolderDto();
         cardHolder.setChannelId(100000);
-        cardHolder.setUserId(10000L);
+        cardHolder.setUserId(100001L);
         cardHolder.setFirstName("张");
         cardHolder.setLastName("三");
         cardHolder.setPhoneCountry("+86");
@@ -51,7 +52,8 @@ class StarchainPacificpayServerApplicationTests {
         cardHolder.setAddress("北京市朝阳区某某路123号");
         cardHolder.setGender("0");
         cardHolder.setBirthday("2000-01-01");
-        cardHolderServiceImpl.addCardHolder(cardHolder);
+        ClientResponse clientResponse = cardHolderController.addCardHolder(cardHolder);
+        System.out.println(clientResponse);
     }
 
     @Test
@@ -83,14 +85,30 @@ class StarchainPacificpayServerApplicationTests {
 
     @Test
     void addRemitCard() {
+        /**
+         * 添加收款卡信息
+         * Account holder name: Progressive Solutions
+         * Account number:  GB55TCCL12345618629629
+         * Swift code: TCCLGB3L
+         * Bank name: The Currency Cloud Limited
+         * Bank address: 12 Steward Street, The Steward Building, London, E1 6FQ, GB
+         */
         RemitCardDto remitCard = new RemitCardDto();
         remitCard.setUserId(10000L);
         remitCard.setChannelId(1000001L);
         remitCard.setRemitFirstName("Progressive");
         remitCard.setRemitLastName("Solutions");
         remitCard.setRemitBankNo("GB55TCCL12345618629629");
-        remitCard.setRemitCode(RemitCodeEnum.UQR_CNH.getRemitCode());
+        remitCard.setRemitCode("UQR_CNH");
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("swiftCode", "TCCLGB3L");
+        jsonObject.put("remitName", "Progressive Solutions");
+        jsonObject.put("remitBank", "The Currency Cloud Limited");
+        jsonObject.put("remitBankAddress", "12 Steward Street, The Steward Building, London, E1 6FQ, GB");
+        jsonObject.put("toMoneyKind", RemitCodeEnum.UQR_CNH.getRemitCode());
+        remitCard.setExtraParams(jsonObject);
         ClientResponse response = remitCardController.addRemitCard(remitCard);
+        System.out.println(response);
 
     }
 

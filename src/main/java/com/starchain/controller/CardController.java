@@ -87,7 +87,7 @@ public class CardController {
     /*
      * 查询商户交易明细 支持查询多种类型数据
      */
-    @ApiOperation(value = "查询交易明细")
+    @ApiOperation(value = "查询商户交易明细")
     @PostMapping("/tradeDetail")
     public ClientResponse tradeDetail(@RequestBody TradeDetailDto tradeDetailDto) {
         String token = null;

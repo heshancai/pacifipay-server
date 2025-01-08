@@ -20,7 +20,7 @@ public class OrderIdGenerator {
      */
     public static String generateOrderId(String userId, String channelId, Integer length) {
         // 获取当前时间并格式化为 yyyyMMddHHmm
-        String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
+        String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
 
         // 生成 8 位 UUID
         String uuid = UUIDUtil.generate8CharUUID(length);

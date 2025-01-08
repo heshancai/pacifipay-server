@@ -11,7 +11,7 @@ import com.starchain.entity.dto.RemitRateDto;
  * @date 2025-01-02
  * @Description
  */
-public interface IRemitCardService extends IService<RemitCard> {
+public interface IRemitCardService extends IService<RemitCard>,IMiPayNotifyService {
     /**
      * 添加收款卡信息
      * @param

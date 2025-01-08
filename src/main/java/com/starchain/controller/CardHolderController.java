@@ -41,6 +41,23 @@ public class CardHolderController {
         if (ObjectUtils.isEmpty(cardHolderDto.getChannelId())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
+        // 创建持卡人
+        CardHolder cardHolder = cardHolderService.addCardHolder(cardHolderDto);
+        return ResultGenerator.genSuccessResult(cardHolder);
+    }
+
+    /**
+     * 修改持卡人
+     */
+    @ApiOperation(value = "修改持卡人")
+    @PostMapping("/update")
+    public ClientResponse updateCardHolder(@RequestBody CardHolderDto cardHolderDto) {
+        if (ObjectUtils.isEmpty(cardHolderDto.getUserId())) {
+            return ResultGenerator.genFailResult("dto不能为空");
+        }
+        if (ObjectUtils.isEmpty(cardHolderDto.getChannelId())) {
+            return ResultGenerator.genFailResult("dto不能为空");
+        }
         // 每个用户只能创建一个持卡人
         LambdaQueryWrapper<CardHolder> cardHolderLambdaQueryWrapper = new LambdaQueryWrapper<>();
         cardHolderLambdaQueryWrapper.eq(CardHolder::getUserId, cardHolderDto.getUserId());
@@ -52,4 +69,29 @@ public class CardHolderController {
         }
         return ResultGenerator.genSuccessResult(cardHolder);
     }
+
+    /**
+     * 查询持卡人
+     */
+    @ApiOperation(value = "查询持卡人")
+    @PostMapping("/select")
+    public ClientResponse selectCardHolder(@RequestBody CardHolderDto cardHolderDto) {
+        if (ObjectUtils.isEmpty(cardHolderDto.getUserId())) {
+            return ResultGenerator.genFailResult("dto不能为空");
+        }
+        if (ObjectUtils.isEmpty(cardHolderDto.getChannelId())) {
+            return ResultGenerator.genFailResult("dto不能为空");
+        }
+        // 每个用户只能创建一个持卡人
+        LambdaQueryWrapper<CardHolder> cardHolderLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        cardHolderLambdaQueryWrapper.eq(CardHolder::getUserId, cardHolderDto.getUserId());
+        cardHolderLambdaQueryWrapper.eq(CardHolder::getChannelId, cardHolderDto.getChannelId());
+        CardHolder cardHolder = cardHolderService.getOne(cardHolderLambdaQueryWrapper);
+        if (cardHolder == null) {
+            // 创建持卡人
+            cardHolder = cardHolderService.addCardHolder(cardHolderDto);
+        }
+        return ResultGenerator.genSuccessResult(cardHolder);
+    }
+
 }

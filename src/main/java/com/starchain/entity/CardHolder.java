@@ -33,7 +33,7 @@ public class CardHolder {
     @ApiModelProperty(value = "渠道号", example = "100001")
     private Integer channelId;
 
-    @ApiModelProperty(value = "商户持卡人ID", example = "商户申请创建持卡人的唯一值")
+    @ApiModelProperty(value = "商户持卡人ID", example = "商户端生成")
     private String merchantCardHolderId;
 
     @ApiModelProperty(value = "名", example = "John")

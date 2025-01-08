@@ -9,10 +9,12 @@ import com.starchain.constants.CardUrlConstants;
 import com.starchain.dao.CardHolderMapper;
 import com.starchain.entity.CardHolder;
 import com.starchain.entity.dto.CardHolderDto;
+import com.starchain.entity.response.MiPayCardNotifyResponse;
 import com.starchain.enums.CardCodeEnum;
 import com.starchain.exception.StarChainException;
 import com.starchain.service.ICardHolderService;
 import com.starchain.util.HttpUtils;
+import com.starchain.util.OrderIdGenerator;
 import com.starchain.util.TpyshUtils;
 import com.starchain.util.UUIDUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -51,9 +53,9 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
             CardHolder cardHolder = new CardHolder();
             cardHolder.setCardCode(CardCodeEnum.TPY_MDN6.getCardCode());
             //商户申请创建持卡人的唯一值
-            String merchantCardHolderId = String.valueOf(cardHolderDto.getChannelId()) + cardHolderDto.getUserId() + cardHolder.getCardCode() + UUIDUtil.generate8CharUUID(8);
-            cardHolder.setMerchantCardHolderId(merchantCardHolderId);
+            String merchantCardHolderId = OrderIdGenerator.generateOrderId("", "", 6);
 
+            cardHolder.setMerchantCardHolderId(merchantCardHolderId);
             cardHolder.setUserId(cardHolderDto.getUserId());
             cardHolder.setChannelId(cardHolderDto.getChannelId());
 
@@ -74,8 +76,8 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
             // 公钥加密传输 数据  我的私钥解密接收到的数据
             String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.addCardHolder,
                     token, JSONObject.toJSONString(cardHolder), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            log.info("创建持卡人返回的数据：{}",str);
             CardHolder returnCardHolder = JSON.parseObject(str, CardHolder.class);
-            System.out.println("返回的数据：" + returnCardHolder);
             cardHolder.setTpyshCardHolderId(returnCardHolder.getTpyshCardHolderId());
             cardHolder.setUpdateTime(LocalDateTime.now());
             cardHolder.setStatus(1);
@@ -100,4 +102,6 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
         }
         return false;
     }
+
+
 }

@@ -3,18 +3,16 @@ package com.starchain.service.impl;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.config.PacificPayConfig;
 import com.starchain.constants.CardUrlConstants;
-import com.starchain.context.MiPayNotifyType;
 import com.starchain.dao.CardMapper;
 import com.starchain.entity.Card;
 import com.starchain.entity.CardHolder;
-import com.starchain.entity.CardOpenCallbackRecord;
+import com.starchain.entity.CardRechargeRecord;
 import com.starchain.entity.dto.CardDto;
-import com.starchain.entity.response.MiPayCardNotifyResponse;
 import com.starchain.enums.CardStatusEnum;
+import com.starchain.service.ICardHolderService;
 import com.starchain.service.ICardOpenCallbackRecordService;
 import com.starchain.service.ICardService;
 import com.starchain.util.HttpUtils;
@@ -42,6 +40,9 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
 
     @Autowired
     private ICardOpenCallbackRecordService cardOpenCallbackRecordService;
+
+    @Autowired
+    private ICardHolderService cardHolderService;
 
     /**
      * 查询商户余额
@@ -119,100 +120,6 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
 
 
     /**
-     * 卡开通回调
-     *
-     * @param miPayCardNotifyResponse
-     * @return
-     */
-    @Override
-    public Boolean callBack(MiPayCardNotifyResponse miPayCardNotifyResponse) {
-        try {
-            // 1. 校验业务类型
-            Assert.isTrue(
-                    MiPayNotifyType.CardOpen.getType().equals(miPayCardNotifyResponse.getBusinessType()),
-                    "回调业务类型与接口调用不匹配"
-            );
-            log.info("回调业务类型校验通过: {}", miPayCardNotifyResponse.getBusinessType());
-
-            // 2. 检查卡信息是否存在
-            LambdaQueryWrapper<Card> cardQueryWrapper = new LambdaQueryWrapper<>();
-            cardQueryWrapper.eq(Card::getCardId, miPayCardNotifyResponse.getCardId());
-            cardQueryWrapper.eq(Card::getCardNo, miPayCardNotifyResponse.getCardNo());
-            cardQueryWrapper.eq(Card::getCardCode, miPayCardNotifyResponse.getCardCode());
-            Card card = this.getOne(cardQueryWrapper);
-            Assert.isTrue(card != null, "卡信息不存在");
-            log.info("卡信息校验通过, 卡ID: {}", miPayCardNotifyResponse.getCardId());
-
-            // 3. 校验卡开通手续费
-            BigDecimal actual = (BigDecimal) miPayCardNotifyResponse.getAmount().get("actual");
-            Assert.isTrue(
-                    card.getCardFee().compareTo(actual) == 0,
-                    "卡开通手续费不一致"
-            );
-            log.info("卡开通手续费校验通过, 实际手续费: {}", actual);
-
-            // 4. 查询或创建回调记录
-            LambdaQueryWrapper<CardOpenCallbackRecord> recordQueryWrapper = new LambdaQueryWrapper<>();
-            recordQueryWrapper.eq(CardOpenCallbackRecord::getNotifyId, miPayCardNotifyResponse.getNotifyId());
-            recordQueryWrapper.eq(CardOpenCallbackRecord::getCardCode, miPayCardNotifyResponse.getCardCode());
-            recordQueryWrapper.eq(CardOpenCallbackRecord::getBusinessType, miPayCardNotifyResponse.getBusinessType());
-            recordQueryWrapper.eq(CardOpenCallbackRecord::getCardId, miPayCardNotifyResponse.getCardId());
-
-            CardOpenCallbackRecord cardOpenCallbackRecord = cardOpenCallbackRecordService.getOne(recordQueryWrapper);
-            if (cardOpenCallbackRecord == null) {
-                cardOpenCallbackRecord = new CardOpenCallbackRecord();
-                cardOpenCallbackRecord.setNotifyId(miPayCardNotifyResponse.getNotifyId());
-                cardOpenCallbackRecord.setCardCode(miPayCardNotifyResponse.getCardCode());
-                cardOpenCallbackRecord.setBusinessType(miPayCardNotifyResponse.getBusinessType());
-                cardOpenCallbackRecord.setCardId(miPayCardNotifyResponse.getCardId());
-                cardOpenCallbackRecord.setLocalCreateTime(LocalDateTime.now());
-                cardOpenCallbackRecord.setLocalUpdateTime(LocalDateTime.now());
-                cardOpenCallbackRecordService.save(cardOpenCallbackRecord);
-                log.info("创建新的回调记录, 通知ID: {}", miPayCardNotifyResponse.getNotifyId());
-            } else {
-                log.info("回调记录已存在, 通知ID: {}", miPayCardNotifyResponse.getNotifyId());
-            }
-
-            // 5. 处理回调状态
-            if (card.getCardStatus().equals(CardStatusEnum.ACTIVATING.getCardStatus())
-                    && card.getStatus() == 0
-                    && "SUCCESS".equals(miPayCardNotifyResponse.getStatus())
-                    && "CardOpen success".equals(miPayCardNotifyResponse.getStatusDesc())) {
-                // 5.1 修改卡状态为开通成功
-                card.setCardStatus(CardStatusEnum.NORMAL.getCardStatus());
-                card.setStatus(1);
-                card.setLocalUpdateTime(LocalDateTime.now());
-                card.setFinishTime(LocalDateTime.now());
-                this.updateById(card);
-
-                // 5.2 更新回调记录
-                cardOpenCallbackRecord.setLocalUpdateTime(LocalDateTime.now());
-                cardOpenCallbackRecord.setFinishTime(LocalDateTime.now());
-                cardOpenCallbackRecordService.updateById(cardOpenCallbackRecord);
-
-                log.info("卡状态更新为开通成功, 卡ID: {}", card.getCardId());
-                return true;
-            } else if ("FAILED".equals(miPayCardNotifyResponse.getStatus())) {
-                // 5.3 处理失败状态
-                LambdaUpdateWrapper<CardOpenCallbackRecord> updateWrapper = new LambdaUpdateWrapper<>();
-                updateWrapper.eq(CardOpenCallbackRecord::getNotifyId, cardOpenCallbackRecord.getNotifyId());
-                updateWrapper.setSql("retries = retries + 1");
-                updateWrapper.set(CardOpenCallbackRecord::getLocalUpdateTime, LocalDateTime.now());
-                cardOpenCallbackRecordService.update(updateWrapper);
-
-                log.warn("卡开通失败, 通知ID: {}, 重试次数: {}", cardOpenCallbackRecord.getNotifyId(), cardOpenCallbackRecord.getRetries());
-                return false;
-            }
-
-            log.info("回调处理完成, 通知ID: {}", miPayCardNotifyResponse.getNotifyId());
-            return true;
-        } catch (Exception e) {
-            log.error("卡开通回调处理失败, 通知ID: {}, 错误信息: {}", miPayCardNotifyResponse.getNotifyId(), e.getMessage(), e);
-            throw new RuntimeException("卡开通回调处理失败", e);
-        }
-    }
-
-    /**
      * 申请销卡
      *
      * @param
@@ -234,6 +141,12 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         return false;
     }
 
+    /**
+     * 申请换卡
+     *
+     * @param card
+     * @return
+     */
     @Override
     public Card changeCard(Card card) {
         String token = null;
@@ -245,6 +158,33 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         } catch (Exception e) {
             log.error("服务异常", e);
         }
+        return null;
+    }
+
+
+    /**
+     * 卡充值
+     *
+     * @param cardDto
+     * @return
+     */
+    @Override
+    public CardRechargeRecord applyRecharge(CardDto cardDto) {
+        LambdaQueryWrapper<CardHolder> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(CardHolder::getUserId, cardDto.getUserId());
+        lambdaQueryWrapper.eq(CardHolder::getCardCode, cardDto.getCardCode());
+        lambdaQueryWrapper.eq(CardHolder::getTpyshCardHolderId, cardDto.getTpyshCardHolderId());
+        lambdaQueryWrapper.eq(CardHolder::getChannelId, cardDto.getChannelId());
+        CardHolder cardHolder = cardHolderService.getOne(lambdaQueryWrapper);
+        Assert.notNull(cardHolder, "持卡人不存在");
+
+        // 卡校验
+        LambdaQueryWrapper<Card> cardLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        cardLambdaQueryWrapper.eq(Card::getCardId, cardDto.getCardId());
+        cardLambdaQueryWrapper.eq(Card::getTpyshCardHolderId, cardDto.getTpyshCardHolderId());
+        Card card = this.getOne(cardLambdaQueryWrapper);
+        Assert.notNull(card, "卡不存在");
+
 
         return null;
     }

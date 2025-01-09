@@ -3,6 +3,7 @@ package com.starchain.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.starchain.entity.Card;
 import com.starchain.entity.CardHolder;
+import com.starchain.entity.CardRechargeRecord;
 import com.starchain.entity.dto.CardDto;
 
 /**
@@ -10,7 +11,7 @@ import com.starchain.entity.dto.CardDto;
  * @date 2025-01-03
  * @Description
  */
-public interface ICardService extends IService<Card>,IMiPayNotifyService {
+public interface ICardService extends IService<Card> {
     /**
      * 根据用户id和渠道id查询卡数量
      * @param
@@ -40,4 +41,12 @@ public interface ICardService extends IService<Card>,IMiPayNotifyService {
      * @return
      */
     Card changeCard(Card card);
+
+
+    /**
+     * 卡充值
+     * @param cardDto
+     * @return
+     */
+    CardRechargeRecord applyRecharge(CardDto cardDto);
 }

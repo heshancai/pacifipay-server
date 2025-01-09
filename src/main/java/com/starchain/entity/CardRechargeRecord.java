@@ -27,6 +27,9 @@ public class CardRechargeRecord {
     @ApiModelProperty(value = "用户Id，第三方传递过来")
     private Long userId; // 用户Id
 
+    @ApiModelProperty(value = "持卡人Id", example = "")
+    private String tpyshCardHolderId;
+
     @ApiModelProperty(value = "渠道号", example = "100001")
     private Integer channelId; // 渠道号
 

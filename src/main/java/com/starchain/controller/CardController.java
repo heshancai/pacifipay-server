@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.starchain.config.PacificPayConfig;
 import com.starchain.constants.CardUrlConstants;
 import com.starchain.entity.Card;
+import com.starchain.entity.CardRechargeRecord;
 import com.starchain.entity.dto.CardDto;
 import com.starchain.entity.dto.CardHolderDto;
 import com.starchain.entity.dto.TradeDetailDto;
@@ -60,6 +61,39 @@ public class CardController {
         // 创建卡
         Card card = cardService.addCard(cardHolderDto);
         return ResultGenerator.genSuccessResult(card);
+    }
+
+    /*
+     * 卡充值
+     */
+    @ApiOperation(value = "卡充值")
+    @PostMapping("/applyRecharge")
+    public ClientResponse applyRecharge(@RequestBody CardDto cardDto) {
+        if (cardDto.getCardId() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        if (cardDto.getCardCode() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        if (cardDto.getUserId() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        if (cardDto.getTpyshCardHolderId() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        if (cardDto.getChannelId() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        if (cardDto.getSaveAmount() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        try {
+            CardRechargeRecord rechargeRecord = cardService.applyRecharge(cardDto);
+            return ResultGenerator.genSuccessResult(cardDto);
+        } catch (Exception e) {
+            log.error("查询卡失败", e);
+            return ResultGenerator.genFailResult(e.getMessage());
+        }
     }
 
 

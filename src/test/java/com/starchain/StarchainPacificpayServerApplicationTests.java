@@ -4,10 +4,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.starchain.controller.CardController;
 import com.starchain.controller.CardHolderController;
 import com.starchain.controller.RemitCardController;
-import com.starchain.entity.dto.CardHolderDto;
-import com.starchain.entity.dto.RemitApplicationRecordDto;
-import com.starchain.entity.dto.RemitCardDto;
-import com.starchain.entity.dto.TradeDetailDto;
+import com.starchain.entity.dto.*;
 import com.starchain.enums.MoneyKindEnum;
 import com.starchain.result.ClientResponse;
 import com.starchain.service.IRemitApplicationRecordService;
@@ -91,6 +88,14 @@ class StarchainPacificpayServerApplicationTests {
     }
 
 
+
+    @Test
+    void getCardDetail() {
+        CardDto cardDto = new CardDto();
+        cardDto.setCardCode("TpyMDN6");
+        cardDto.setCardId("2025010910301416050");
+        cardController.getCardDetail(cardDto);
+    }
 
     @Test
     void tradeDetail() {

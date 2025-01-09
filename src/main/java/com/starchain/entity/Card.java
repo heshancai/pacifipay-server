@@ -77,10 +77,13 @@ public class Card {
     @ApiModelProperty(value = "开卡手续费", example = "50.00")
     private BigDecimal cardFee;
 
+    @ApiModelProperty(value = "销卡手续费")
+    private BigDecimal handleFeeAmount;
+
     @ApiModelProperty(value = "SO123456", example = "预存款客户订单号同saveOrderId 保持一致")
     private String saveTradeId;
 
-    @ApiModelProperty(value = "卡状态创建状态", example = "卡创建状态：0 创建中 1 创建成功 2 创建失败")
+    @ApiModelProperty(value = "卡状态创建状态", example = "卡卡创建状态：0 创建中 1 创建成功 2 创建失败 3 已注销")
     private Integer status;
 
     @ApiModelProperty(value = "卡状态-银行卡端返回", example = "normal initFail unactivated activating freezing cancelled")
@@ -91,9 +94,14 @@ public class Card {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime localCreateTime;
 
-    @ApiModelProperty(value = "完成时间")
+    @ApiModelProperty(value = "开卡完成时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime localFinishTime;
+    private LocalDateTime finishTime;
+
+
+    @ApiModelProperty(value = "销卡时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime cancelTime;
 
 
     @ApiModelProperty(value = "数据更新时间")

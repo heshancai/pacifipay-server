@@ -9,7 +9,6 @@ import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * @author
@@ -46,5 +45,5 @@ public class MiPayCardNotifyResponse extends BaseMiPayNotifyResponse{
     @ApiModelProperty(value = "验证码 通常3分钟有效",example = "卡验证码特有字段")
     private String verifyCode;
     @ApiModelProperty(value = "金额信息列表", example = "[{\"actual\": 10.50}]")
-    private List<JSONObject> amount;
+    private JSONObject amount;
 }

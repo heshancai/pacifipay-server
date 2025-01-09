@@ -50,7 +50,10 @@ public class CardCancelCallbackRecord {
     @ApiModelProperty(value = "回退金额")
     private BigDecimal returnAmount;
 
-    @ApiModelProperty(value = "手续费")
+    @ApiModelProperty(value = "重试次数")
+    private Integer retries;
+
+    @ApiModelProperty(value = "销卡手续费")
     private BigDecimal handleFeeAmount;
 
     @ApiModelProperty(value = "创建时间")
@@ -60,4 +63,8 @@ public class CardCancelCallbackRecord {
     @ApiModelProperty(value = "更新时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime updateTime;
+
+    @ApiModelProperty(value = "更新时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime finishTime;
 }

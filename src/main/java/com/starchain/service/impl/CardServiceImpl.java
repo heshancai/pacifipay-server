@@ -90,8 +90,8 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             card.setSaveOrderId(OrderIdGenerator.generateOrderId("", "", 6));
             // 太平洋的持卡人唯一值
             card.setTpyshCardHolderId(cardHolder.getTpyshCardHolderId());
-            card.setCardStatus(CardStatusEnum.ACTIVATING.getCardStatus());
-            card.setStatus(0);
+            card.setCardStatus(CardStatusEnum.CANCELLED.getCardStatus());
+            card.setStatus(3);
             card.setLocalCreateTime(LocalDateTime.now());
             card.setLocalUpdateTime(LocalDateTime.now());
             card.setSaveAmount(BigDecimal.ZERO);
@@ -144,7 +144,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             log.info("卡信息校验通过, 卡ID: {}", miPayCardNotifyResponse.getCardId());
 
             // 3. 校验卡开通手续费
-            BigDecimal actual = (BigDecimal) miPayCardNotifyResponse.getAmount().get(0).get("actual");
+            BigDecimal actual = (BigDecimal) miPayCardNotifyResponse.getAmount().get("actual");
             Assert.isTrue(
                     card.getCardFee().compareTo(actual) == 0,
                     "卡开通手续费不一致"
@@ -182,12 +182,12 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
                 card.setCardStatus(CardStatusEnum.NORMAL.getCardStatus());
                 card.setStatus(1);
                 card.setLocalUpdateTime(LocalDateTime.now());
-                card.setLocalFinishTime(LocalDateTime.now());
+                card.setFinishTime(LocalDateTime.now());
                 this.updateById(card);
 
                 // 5.2 更新回调记录
                 cardOpenCallbackRecord.setLocalUpdateTime(LocalDateTime.now());
-                cardOpenCallbackRecord.setLocalFinishTime(LocalDateTime.now());
+                cardOpenCallbackRecord.setFinishTime(LocalDateTime.now());
                 cardOpenCallbackRecordService.updateById(cardOpenCallbackRecord);
 
                 log.info("卡状态更新为开通成功, 卡ID: {}", card.getCardId());
@@ -224,16 +224,13 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         String token = null;
         try {
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
-            // 卡状态为激活中
             String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.deleteCard, token, JSONObject.toJSONString(cardDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
-
             log.info("返回的数据：{}", str);
             CardDto returnCard = JSON.parseObject(str, CardDto.class);
-
+            if (returnCard != null) return true;
         } catch (Exception e) {
             log.error("服务异常", e);
-            throw new RuntimeException(e);
         }
-        return null;
+        return false;
     }
 }

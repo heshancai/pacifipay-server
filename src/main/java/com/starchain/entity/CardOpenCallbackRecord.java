@@ -74,5 +74,5 @@ public class CardOpenCallbackRecord {
 
     @ApiModelProperty(value = "卡开通时间-回调得到")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime localFinishTime;
+    private LocalDateTime finishTime;
 }

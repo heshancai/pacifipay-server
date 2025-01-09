@@ -104,7 +104,7 @@ public class CardController {
      */
     @ApiOperation(value = "查询卡")
     @PostMapping("/getCardDetail")
-    public ClientResponse tradeDetail(@RequestBody CardDto cardDto) {
+    public ClientResponse getCardDetail(@RequestBody CardDto cardDto) {
         if (cardDto.getCardId() == null) {
             return ResultGenerator.genFailResult("dto 不能为null");
         }
@@ -115,9 +115,8 @@ public class CardController {
         try {
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
             String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.getCardDetail, token, JSONObject.toJSONString(cardDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
-            List<TradeDetailResponse> tradeDetailResponseList = JSON.parseArray(str, TradeDetailResponse.class);
-            System.out.println("查询交易明细：" + tradeDetailResponseList);
-            return ResultGenerator.genSuccessResult(tradeDetailResponseList);
+            Card card = JSON.parseObject(str, Card.class);
+            return ResultGenerator.genSuccessResult(card);
         } catch (Exception e) {
             log.error("查询卡失败", e);
             return ResultGenerator.genFailResult(e.getMessage());
@@ -145,7 +144,7 @@ public class CardController {
         }
         try {
             Boolean result = cardService.deleteCard(cardDto);
-            return ResultGenerator.genSuccessResult(result);
+            return ResultGenerator.genSuccessResult("申请销卡正在处理中");
         } catch (Exception e) {
             log.error("申请销卡失败", e);
             return ResultGenerator.genFailResult("申请销卡失败");

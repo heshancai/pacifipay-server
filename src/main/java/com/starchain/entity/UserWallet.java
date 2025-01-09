@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 public class UserWallet {
 
     @TableId(value = "id", type = IdType.AUTO)
-    @ApiModelProperty(value = "唯一标识", example = "1")
+    @ApiModelProperty(value = "主键", example = "1")
     private Long id;
 
     @ApiModelProperty(value = "渠道ID", example = "1001")

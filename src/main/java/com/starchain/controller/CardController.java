@@ -2,26 +2,22 @@ package com.starchain.controller;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.starchain.config.PacificPayConfig;
 import com.starchain.constants.CardUrlConstants;
 import com.starchain.entity.Card;
-import com.starchain.entity.CardHolder;
-import com.starchain.entity.dto.TradeDetailDto;
+import com.starchain.entity.dto.CardDto;
 import com.starchain.entity.dto.CardHolderDto;
+import com.starchain.entity.dto.TradeDetailDto;
 import com.starchain.entity.response.TradeDetailResponse;
-import com.starchain.enums.OrderTypeEnum;
 import com.starchain.result.ClientResponse;
 import com.starchain.result.ResultGenerator;
-import com.starchain.service.ICardHolderService;
 import com.starchain.service.ICardService;
 import com.starchain.util.HttpUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,10 +40,8 @@ public class CardController {
     private PacificPayConfig pacificPayConfig;
 
 
-
     @Autowired
     private ICardService cardService;
-
 
 
     /**
@@ -57,9 +51,9 @@ public class CardController {
     @PostMapping("/addCard")
     public ClientResponse addCard(@RequestBody CardHolderDto cardHolderDto) {
         // 检查当前用户卡数量是否超过 4张
-        Integer holderCardNum = cardService.checkCardNum(cardHolderDto.getId(), cardHolderDto.getChannelId(), cardHolderDto.getCardCode());
+        Integer holderCardNum = cardService.checkCardNum(cardHolderDto.getId(), cardHolderDto.getChannelId(), cardHolderDto.getCardCode(), cardHolderDto.getTpyshCardHolderId());
         if (holderCardNum >= 4) {
-            return ResultGenerator.genFailResult("当前用户卡数量超过4张，无法创建新卡");
+            return ResultGenerator.genFailResult("当前持卡人数量超过4张，无法创建新卡");
         }
         // 创建卡
         Card card = cardService.addCard(cardHolderDto);
@@ -93,13 +87,70 @@ public class CardController {
         String token = null;
         try {
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.tradeDetail, token, JSONObject.toJSONString(tradeDetailDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            List<TradeDetailResponse> tradeDetailResponseList = JSON.parseArray(str, TradeDetailResponse.class);
+            System.out.println("查询交易明细：" + tradeDetailResponseList);
+            return ResultGenerator.genSuccessResult(tradeDetailResponseList);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("查询商户交易明细失败", e);
+            return ResultGenerator.genFailResult(e.getMessage());
         }
-        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.tradeDetail, token, JSONObject.toJSONString(tradeDetailDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
-        List<TradeDetailResponse> tradeDetailResponseList = JSON.parseArray(str, TradeDetailResponse.class);
-        System.out.println("查询交易明细：" + tradeDetailResponseList);
-        return ResultGenerator.genSuccessResult(tradeDetailResponseList);
+
     }
+
+
+    /*
+     * 查询卡
+     */
+    @ApiOperation(value = "查询卡")
+    @PostMapping("/getCardDetail")
+    public ClientResponse tradeDetail(@RequestBody CardDto cardDto) {
+        if (cardDto.getCardId() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        if (cardDto.getCardCode() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        String token = null;
+        try {
+            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.getCardDetail, token, JSONObject.toJSONString(cardDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            List<TradeDetailResponse> tradeDetailResponseList = JSON.parseArray(str, TradeDetailResponse.class);
+            System.out.println("查询交易明细：" + tradeDetailResponseList);
+            return ResultGenerator.genSuccessResult(tradeDetailResponseList);
+        } catch (Exception e) {
+            log.error("查询卡失败", e);
+            return ResultGenerator.genFailResult(e.getMessage());
+        }
+    }
+
+    /*
+     * 申请销卡
+     */
+    @ApiOperation(value = "申请销卡")
+    @PostMapping("/deleteCard")
+    public ClientResponse deleteCard(@RequestBody CardDto cardDto) {
+        if (cardDto.getCardId() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        if (cardDto.getCardCode() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        LambdaQueryWrapper<Card> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Card::getCardId, cardDto.getCardId());
+        queryWrapper.eq(Card::getCardCode, cardDto.getCardCode());
+        Card card = cardService.getOne(queryWrapper);
+        if (card == null) {
+            return ResultGenerator.genFailResult("卡信息不存在");
+        }
+        try {
+            Boolean result = cardService.deleteCard(cardDto);
+            return ResultGenerator.genSuccessResult(result);
+        } catch (Exception e) {
+            log.error("申请销卡失败", e);
+            return ResultGenerator.genFailResult("申请销卡失败");
+        }
+    }
+
 
 }

@@ -4,13 +4,11 @@ import com.alibaba.fastjson2.JSONObject;
 import com.starchain.controller.CardController;
 import com.starchain.controller.CardHolderController;
 import com.starchain.controller.RemitCardController;
-import com.starchain.entity.RemitCard;
 import com.starchain.entity.dto.CardHolderDto;
 import com.starchain.entity.dto.RemitApplicationRecordDto;
 import com.starchain.entity.dto.RemitCardDto;
 import com.starchain.entity.dto.TradeDetailDto;
 import com.starchain.enums.MoneyKindEnum;
-import com.starchain.enums.RemitCodeEnum;
 import com.starchain.result.ClientResponse;
 import com.starchain.service.IRemitApplicationRecordService;
 import com.starchain.service.impl.CardHolderServiceImpl;
@@ -19,10 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 class StarchainPacificpayServerApplicationTests {
@@ -67,6 +61,21 @@ class StarchainPacificpayServerApplicationTests {
         System.out.println(cardHolder1);
     }
     @Test
+    void addCard() {
+        CardHolderDto cardHolder = new CardHolderDto();
+        cardHolder.setMerchantCardHolderId("2025010811491392234e378");
+        cardHolder.setCardCode("TpyMDN6");
+        cardHolder.setTpyshCardHolderId("2025010811491487397");
+        cardHolder.setUserId(10000L);
+        cardHolder.setChannelId(100000);
+        cardHolder.setFirstName("hsc");
+        cardHolder.setLastName("starChain");
+        cardHolder.setId(13L);
+        ClientResponse cardHolder1 = cardController.addCard(cardHolder);
+        System.out.println(cardHolder1);
+    }
+
+    @Test
     void editCardHolder() {
         CardHolderDto cardHolder = new CardHolderDto();
         cardHolder.setMerchantCardHolderId("2025010811491392234e378");
@@ -89,11 +98,17 @@ class StarchainPacificpayServerApplicationTests {
         cardController.tradeDetail(tradeDetailDto);
     }
 
+    @Test
+    void mchInfo() {
+
+        cardController.mchInfo();
+    }
+
     @Autowired
     RemitCardController remitCardController;
 
     /**
-     * 申请汇款
+     * 添加收款卡信息
      */
     @Test
     void addRemitCard() {

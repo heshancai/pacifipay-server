@@ -8,6 +8,6 @@ import com.starchain.entity.CardPresaveCallbackRecord;
  * @date 2025-01-06
  * @Description
  */
-public interface ICardPresaveCallbackRecordService extends IService<CardPresaveCallbackRecord> {
+public interface ICardPresaveCallbackRecordService extends IService<CardPresaveCallbackRecord>,IMiPayNotifyService {
     // 自定义方法可以在这里定义
 }

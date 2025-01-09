@@ -6,6 +6,7 @@ package com.starchain.entity.dto;
  * @Description
  */
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,4 +20,6 @@ public class CardDto implements Serializable {
     private String saveOrderId;
     private String saveAmount;
     private String tpyshCardHolderId;
+    @ApiModelProperty(value = "卡ID-银行卡端返回", example = "CARD123456")
+    private String cardId;
 }

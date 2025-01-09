@@ -8,6 +8,6 @@ import com.starchain.entity.CardRechargeCallbackRecord;
  * @date 2025-01-06
  * @Description
  */
-public interface ICardRechargeCallbackRecordService extends IService<CardRechargeCallbackRecord> {
+public interface ICardRechargeCallbackRecordService extends IService<CardRechargeCallbackRecord>,IMiPayNotifyService {
     // 自定义方法可以在这里定义
 }

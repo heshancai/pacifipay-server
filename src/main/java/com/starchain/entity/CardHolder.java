@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 
@@ -15,7 +14,6 @@ import java.time.LocalDateTime;
  * @Description 持卡人信息表
  */
 @Data
-@Slf4j
 @TableName("card_holder")
 @ApiModel(value = "CardHolder对象", description = "持卡人信息表")
 public class CardHolder {

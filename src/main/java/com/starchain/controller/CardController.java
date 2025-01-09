@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author
@@ -88,9 +90,11 @@ public class CardController {
         try {
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
             String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.tradeDetail, token, JSONObject.toJSONString(tradeDetailDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            System.out.println("查询交易明细：" + str);
             List<TradeDetailResponse> tradeDetailResponseList = JSON.parseArray(str, TradeDetailResponse.class);
-            System.out.println("查询交易明细：" + tradeDetailResponseList);
-            return ResultGenerator.genSuccessResult(tradeDetailResponseList);
+            List<TradeDetailResponse> sortedList = tradeDetailResponseList.stream().sorted(Comparator.comparing(TradeDetailResponse::getBalance))
+                    .collect(Collectors.toList());
+            return ResultGenerator.genSuccessResult(sortedList);
         } catch (Exception e) {
             log.error("查询商户交易明细失败", e);
             return ResultGenerator.genFailResult(e.getMessage());
@@ -145,6 +149,38 @@ public class CardController {
         try {
             Boolean result = cardService.deleteCard(cardDto);
             return ResultGenerator.genSuccessResult("申请销卡正在处理中");
+        } catch (Exception e) {
+            log.error("申请销卡失败", e);
+            return ResultGenerator.genFailResult("申请销卡失败");
+        }
+    }
+
+    /*
+     * 申请销卡
+     */
+    @ApiOperation(value = "申请换卡")
+    @PostMapping("/changeCard")
+    public ClientResponse changeCard(@RequestBody CardDto cardDto) {
+        if (cardDto.getCardId() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        if (cardDto.getCardCode() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        if (cardDto.getTpyshCardHolderId() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        LambdaQueryWrapper<Card> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Card::getCardId, cardDto.getCardId());
+        queryWrapper.eq(Card::getCardCode, cardDto.getCardCode());
+        queryWrapper.eq(Card::getTpyshCardHolderId, cardDto.getTpyshCardHolderId());
+        Card card = cardService.getOne(queryWrapper);
+        if (card == null) {
+            return ResultGenerator.genFailResult("原卡信息不存在");
+        }
+        try {
+            Card card1 = cardService.changeCard(cardDto);
+            return ResultGenerator.genSuccessResult(card1);
         } catch (Exception e) {
             log.error("申请销卡失败", e);
             return ResultGenerator.genFailResult("申请销卡失败");

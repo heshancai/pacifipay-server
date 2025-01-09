@@ -93,20 +93,31 @@ class StarchainPacificpayServerApplicationTests {
     void getCardDetail() {
         CardDto cardDto = new CardDto();
         cardDto.setCardCode("TpyMDN6");
-        cardDto.setCardId("2025010910301416050");
+        cardDto.setCardId("2025010910213120d78");
         cardController.getCardDetail(cardDto);
     }
 
+    // 卡注销
     @Test
-    void tradeDetail() {
-        TradeDetailDto tradeDetailDto = new TradeDetailDto();
-        cardController.tradeDetail(tradeDetailDto);
+    void deleteCard() {
+        CardDto cardDto = new CardDto();
+        cardDto.setCardCode("TpyMDN6");
+        cardDto.setCardId("2025010910213120d78");
+        ClientResponse clientResponse = cardController.deleteCard(cardDto);
+        System.out.println(clientResponse);
     }
 
     @Test
     void mchInfo() {
-
+        // 查询商户余额
         cardController.mchInfo();
+    }
+
+    // 查询商户交易明细
+    @Test
+    void tradeDetail() {
+        TradeDetailDto tradeDetailDto = new TradeDetailDto();
+        System.out.println(cardController.tradeDetail(tradeDetailDto));
     }
 
     @Autowired

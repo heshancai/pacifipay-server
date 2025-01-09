@@ -20,7 +20,7 @@ public interface ICardService extends IService<Card>,IMiPayNotifyService {
     Integer checkCardNum(Long cardHolderId, Integer channelId,String cardCode,String tpyshCardHolderId);
 
     /**
-     *  根据持卡人创建卡
+     *  创建卡
      * @param cardHolder
      * @return
      */
@@ -33,4 +33,11 @@ public interface ICardService extends IService<Card>,IMiPayNotifyService {
      * @return
      */
     Boolean deleteCard(CardDto cardDto);
+
+    /**
+     * 申请换卡
+     * @param cardDto
+     * @return
+     */
+    Card changeCard(CardDto cardDto);
 }

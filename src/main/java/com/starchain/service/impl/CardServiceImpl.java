@@ -233,4 +233,9 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         }
         return false;
     }
+
+    @Override
+    public Card changeCard(CardDto cardDto) {
+        return null;
+    }
 }

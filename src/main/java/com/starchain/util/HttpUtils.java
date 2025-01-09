@@ -61,7 +61,7 @@ public class HttpUtils {
                 String dataEncrypt = resultJson.getString("data");
                 // 私钥解密
                 res = RSA2048Encrypt.decrypt(dataEncrypt, RSA2048Encrypt.getPrivateKey(privateKey));
-                System.out.println(res);
+                System.out.println("解密后的数据：" + res);
             }
         } catch (Exception e) {
             log.error("请求失败", e);

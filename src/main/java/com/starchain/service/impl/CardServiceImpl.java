@@ -235,7 +235,17 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     }
 
     @Override
-    public Card changeCard(CardDto cardDto) {
+    public Card changeCard(Card card) {
+        String token = null;
+        try {
+            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.deleteCard, token, JSONObject.toJSONString(card), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            log.info("返回的数据：{}", str);
+            CardDto returnCard = JSON.parseObject(str, CardDto.class);
+        } catch (Exception e) {
+            log.error("服务异常", e);
+        }
+
         return null;
     }
 }

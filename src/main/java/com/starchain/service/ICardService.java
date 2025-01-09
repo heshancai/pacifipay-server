@@ -36,8 +36,8 @@ public interface ICardService extends IService<Card>,IMiPayNotifyService {
 
     /**
      * 申请换卡
-     * @param cardDto
+     * @param card
      * @return
      */
-    Card changeCard(CardDto cardDto);
+    Card changeCard(Card card);
 }

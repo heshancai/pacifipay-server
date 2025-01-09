@@ -92,8 +92,7 @@ public class CardController {
             String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.tradeDetail, token, JSONObject.toJSONString(tradeDetailDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             System.out.println("查询交易明细：" + str);
             List<TradeDetailResponse> tradeDetailResponseList = JSON.parseArray(str, TradeDetailResponse.class);
-            List<TradeDetailResponse> sortedList = tradeDetailResponseList.stream().sorted(Comparator.comparing(TradeDetailResponse::getBalance))
-                    .collect(Collectors.toList());
+            List<TradeDetailResponse> sortedList = tradeDetailResponseList.stream().sorted(Comparator.comparing(TradeDetailResponse::getBalance)).collect(Collectors.toList());
             return ResultGenerator.genSuccessResult(sortedList);
         } catch (Exception e) {
             log.error("查询商户交易明细失败", e);
@@ -156,7 +155,7 @@ public class CardController {
     }
 
     /*
-     * 申请销卡
+     * 作废 现无法使用-申请换卡
      */
     @ApiOperation(value = "申请换卡")
     @PostMapping("/changeCard")
@@ -170,16 +169,19 @@ public class CardController {
         if (cardDto.getTpyshCardHolderId() == null) {
             return ResultGenerator.genFailResult("dto 不能为null");
         }
+
         LambdaQueryWrapper<Card> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Card::getCardId, cardDto.getCardId());
         queryWrapper.eq(Card::getCardCode, cardDto.getCardCode());
+        queryWrapper.eq(Card::getStatus, 1);
+        queryWrapper.eq(Card::getStatus, 1);
         queryWrapper.eq(Card::getTpyshCardHolderId, cardDto.getTpyshCardHolderId());
         Card card = cardService.getOne(queryWrapper);
         if (card == null) {
             return ResultGenerator.genFailResult("原卡信息不存在");
         }
         try {
-            Card card1 = cardService.changeCard(cardDto);
+            Card card1 = cardService.changeCard(card);
             return ResultGenerator.genSuccessResult(card1);
         } catch (Exception e) {
             log.error("申请销卡失败", e);

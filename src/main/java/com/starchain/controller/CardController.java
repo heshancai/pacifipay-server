@@ -89,7 +89,7 @@ public class CardController {
         }
         try {
             CardRechargeRecord rechargeRecord = cardService.applyRecharge(cardDto);
-            return ResultGenerator.genSuccessResult(cardDto);
+            return ResultGenerator.genSuccessResult(rechargeRecord);
         } catch (Exception e) {
             log.error("查询卡失败", e);
             return ResultGenerator.genFailResult(e.getMessage());

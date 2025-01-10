@@ -170,6 +170,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
      */
     @Override
     public CardRechargeRecord applyRecharge(CardDto cardDto) {
+        // 持卡人校验
         LambdaQueryWrapper<CardHolder> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(CardHolder::getUserId, cardDto.getUserId());
         lambdaQueryWrapper.eq(CardHolder::getCardCode, cardDto.getCardCode());
@@ -184,6 +185,8 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         cardLambdaQueryWrapper.eq(Card::getTpyshCardHolderId, cardDto.getTpyshCardHolderId());
         Card card = this.getOne(cardLambdaQueryWrapper);
         Assert.notNull(card, "卡不存在");
+
+        // 核实用户余额
 
 
         return null;

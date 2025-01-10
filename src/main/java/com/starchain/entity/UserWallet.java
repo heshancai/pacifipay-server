@@ -27,10 +27,6 @@ public class UserWallet {
     @TableId(value = "id", type = IdType.AUTO)
     @ApiModelProperty(value = "主键", example = "1")
     private Long id;
-
-    @ApiModelProperty(value = "渠道ID", example = "1001")
-    private Long channelId;
-
     @ApiModelProperty(value = "用户ID", example = "12345")
     private Long userId;
 
@@ -38,7 +34,7 @@ public class UserWallet {
     private Long cardHolderId;
 
     @ApiModelProperty(value = "USDT 钱包地址", example = "1AaBbCcDdEeFfGgHh12345")
-    private String usdtAddress;
+    private String address;
 
     @ApiModelProperty(value = "USDT 支持的网络类型：1=TRC20, 2=BEP20", example = "1")
     private Integer usdtNetwork;
@@ -49,8 +45,8 @@ public class UserWallet {
     @ApiModelProperty(value = "币种符号 ", example = " USDT-TRC20,USDT-BEP20")
     private String coinId;
 
-    @ApiModelProperty(value = "状态", example = "状态：1:有效,0:无效")
-    private Integer status;
+    @ApiModelProperty(value = "钱包状态", example = "钱包是否锁定 0:锁定 1正常")
+    private Integer lockStatus;
 
     @ApiModelProperty(value = "创建时间", example = "2025-01-01T12:00:00")
     private LocalDateTime createTime;

@@ -10,41 +10,37 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
  * @author
- * @date 2025-01-02
+ * @date 2025-01-13
  * @Description
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("user_wallet")
-@ApiModel(value = "UserWallet", description = "用户钱包信息")
+@TableName("user_wallet_balance")
+@ApiModel(value = "UserWalletBalance", description = "用户钱包余额信息")
 @Builder
-public class UserWallet {
+public class UserWalletBalance {
 
     @TableId(value = "id", type = IdType.AUTO)
     @ApiModelProperty(value = "主键", example = "1")
     private Long id;
+
     @ApiModelProperty(value = "用户ID", example = "12345")
     private Long userId;
-    @ApiModelProperty(value = "渠道Id", example = "12345")
-    private Long channelId;
 
-    @ApiModelProperty(value = "USDT 钱包地址", example = "1AaBbCcDdEeFfGgHh12345")
-    private String address;
+    @ApiModelProperty(value = "渠道ID", example = "12345")
+    private Long channelId;
 
     @ApiModelProperty(value = "USDT 支持的网络类型：1=TRC20, 2=BEP20", example = "1")
     private Integer usdtNetwork;
 
-
-    @ApiModelProperty(value = "币种符号 ", example = " USDT-TRC20,USDT-BEP20")
-    private String coinId;
-
-    @ApiModelProperty(value = "钱包状态", example = "钱包是否锁定 0:锁定 1正常")
-    private Integer lockStatus;
+    @ApiModelProperty(value = "地址余额", example = "总余额")
+    private BigDecimal balance;
 
     @ApiModelProperty(value = "创建时间", example = "2025-01-01T12:00:00")
     private LocalDateTime createTime;
@@ -52,4 +48,3 @@ public class UserWallet {
     @ApiModelProperty(value = "更新时间", example = "2025-01-01T12:00:00")
     private LocalDateTime updateTime;
 }
-

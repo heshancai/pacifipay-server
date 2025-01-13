@@ -31,7 +31,7 @@ public class WalletCallbackRecordServiceImpl extends ServiceImpl<WalletCallbackR
                 .eq(WalletCallbackRecord::getSide, side)
                 .eq(WalletCallbackRecord::getNotifyId, walletRechargeCallbackResponse.getNotifyId())
                 .eq(WalletCallbackRecord::getDepositId, walletRechargeCallbackResponse.getDepositId());
-        log.info("txid:{},address:{},symbol:{},side{},notify_id:{},deposit_id:{}", walletRechargeCallbackResponse.getTxId(), walletRechargeCallbackResponse.getDepositAddress(), walletRechargeCallbackResponse.getCurrencySymbol(), side, walletRechargeCallbackResponse.getNotifyId(), walletRechargeCallbackResponse.getDepositId());
+        log.info("tx_id:{},address:{},symbol:{},side{},notify_id:{},deposit_id:{}", walletRechargeCallbackResponse.getTxId(), walletRechargeCallbackResponse.getDepositAddress(), walletRechargeCallbackResponse.getCurrencySymbol(), side, walletRechargeCallbackResponse.getNotifyId(), walletRechargeCallbackResponse.getDepositId());
         WalletCallbackRecord walletCallbackRecord = this.getOne(lambdaQueryWrapper);
         if (walletCallbackRecord != null) {
             log.info("充值记录已存在:{}", walletCallbackRecord);

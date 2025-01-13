@@ -1,4 +1,3 @@
-
 spring:
   application:
     name: starChain-pacificPay-Server
@@ -22,4 +21,8 @@ app:
   base-url: "http://42.194.129.4:8082/merchant-app-server/mch"
   server-public-key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwyJ/9AZq7wnOWxpu0b6LulsSEY2X98rSkqfNBzBYNBGsUIJDN9fv6HmfSLdrvSuqU89DSYP+ek11h60d3ZFKtM414dslWbIhzMkcGBboq2cyAER7iX9k5wuCcGpeejiICVFurx8MDKaMJBpuYYrVoyjW69bEHpkfrrr8WusqECbYSTDd2e5+uGELkRBY1bqyA2AWrTizNsU7Waflzi7ODc2h1bsZt+9bwahx107IA0mE6bQnX2e8TnN+9Ijjm5VoAeKuOLsd5Uu+/NLKmgYE0cUQismRon+mUPLB6JKKbrTGGOXRKb4Rb1zVvOxvtNnEIZZpSMjI+Do6ojZnkC/VKQIDAQAB"
 wallet:
-  base-url: ""
+  domain: "http://192.168.31.57:9999"  # 钱包服务地址
+  createAddress: "/proxy-wallet/api/get/address" # 获取钱包地址uri
+  contentSecret: 6oF1uTRSmEYS6WsC # 钱包内容秘钥
+  signSecret: xkrNZYknhFSIrCVP4O9B0eCJdONj8fsx # 钱包签名秘钥
+  appKey: 06c0ca10841d45419b8b54faac7c71b0 # 钱包appKey

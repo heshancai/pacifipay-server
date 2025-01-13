@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @TableName("user_wallet_transaction")
 @ApiModel(value = "UserWalletTransaction对象", description = "用户交易记录表")
+@Builder
 public class UserWalletTransaction {
 
     @ApiModelProperty(value = "主键ID")
@@ -27,18 +29,18 @@ public class UserWalletTransaction {
     private Long id;
 
     @ApiModelProperty(value = "会员ID")
-    private Long memberId;
+    private Long userId;
 
     @ApiModelProperty(value = "币种名称")
     private String coinName;
 
-    @ApiModelProperty(value = "操作金额")
+    @ApiModelProperty(value = "充值金额")
     private BigDecimal amount;
 
     @ApiModelProperty(value = "手续费")
     private BigDecimal fee;
 
-    @ApiModelProperty(value = "扣除手续后的金额")
+    @ApiModelProperty(value = "实际到账金额")
     private BigDecimal actAmount;
 
     @ApiModelProperty(value = "交易类型：1-充币 2-提币")

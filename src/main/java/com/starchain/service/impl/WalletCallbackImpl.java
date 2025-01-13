@@ -1,8 +1,10 @@
 package com.starchain.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.starchain.entity.SysCoin;
 import com.starchain.entity.UserWallet;
+import com.starchain.entity.UserWalletBalance;
 import com.starchain.entity.WalletCallbackRecord;
 import com.starchain.entity.response.WalletRechargeCallbackResponse;
 import com.starchain.enums.RechargeRecordStatusEnum;
@@ -38,6 +40,9 @@ public class WalletCallbackImpl implements IWalletCallbackService {
     @Autowired
     private IUserWalletTransactionService userWalletTransactionService;
 
+    @Autowired
+    private IUserWalletBalanceService userWalletBalanceService;
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void dealDeposit(WalletRechargeCallbackResponse walletRechargeCallbackResponse, BigDecimal depositAmount, WalletCallbackRecord walletCallbackRecord) {
@@ -46,18 +51,24 @@ public class WalletCallbackImpl implements IWalletCallbackService {
         sysCoinLambdaQueryWrapper.eq(SysCoin::getCoinName, walletRechargeCallbackResponse.getCurrencySymbol());
         SysCoin coin = sysCoinService.getOne(sysCoinLambdaQueryWrapper);
         Assert.notNull(coin, "币种信息不能为空");
-
         // 获取用户钱包信息
         LambdaQueryWrapper<UserWallet> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(UserWallet::getCoinId, walletRechargeCallbackResponse.getDepositAddress());
+        lambdaQueryWrapper.eq(UserWallet::getAddress, walletRechargeCallbackResponse.getDepositAddress());
         UserWallet userWallet = userWalletService.getOne(lambdaQueryWrapper);
         Assert.notNull(userWallet, "用户钱包信息不存在");
         // 计算手续费
         BigDecimal localFee = depositPoundageCalc(coin, new BigDecimal(walletRechargeCallbackResponse.getDepositAmount()));
-        // 记录交易记录
-        userWalletTransactionService.dealRecodeTransaction(userWallet,walletCallbackRecord);
-        //  修改用户钱包余额信息
+        // 实际到账金额
+        BigDecimal actAmount = walletCallbackRecord.getAmount().subtract(localFee);
         walletCallbackRecord.setStatus(RechargeRecordStatusEnum.CONFIRMED.getKey());
+        // 记录交易记录
+        userWalletTransactionService.dealRecodeTransaction(localFee, actAmount, userWallet, walletCallbackRecord);
+        // 修改钱包余额信息
+        LambdaUpdateWrapper<UserWalletBalance> userWalletLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        userWalletLambdaUpdateWrapper.eq(UserWalletBalance::getUserId, userWallet.getUserId()).eq(UserWalletBalance::getChannelId, userWallet.getChannelId())
+                .setSql("balance = balance + " + actAmount).set(UserWalletBalance::getUpdateTime, LocalDateTime.now()).set(UserWalletBalance::getCreateTime, LocalDateTime.now());
+        userWalletBalanceService.update(userWalletLambdaUpdateWrapper);
+
         walletCallbackRecord.setFinishTime(LocalDateTime.now());
         walletCallbackRecord.setSuccessConfirm(1);
         // 更新记录表信息 设置状态为成功

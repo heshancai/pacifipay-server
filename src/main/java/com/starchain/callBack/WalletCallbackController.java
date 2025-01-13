@@ -8,9 +8,13 @@ import com.starchain.result.ClientResponse;
 import com.starchain.result.ResultGenerator;
 import com.starchain.service.IWalletCallbackRecordService;
 import com.starchain.service.IWalletCallbackService;
+import com.starchain.service.IWalletCoinConfigService;
+import com.starchain.util.AesUtils;
+import com.starchain.util.SignUtils;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * @author
@@ -28,7 +33,11 @@ import java.math.BigDecimal;
 @RequestMapping("/callback")
 @RestController
 public class WalletCallbackController {
+    @Value("${wallet.contentSecret}")
+    private String contentSecret;
 
+    @Value("${wallet.signSecret}")
+    private String signSecret;
 
     @Autowired
     private IWalletCallbackRecordService walletCallbackRecordService;
@@ -36,6 +45,9 @@ public class WalletCallbackController {
 
     @Autowired
     private IWalletCallbackService walletCallbackService;
+
+    @Autowired
+    private IWalletCoinConfigService walletCoinConfigService;
 
 
     /**
@@ -45,18 +57,21 @@ public class WalletCallbackController {
     @PostMapping("/recharge")
     public ClientResponse rechargeCallback(HttpServletRequest request) {
         try {
+            log.info("开始处理钱包回调信息");
             // 验签 解密数据
             String realJsonStr = handleMsg(request);
             WalletRechargeCallbackResponse walletRechargeCallbackResponse = JSONObject.parseObject(realJsonStr, WalletRechargeCallbackResponse.class);
             // 数据非空校验
             checkRecharge(walletRechargeCallbackResponse);
+            // 将接口的币种符号转换为数据库的币种符号
+            walletRechargeCallbackResponse.setCurrencySymbol(walletCoinConfigService.toCurrencySymbol(walletRechargeCallbackResponse.getCurrencySymbol()));
             // 生成充币记录
             WalletCallbackRecord walletCallbackRecord = walletCallbackRecordService.checkDepositRecordIsExist(walletRechargeCallbackResponse, WalletSideEnum.DEPOSIT.getKey());
-            // 处理充值 并且计算手续费
+            // 处理充值 并且计算手续费 记录交易记录 修改钱包余额
             walletCallbackService.dealDeposit(walletRechargeCallbackResponse, new BigDecimal(walletRechargeCallbackResponse.getDepositAmount()), walletCallbackRecord);
             return ResultGenerator.genSuccessResult();
         } catch (Exception e) {
-            log.warn("wallet rechargeCallBack 异常：", e);
+            log.error("wallet rechargeCallBack 异常：", e);
             return ResultGenerator.genFailResult("rechargeCallback 异常");
         }
     }
@@ -78,6 +93,40 @@ public class WalletCallbackController {
     }
 
     private String handleMsg(HttpServletRequest request) {
+        String msg = getMsg(request);
+        String sign = request.getHeader("Sign");
+        log.info("proxywallet callback sign：[{}], msg：[{}]", sign, msg);
+        Assert.isTrue(SignUtils.validSign(msg, sign, signSecret), "验签失败");
+        String realJsonStr = AesUtils.decrypt(contentSecret, msg);
+        log.info("proxywallet 解密后的数据：[{}]", realJsonStr);
+        return realJsonStr;
+    }
+
+    /**
+     * 获取请求参数msg
+     *
+     * @param request request
+     * @return
+     */
+    private String getMsg(HttpServletRequest request) {
+        String requestContent = getRequestFirstName(request);
+        Assert.notNull(requestContent, "充值提币请求内容不存在");
+        JSONObject jsonObject = JSONObject.parseObject(requestContent);
+        return jsonObject.getString("msg");
+    }
+
+
+    /**
+     * 获取第一个请求字段的名称
+     *
+     * @param request request
+     * @return
+     */
+    private String getRequestFirstName(HttpServletRequest request) {
+        Map<String, String[]> m = request.getParameterMap();
+        for (String key : m.keySet()) {
+            return key;
+        }
         return null;
     }
 }

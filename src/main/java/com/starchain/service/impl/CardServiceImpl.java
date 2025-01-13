@@ -13,7 +13,6 @@ import com.starchain.entity.CardRechargeRecord;
 import com.starchain.entity.dto.CardDto;
 import com.starchain.enums.CardStatusEnum;
 import com.starchain.service.ICardHolderService;
-import com.starchain.service.ICardOpenCallbackRecordService;
 import com.starchain.service.ICardService;
 import com.starchain.util.HttpUtils;
 import com.starchain.util.OrderIdGenerator;
@@ -38,8 +37,8 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     @Autowired
     private PacificPayConfig pacificPayConfig;
 
-    @Autowired
-    private ICardOpenCallbackRecordService cardOpenCallbackRecordService;
+//    @Autowired
+//    private ICardOpenCallbackRecordService cardOpenCallbackRecordService;
 
     @Autowired
     private ICardHolderService cardHolderService;
@@ -64,7 +63,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     @Override
     public Integer checkCardNum(Long cardHolderId, Integer channelId, String cardCode, String tpyshCardHolderId) {
         LambdaQueryWrapper<Card> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(Card::getCardHolderId, cardHolderId).eq(Card::getCardCode, cardCode).eq(Card::getTpyshCardHolderId, tpyshCardHolderId);
+        lambdaQueryWrapper.eq(Card::getCardCode, cardCode).eq(Card::getTpyshCardHolderId, tpyshCardHolderId);
         return this.count(lambdaQueryWrapper);
     }
 
@@ -86,7 +85,6 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
 
             Card card = new Card();
             card.setCardCode(cardHolder.getCardCode());
-            card.setCardHolderId(cardHolder.getId());
             //  生成一个唯一的订单号
             card.setSaveOrderId(OrderIdGenerator.generateOrderId("", "", 6));
             // 太平洋的持卡人唯一值

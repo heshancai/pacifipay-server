@@ -45,11 +45,14 @@ public class CardRechargeRecord {
     @ApiModelProperty(value = "充值金额", example = "100.00")
     private BigDecimal orderAmount; // 充值金额
 
+    @ApiModelProperty(value = "充值到账金额", example = "100.00")
+    private BigDecimal acTAmount; // 充值金额
+
     @ApiModelProperty(value = "流水号", example = "TRADE123456789")
     private String tradeId; // 充值流水号
 
-    @ApiModelProperty(value = "流水号", example = "TRADE123456789")
-    private String status; // 充值流水号
+    @ApiModelProperty(value = "状态", example = "0 充值中 1 充值成功 2 充值失败 3 充值取消")
+    private Integer status; //
 
     @ApiModelProperty(value = "手续费", example = "5.00")
     private BigDecimal orderFee; // 手续费

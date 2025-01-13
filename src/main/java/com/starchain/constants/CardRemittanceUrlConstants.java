@@ -7,23 +7,21 @@ package com.starchain.constants;
  */
 public class CardRemittanceUrlConstants {
     // 查询商户余额
-    public static final String mchInfo = "/apiMerchant/mchInfo";
+    public static final String MCH_INFO = "/apiMerchant/mchInfo";
     // 查询商户交易明细
-    public static final String tradeDetail = "/apiMerchant/tradeDetail";
+    public static final String TRADE_DETAIL = "/apiMerchant/tradeDetail";
     // 获取汇款汇率
-    public static final String getRemitRate = "/apiMerchant/getRemitRate";
+    public static final String GET_REMIT_RATE = "/apiMerchant/getRemitRate";
     // 添加收款卡信息
-    public static final String addRemitCard = "/apiMerchant/addRemitCard";
+    public static final String ADD_REMIT_CARD = "/apiMerchant/addRemitCard";
     // 修改收款卡信息
-    public static final String updateRemitCard = "/apiMerchant/updateRemitCard";
+    public static final String UPDATE_REMIT_CARD = "/apiMerchant/updateRemitCard";
     // 获取收款卡信息
-    public static final String getRemitCard = "/apiMerchant/getRemitCard";
+    public static final String GET_REMIT_CARD = "/apiMerchant/getRemitCard";
     // 删除收款卡信息
-    public static final String delRemitCard = "/apiMerchant/delRemitCard";
+    public static final String DEL_REMIT_CARD = "/apiMerchant/delRemitCard";
     // 申请汇款
-    public static final String applyRemit = "/apiMerchant/applyRemit";
+    public static final String APPLY_REMIT = "/apiMerchant/applyRemit";
     // 汇款单详情
-    public static final String remitDetail = "/apiMerchant/remitDetail";
-
-
+    public static final String REMIT_DETAIL = "/apiMerchant/remitDetail";
 }

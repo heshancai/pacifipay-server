@@ -10,18 +10,13 @@ import com.starchain.constants.CardUrlConstants;
 import com.starchain.dao.CardHolderMapper;
 import com.starchain.entity.CardHolder;
 import com.starchain.entity.dto.CardHolderDto;
-import com.starchain.entity.response.MiPayCardNotifyResponse;
 import com.starchain.enums.CardCodeEnum;
 import com.starchain.exception.StarChainException;
 import com.starchain.service.ICardHolderService;
 import com.starchain.util.HttpUtils;
 import com.starchain.util.OrderIdGenerator;
-import com.starchain.util.TpyshUtils;
-import com.starchain.util.UUIDUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -76,7 +71,7 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
 
             this.save(cardHolder);
             // 公钥加密传输 数据  我的私钥解密接收到的数据
-            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.addCardHolder,
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.ADD_CARD_HOLDER,
                     token, JSONObject.toJSONString(cardHolder), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             log.info("创建持卡人返回的数据：{}", str);
             CardHolder returnCardHolder = JSON.parseObject(str, CardHolder.class);
@@ -134,7 +129,7 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
         try {
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
             System.out.println("token=>" + token);
-            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.editCardHolder, token, JSONObject.toJSONString(cardHolderDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.EDIT_CARD_HOLDER, token, JSONObject.toJSONString(cardHolderDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             CardHolder returnCardHolder = JSON.parseObject(str, CardHolder.class);
             cardHolderLambdaUpdateWrapper.set(CardHolder::getUpdateTime, LocalDateTime.now());
             this.update(cardHolderLambdaUpdateWrapper);
@@ -162,7 +157,7 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
         try {
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
             System.out.println("token=>" + token);
-            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.getCardHolder, token, JSONObject.toJSONString(cardHolderDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.GET_CARD_HOLDER, token, JSONObject.toJSONString(cardHolderDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             return JSON.parseObject(str, CardHolder.class);
         } catch (Exception e) {
             throw new RuntimeException(e);

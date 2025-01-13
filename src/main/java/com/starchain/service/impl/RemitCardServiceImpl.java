@@ -4,32 +4,24 @@ import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.config.PacificPayConfig;
 import com.starchain.constants.CardRemittanceUrlConstants;
-import com.starchain.constants.CardUrlConstants;
-import com.starchain.context.MiPayNotifyType;
 import com.starchain.dao.RemitCardMapper;
 import com.starchain.entity.RemitCard;
 import com.starchain.entity.dto.RemitCardDto;
 import com.starchain.entity.dto.RemitRateDto;
 import com.starchain.entity.response.MiPayCardNotifyResponse;
 import com.starchain.entity.response.RemitCardResponse;
-import com.starchain.enums.RemitCodeEnum;
 import com.starchain.exception.StarChainException;
-import com.starchain.result.ResultGenerator;
-import com.starchain.service.IMiPayNotifyService;
 import com.starchain.service.IRemitCardService;
 import com.starchain.util.HttpUtils;
 import com.starchain.util.OrderIdGenerator;
-import com.starchain.util.UUIDUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -62,7 +54,7 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             log.info("成功获取 Token：{}", token);
 
             // 发送请求并获取响应
-            String requestUrl = pacificPayConfig.getBaseUrl() + CardRemittanceUrlConstants.addRemitCard;
+            String requestUrl = pacificPayConfig.getBaseUrl() + CardRemittanceUrlConstants.ADD_REMIT_CARD;
             String requestBody = JSONObject.toJSONString(remitCardDto);
             log.info("发送请求，URL：{}，请求体：{}", requestUrl, requestBody);
 
@@ -215,7 +207,7 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
         Assert.notNull(remitRateDto.getRemitCode(), "汇款类型编码不能为空");
         Assert.notNull(remitRateDto.getToMoneyKind(), "汇款目标币种编码不能为空");
         try {
-            String requestUrl = pacificPayConfig.getBaseUrl() + CardRemittanceUrlConstants.getRemitRate;
+            String requestUrl = pacificPayConfig.getBaseUrl() + CardRemittanceUrlConstants.GET_REMIT_RATE;
             String requestBody = JSONObject.toJSONString(remitRateDto);
             log.info("发送请求，URL：{}，请求体：{}", requestUrl, requestBody);
             String responseStr = HttpUtils.doPostMiPay(requestUrl, token, requestBody, pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());

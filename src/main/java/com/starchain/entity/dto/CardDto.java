@@ -20,7 +20,7 @@ public class CardDto implements Serializable {
     private String cardCode;
     private String saveOrderId;
     @ApiModelProperty(value = "用户Id", example = "CARD123456")
-    private String saveAmount;
+    private BigDecimal saveAmount;
     @ApiModelProperty(value = "充值金额", example = "小数点后最多2位")
     private BigDecimal orderAmount;
     @ApiModelProperty(value = "持卡人Id", example = "")
@@ -31,4 +31,6 @@ public class CardDto implements Serializable {
     private Long userId;
     @ApiModelProperty(value = "渠道Id", example = "CARD123456")
     private Long channelId;
+    @ApiModelProperty(value = "客户卡充值交易唯一标识", example = "CARD123456")
+    private String orderId;
 }

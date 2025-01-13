@@ -13,6 +13,7 @@ import com.starchain.entity.dto.TradeDetailDto;
 import com.starchain.entity.response.TradeDetailResponse;
 import com.starchain.result.ClientResponse;
 import com.starchain.result.ResultGenerator;
+import com.starchain.service.ICardRechargeRecordService;
 import com.starchain.service.ICardService;
 import com.starchain.util.HttpUtils;
 import io.swagger.annotations.Api;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,10 +44,11 @@ public class CardController {
     @Autowired
     private PacificPayConfig pacificPayConfig;
 
-
     @Autowired
     private ICardService cardService;
 
+    @Autowired
+    private ICardRechargeRecordService cardRechargeRecordService;
 
     /**
      * 创建卡 每种类型限制一张
@@ -87,7 +90,20 @@ public class CardController {
         if (cardDto.getSaveAmount() == null) {
             return ResultGenerator.genFailResult("dto 不能为null");
         }
+        if (cardDto.getSaveAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            return ResultGenerator.genFailResult("输入的金额必须大于0");
+        }
+        //最新的卡充值未结束 无法进行新一轮充值
+        LambdaQueryWrapper<CardRechargeRecord> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(CardRechargeRecord::getCardId, cardDto.getCardId());
+        lambdaQueryWrapper.eq(CardRechargeRecord::getUserId, cardDto.getUserId());
+        lambdaQueryWrapper.eq(CardRechargeRecord::getCardCode, cardDto.getCardCode());
+        CardRechargeRecord cardRechargeRecord = cardRechargeRecordService.getOne(lambdaQueryWrapper);
+        if (cardRechargeRecord != null && cardRechargeRecord.getStatus() == 0) {
+            return ResultGenerator.genFailResult("当前卡充值未结束，无法进行新一轮充值");
+        }
         try {
+            // 进行卡充值
             CardRechargeRecord rechargeRecord = cardService.applyRecharge(cardDto);
             return ResultGenerator.genSuccessResult(rechargeRecord);
         } catch (Exception e) {
@@ -109,7 +125,7 @@ public class CardController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.mchInfo, token, "", pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.MCH_INFO, token, "", pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
         JSONObject jsonObject = JSON.parseObject(str);
         return ResultGenerator.genSuccessResult(jsonObject);
     }
@@ -123,7 +139,7 @@ public class CardController {
         String token = null;
         try {
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
-            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.tradeDetail, token, JSONObject.toJSONString(tradeDetailDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.TRADE_DETAIL, token, JSONObject.toJSONString(tradeDetailDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             System.out.println("查询交易明细：" + str);
             List<TradeDetailResponse> tradeDetailResponseList = JSON.parseArray(str, TradeDetailResponse.class);
             List<TradeDetailResponse> sortedList = tradeDetailResponseList.stream().sorted(Comparator.comparing(TradeDetailResponse::getBalance)).collect(Collectors.toList());
@@ -151,7 +167,7 @@ public class CardController {
         String token = null;
         try {
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
-            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.getCardDetail, token, JSONObject.toJSONString(cardDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.GET_CARD_DETAIL, token, JSONObject.toJSONString(cardDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             Card card = JSON.parseObject(str, Card.class);
             return ResultGenerator.genSuccessResult(card);
         } catch (Exception e) {

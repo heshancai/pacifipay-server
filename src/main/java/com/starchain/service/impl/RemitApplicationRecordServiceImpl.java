@@ -8,7 +8,6 @@ import com.starchain.dao.RemitApplicationRecordMapper;
 import com.starchain.entity.RemitApplicationRecord;
 import com.starchain.entity.dto.RemitApplicationRecordDto;
 import com.starchain.entity.dto.RemitRateDto;
-import com.starchain.entity.response.RemitCardResponse;
 import com.starchain.enums.MoneyKindEnum;
 import com.starchain.enums.RemitCodeEnum;
 import com.starchain.exception.StarChainException;
@@ -20,8 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-
-import java.math.BigDecimal;
 
 /**
  * @author
@@ -41,6 +38,7 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
 
     /**
      * 申请汇款
+     *
      * @param remitApplicationRecordDto
      * @return
      */
@@ -51,7 +49,7 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
             RemitRateDto remitRateDto = new RemitRateDto();
             remitRateDto.setRemitCode(RemitCodeEnum.UQR_CNH.getRemitCode()).setToMoneyKind(MoneyKindEnum.CNY.getMoneyKindCode());
             RemitRateDto remitRate = remitCardService.getRemitRate(token, remitRateDto);
-            log.info("实时汇率，{}",remitRate);
+            log.info("实时汇率，{}", remitRate);
             Assert.notNull(remitRate.getTradeRate(), "汇款汇率为null");
             String orderId = OrderIdGenerator.generateOrderId(String.valueOf(remitApplicationRecordDto.getChannelId()), String.valueOf(remitApplicationRecordDto.getUserId()), 6);
             remitApplicationRecordDto.setRemitCode(remitRate.getRemitCode())
@@ -60,7 +58,7 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
                     .setOrderId(orderId)
                     .setRemitRate(remitRate.getTradeRate());
             // 发送请求并获取响应
-            String requestUrl = pacificPayConfig.getBaseUrl() + CardRemittanceUrlConstants.applyRemit;
+            String requestUrl = pacificPayConfig.getBaseUrl() + CardRemittanceUrlConstants.APPLY_REMIT;
             String requestBody = JSONObject.toJSONString(remitApplicationRecordDto);
             log.info("发送请求，URL：{}，请求体：{}", requestUrl, requestBody);
             String responseStr = HttpUtils.doPostMiPay(requestUrl, token, requestBody, pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());

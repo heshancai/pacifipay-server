@@ -39,7 +39,7 @@ public class WalletCallbackRecord {
     private String notifyId;
     @ApiModelProperty(value = "充值id")
     private String depositId;
-    @ApiModelProperty(value = "0:等待确认 1失败，2:已经确认，3取消")
+    @ApiModelProperty(value = "0:等待确认 1成功，2:失败，3取消")
     private Integer status;
     @ApiModelProperty(value = "交易传送入的唯一工单号，确保每一笔是唯一的")
     private String orderNo;

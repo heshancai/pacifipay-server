@@ -12,8 +12,7 @@ import com.starchain.entity.CardHolder;
 import com.starchain.entity.CardRechargeRecord;
 import com.starchain.entity.dto.CardDto;
 import com.starchain.enums.CardStatusEnum;
-import com.starchain.service.ICardHolderService;
-import com.starchain.service.ICardService;
+import com.starchain.service.*;
 import com.starchain.util.HttpUtils;
 import com.starchain.util.OrderIdGenerator;
 import lombok.extern.slf4j.Slf4j;
@@ -37,11 +36,15 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     @Autowired
     private PacificPayConfig pacificPayConfig;
 
-//    @Autowired
-//    private ICardOpenCallbackRecordService cardOpenCallbackRecordService;
-
     @Autowired
     private ICardHolderService cardHolderService;
+
+    @Autowired
+    private IUserWalletBalanceService userWalletBalanceService;
+    @Autowired
+    private IdWorker idWorker;
+    @Autowired
+    private ICardRechargeRecordService cardRechargeRecordService;
 
     /**
      * 查询商户余额
@@ -55,7 +58,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.mchInfo, token, "", pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+        String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.MCH_INFO, token, "", pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
         System.out.println("返回的数据：" + str);
         return JSON.parseObject(str);
     }
@@ -96,7 +99,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             card.setSaveAmount(BigDecimal.ZERO);
             this.save(card);
             // 卡状态为激活中
-            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.addCard, token, JSONObject.toJSONString(card), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.ADD_CARD, token, JSONObject.toJSONString(card), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             log.info("返回的数据：{}", str);
             Card returnCard = JSON.parseObject(str, Card.class);
             if (CardStatusEnum.NORMAL.getCardStatus().equals(returnCard.getCardStatus())) {
@@ -129,7 +132,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         String token = null;
         try {
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
-            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.deleteCard, token, JSONObject.toJSONString(cardDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.DELETE_CARD, token, JSONObject.toJSONString(cardDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             log.info("返回的数据：{}", str);
             CardDto returnCard = JSON.parseObject(str, CardDto.class);
             if (returnCard != null) return true;
@@ -150,7 +153,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         String token = null;
         try {
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
-            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.deleteCard, token, JSONObject.toJSONString(card), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.DELETE_CARD, token, JSONObject.toJSONString(card), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             log.info("返回的数据：{}", str);
             CardDto returnCard = JSON.parseObject(str, CardDto.class);
         } catch (Exception e) {
@@ -168,25 +171,44 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
      */
     @Override
     public CardRechargeRecord applyRecharge(CardDto cardDto) {
-        // 持卡人校验
-        LambdaQueryWrapper<CardHolder> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(CardHolder::getUserId, cardDto.getUserId());
-        lambdaQueryWrapper.eq(CardHolder::getCardCode, cardDto.getCardCode());
-        lambdaQueryWrapper.eq(CardHolder::getTpyshCardHolderId, cardDto.getTpyshCardHolderId());
-        lambdaQueryWrapper.eq(CardHolder::getChannelId, cardDto.getChannelId());
-        CardHolder cardHolder = cardHolderService.getOne(lambdaQueryWrapper);
-        Assert.notNull(cardHolder, "持卡人不存在");
+        String token = null;
+        try {
 
-        // 卡校验
-        LambdaQueryWrapper<Card> cardLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        cardLambdaQueryWrapper.eq(Card::getCardId, cardDto.getCardId());
-        cardLambdaQueryWrapper.eq(Card::getTpyshCardHolderId, cardDto.getTpyshCardHolderId());
-        Card card = this.getOne(cardLambdaQueryWrapper);
-        Assert.notNull(card, "卡不存在");
+            // 持卡人校验
+            LambdaQueryWrapper<CardHolder> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.eq(CardHolder::getUserId, cardDto.getUserId());
+            lambdaQueryWrapper.eq(CardHolder::getCardCode, cardDto.getCardCode());
+            lambdaQueryWrapper.eq(CardHolder::getTpyshCardHolderId, cardDto.getTpyshCardHolderId());
+            lambdaQueryWrapper.eq(CardHolder::getChannelId, cardDto.getChannelId());
+            CardHolder cardHolder = cardHolderService.getOne(lambdaQueryWrapper);
+            Assert.notNull(cardHolder, "持卡人不存在");
 
-        // 核实用户余额
+            // 卡校验
+            LambdaQueryWrapper<Card> cardLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            cardLambdaQueryWrapper.eq(Card::getCardId, cardDto.getCardId());
+            cardLambdaQueryWrapper.eq(Card::getTpyshCardHolderId, cardDto.getTpyshCardHolderId());
+            Card card = this.getOne(cardLambdaQueryWrapper);
+            Assert.notNull(card, "卡不存在");
 
+            // 余额必须大于 0 且必须大于输入的金额
+            BigDecimal orderAmount = cardDto.getOrderAmount().setScale(2, BigDecimal.ROUND_HALF_UP);
+            userWalletBalanceService.checkUserBalance(cardDto.getUserId(), cardDto.getChannelId(), orderAmount);
+            cardDto.setOrderAmount(orderAmount);
+            // 封装传递参数
+            cardDto.setOrderId(String.valueOf(idWorker.nextId()));
+            // 条件通过 进行充值
+            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.APPLY_RECHARGE, token, JSONObject.toJSONString(cardDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            log.info("返回的数据：{}", str);
 
+            CardRechargeRecord cardRechargeRecord = JSON.parseObject(str, CardRechargeRecord.class);
+            cardRechargeRecord.setStatus(0);
+            // 处理成功 等待回调结果
+            cardRechargeRecordService.save(cardRechargeRecord);
+            return cardRechargeRecord;
+        } catch (Exception e) {
+            log.error("服务异常", e);
+        }
         return null;
     }
 }

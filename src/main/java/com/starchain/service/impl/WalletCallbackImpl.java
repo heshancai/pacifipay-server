@@ -63,7 +63,7 @@ public class WalletCallbackImpl implements IWalletCallbackService {
             log.debug("手续费: {}, 实际到账金额: {}", localFee, actAmount);
 
             // 4. 更新充值记录状态
-            walletCallbackRecord.setStatus(RechargeRecordStatusEnum.CONFIRMED.getKey());
+            walletCallbackRecord.setStatus(RechargeRecordStatusEnum.SUCCESS.getKey());
 
             // 5. 记录交易记录
             recordTransaction(localFee, actAmount, userWallet, walletCallbackRecord);

@@ -46,33 +46,90 @@ public class WalletCallbackImpl implements IWalletCallbackService {
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void dealDeposit(WalletRechargeCallbackResponse walletRechargeCallbackResponse, BigDecimal depositAmount, WalletCallbackRecord walletCallbackRecord) {
-        log.info("开始处理充值到账,币种信息为:{}，充值数量为:{}", walletRechargeCallbackResponse.getCurrencySymbol(), depositAmount);
-        LambdaQueryWrapper<SysCoin> sysCoinLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        sysCoinLambdaQueryWrapper.eq(SysCoin::getCoinName, walletRechargeCallbackResponse.getCurrencySymbol());
-        SysCoin coin = sysCoinService.getOne(sysCoinLambdaQueryWrapper);
-        Assert.notNull(coin, "币种信息不能为空");
-        // 获取用户钱包信息
-        LambdaQueryWrapper<UserWallet> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(UserWallet::getAddress, walletRechargeCallbackResponse.getDepositAddress());
-        UserWallet userWallet = userWalletService.getOne(lambdaQueryWrapper);
-        Assert.notNull(userWallet, "用户钱包信息不存在");
-        // 计算手续费
-        BigDecimal localFee = depositPoundageCalc(coin, new BigDecimal(walletRechargeCallbackResponse.getDepositAmount()));
-        // 实际到账金额
-        BigDecimal actAmount = walletCallbackRecord.getAmount().subtract(localFee);
-        walletCallbackRecord.setStatus(RechargeRecordStatusEnum.CONFIRMED.getKey());
-        // 记录交易记录
-        userWalletTransactionService.dealRecodeTransaction(localFee, actAmount, userWallet, walletCallbackRecord);
-        // 修改钱包余额信息
-        LambdaUpdateWrapper<UserWalletBalance> userWalletLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-        userWalletLambdaUpdateWrapper.eq(UserWalletBalance::getUserId, userWallet.getUserId()).eq(UserWalletBalance::getChannelId, userWallet.getChannelId())
-                .setSql("balance = balance + " + actAmount).set(UserWalletBalance::getUpdateTime, LocalDateTime.now()).set(UserWalletBalance::getCreateTime, LocalDateTime.now());
-        userWalletBalanceService.update(userWalletLambdaUpdateWrapper);
+        try {
+            log.info("开始处理充值到账, 币种信息: {}, 充值数量: {}", walletRechargeCallbackResponse.getCurrencySymbol(), depositAmount);
 
-        walletCallbackRecord.setFinishTime(LocalDateTime.now());
-        walletCallbackRecord.setSuccessConfirm(1);
-        // 更新记录表信息 设置状态为成功
-        walletCallbackRecordService.updateById(walletCallbackRecord);
+            // 1. 获取币种信息
+            SysCoin coin = getCoinInfo(walletRechargeCallbackResponse.getCurrencySymbol());
+            Assert.notNull(coin, "币种信息不能为空");
+
+            // 2. 获取用户钱包信息
+            UserWallet userWallet = getUserWallet(walletRechargeCallbackResponse.getDepositAddress());
+            Assert.notNull(userWallet, "用户钱包信息不存在");
+
+            // 3. 计算手续费和实际到账金额
+            BigDecimal localFee = calculateFee(coin, walletRechargeCallbackResponse.getDepositAmount());
+            BigDecimal actAmount = walletCallbackRecord.getAmount().subtract(localFee);
+            log.debug("手续费: {}, 实际到账金额: {}", localFee, actAmount);
+
+            // 4. 更新充值记录状态
+            walletCallbackRecord.setStatus(RechargeRecordStatusEnum.CONFIRMED.getKey());
+
+            // 5. 记录交易记录
+            recordTransaction(localFee, actAmount, userWallet, walletCallbackRecord);
+
+            // 6. 更新钱包余额
+            updateWalletBalance(userWallet, actAmount);
+
+            // 7. 更新充值记录完成时间和状态
+            walletCallbackRecord.setFinishTime(LocalDateTime.now());
+            walletCallbackRecord.setSuccessConfirm(1);
+            walletCallbackRecordService.updateById(walletCallbackRecord);
+
+            log.info("充值处理成功, 用户ID: {}, 充值记录ID: {}", userWallet.getUserId(), walletCallbackRecord.getId());
+        } catch (Exception e) {
+            log.error("充值处理失败, 异常信息: {}", e.getMessage(), e);
+            throw e; // 抛出异常，触发事务回滚
+        }
+    }
+
+    /**
+     * 获取币种信息
+     */
+    private SysCoin getCoinInfo(String currencySymbol) {
+        log.debug("查询币种信息, 币种符号: {}", currencySymbol);
+        LambdaQueryWrapper<SysCoin> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SysCoin::getCoinName, currencySymbol);
+        return sysCoinService.getOne(queryWrapper);
+    }
+
+    /**
+     * 获取用户钱包信息
+     */
+    private UserWallet getUserWallet(String depositAddress) {
+        log.debug("查询用户钱包信息, 充值地址: {}", depositAddress);
+        LambdaQueryWrapper<UserWallet> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserWallet::getAddress, depositAddress);
+        return userWalletService.getOne(queryWrapper);
+    }
+
+    /**
+     * 计算手续费
+     */
+    private BigDecimal calculateFee(SysCoin coin, String depositAmount) {
+        log.debug("计算手续费, 币种: {}, 充值金额: {}", coin.getCoinName(), depositAmount);
+        return depositPoundageCalc(coin, new BigDecimal(depositAmount));
+    }
+
+    /**
+     * 记录交易记录
+     */
+    private void recordTransaction(BigDecimal localFee, BigDecimal actAmount, UserWallet userWallet, WalletCallbackRecord walletCallbackRecord) {
+        log.debug("记录交易记录, 用户ID: {}, 实际到账金额: {}", userWallet.getUserId(), actAmount);
+        userWalletTransactionService.dealRecodeTransaction(localFee, actAmount, userWallet, walletCallbackRecord);
+    }
+
+    /**
+     * 更新钱包余额
+     */
+    private void updateWalletBalance(UserWallet userWallet, BigDecimal actAmount) {
+        log.debug("更新钱包余额, 用户ID: {}, 渠道ID: {}, 增加余额: {}", userWallet.getUserId(), userWallet.getChannelId(), actAmount);
+        LambdaUpdateWrapper<UserWalletBalance> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(UserWalletBalance::getUserId, userWallet.getUserId())
+                .eq(UserWalletBalance::getChannelId, userWallet.getChannelId())
+                .setSql("balance = balance + " + actAmount)
+                .set(UserWalletBalance::getUpdateTime, LocalDateTime.now());
+        userWalletBalanceService.update(updateWrapper);
     }
 
     /**

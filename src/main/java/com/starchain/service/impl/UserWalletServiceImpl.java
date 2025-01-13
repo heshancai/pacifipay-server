@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-
 /**
  * @author
  * @date 2025-01-03
@@ -52,14 +50,13 @@ public class UserWalletServiceImpl extends ServiceImpl<UserWalletMapper, UserWal
             //获取批次号 唯一性
             String bathNo = String.valueOf(idWorker.nextId());
             // 调用钱包服务生成钱包地址
-            String newAddress = walletApiService.createNewAddress(userWallet.getCoinId(), 1, bathNo);
+            String newAddress = walletApiService.createNewAddress(userWalletDto.getCoinId(), 1, bathNo);
             userWallet = UserWallet.builder()
                     .userId(userWalletDto.getUserId())
                     .coinId(userWalletDto.getCoinId())
                     .channelId(userWalletDto.getChannelId())
                     .usdtNetwork(userWalletDto.getUsdtNetwork())
                     .address(newAddress)
-                    .balance(BigDecimal.ZERO)
                     .usdtNetwork(userWalletDto.getUsdtNetwork())
                     .lockStatus(1)
                     .build();

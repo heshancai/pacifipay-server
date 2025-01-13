@@ -101,7 +101,7 @@ public class CardRechargeCallbackRecordServiceImpl extends ServiceImpl<CardRecha
                 updateWrapper.eq(CardRechargeRecord::getCardId, miPayCardNotifyResponse.getCardId());
                 updateWrapper.set(CardRechargeRecord::getStatus, RechargeRecordStatusEnum.SUCCESS.getKey());
                 updateWrapper.set(CardRechargeRecord::getUpdateTime, LocalDateTime.now());
-                updateWrapper.set(CardRechargeRecord::getAcTAmount, cardRechargeCallbackRecord.getActual());
+                updateWrapper.set(CardRechargeRecord::getActAmount, cardRechargeCallbackRecord.getActual());
                 updateWrapper.set(CardRechargeRecord::getFinishTime, LocalDateTime.now());
                 cardRechargeRecordService.update(updateWrapper);
 

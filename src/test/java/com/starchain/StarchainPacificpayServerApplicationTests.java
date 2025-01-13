@@ -57,6 +57,7 @@ class StarchainPacificpayServerApplicationTests {
         ClientResponse cardHolder1 = cardHolderController.getCardHolder(cardHolderDto);
         System.out.println(cardHolder1);
     }
+
     @Test
     void addCard() {
         CardHolderDto cardHolder = new CardHolderDto();
@@ -88,7 +89,6 @@ class StarchainPacificpayServerApplicationTests {
     }
 
 
-
     @Test
     void getCardDetail() {
         CardDto cardDto = new CardDto();
@@ -118,6 +118,19 @@ class StarchainPacificpayServerApplicationTests {
     void tradeDetail() {
         TradeDetailDto tradeDetailDto = new TradeDetailDto();
         System.out.println(cardController.tradeDetail(tradeDetailDto));
+    }
+
+    // 卡充值
+    @Test
+    void applyRecharge() {
+        CardDto cardDto = new CardDto();
+        cardDto.setCardId("2025010910301416050");
+        cardDto.setCardCode("TpyMDN6");
+        cardDto.setUserId(10000L);
+        cardDto.setTpyshCardHolderId("2025010811491487397");
+        cardDto.setChannelId(100000L);
+        cardDto.setOrderAmount(BigDecimal.ONE);
+        System.out.println(cardController.applyRecharge(cardDto));
     }
 
     @Autowired

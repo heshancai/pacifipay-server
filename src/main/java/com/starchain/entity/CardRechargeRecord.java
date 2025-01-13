@@ -46,7 +46,7 @@ public class CardRechargeRecord {
     private BigDecimal orderAmount; // 充值金额
 
     @ApiModelProperty(value = "充值到账金额", example = "100.00")
-    private BigDecimal acTAmount; // 充值金额
+    private BigDecimal actAmount; // 充值金额
 
     @ApiModelProperty(value = "流水号", example = "TRADE123456789")
     private String tradeId; // 充值流水号
@@ -56,9 +56,6 @@ public class CardRechargeRecord {
 
     @ApiModelProperty(value = "手续费", example = "5.00")
     private BigDecimal orderFee; // 手续费
-
-    @ApiModelProperty(value = "业务类型", example = "CardRecharge || CardWithdraw")
-    private BigDecimal businessType; //
 
     @ApiModelProperty(value = "订单时间", example = "2023-10-15 12:30:45")
     private LocalDateTime orderTime; // 订单时间

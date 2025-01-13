@@ -11,7 +11,6 @@ import com.starchain.service.IdWorker;
 import com.starchain.service.WalletApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -23,11 +22,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class UserWalletServiceImpl extends ServiceImpl<UserWalletMapper, UserWallet> implements IUserWalletService {
 
-    @Value("${wallet.base-url}")
-    private String walletBaseUrl;
-
-    @Value("${wallet.base-url}")
-    private String walletServerPublicKey;
 
     @Autowired
     private PacificPayConfig pacificPayConfig;

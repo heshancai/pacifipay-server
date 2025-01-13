@@ -5,9 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
@@ -23,6 +21,8 @@ import java.time.LocalDateTime;
 @TableName("user_wallet")
 @ApiModel(value = "UserWallet", description = "用户钱包信息")
 @Builder
+@NoArgsConstructor // 生成无参构造函数
+@AllArgsConstructor // 生成全参构造函数
 public class UserWallet {
 
     @TableId(value = "id", type = IdType.AUTO)

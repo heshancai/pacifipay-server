@@ -2,7 +2,6 @@ package com.starchain.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.starchain.entity.Card;
-import com.starchain.entity.CardHolder;
 import com.starchain.entity.CardRechargeRecord;
 import com.starchain.entity.dto.CardDto;
 
@@ -14,22 +13,25 @@ import com.starchain.entity.dto.CardDto;
 public interface ICardService extends IService<Card> {
     /**
      * 根据用户id和渠道id查询卡数量
+     *
      * @param
      * @param channelId
      * @return
      */
-    Integer checkCardNum(Long cardHolderId, Long channelId,String cardCode,String tpyshCardHolderId);
+    Integer checkCardNum(Long channelId, String cardCode, String tpyshCardHolderId);
 
     /**
-     *  创建卡
-     * @param cardHolder
+     * 创建卡
+     *
+     * @param
      * @return
      */
-    Card addCard(CardHolder cardHolder);
+    Card addCard(CardDto card);
 
 
     /**
      * 申请销卡
+     *
      * @param
      * @return
      */
@@ -37,6 +39,7 @@ public interface ICardService extends IService<Card> {
 
     /**
      * 申请换卡
+     *
      * @param card
      * @return
      */
@@ -45,6 +48,7 @@ public interface ICardService extends IService<Card> {
 
     /**
      * 卡充值
+     *
      * @param cardDto
      * @return
      */
@@ -52,6 +56,7 @@ public interface ICardService extends IService<Card> {
 
     /**
      * 锁定卡
+     *
      * @param cardDto
      * @return
      */
@@ -59,8 +64,17 @@ public interface ICardService extends IService<Card> {
 
     /**
      * 解锁卡
+     *
      * @param card
      * @return
      */
     Boolean unlockCard(Card card);
+
+    /**
+     * 修改卡限制额度
+     *
+     * @param cardDto
+     * @return
+     */
+    Boolean updateLimit(CardDto cardDto);
 }

@@ -9,7 +9,6 @@ import com.starchain.constants.CardUrlConstants;
 import com.starchain.entity.Card;
 import com.starchain.entity.CardRechargeRecord;
 import com.starchain.entity.dto.CardDto;
-import com.starchain.entity.dto.CardHolderDto;
 import com.starchain.entity.dto.TradeDetailDto;
 import com.starchain.entity.response.TradeDetailResponse;
 import com.starchain.enums.CardStatusEnum;
@@ -58,14 +57,14 @@ public class CardController {
      */
     @ApiOperation(value = "根据持卡人创建卡")
     @PostMapping("/addCard")
-    public ClientResponse addCard(@RequestBody CardHolderDto cardHolderDto) {
+    public ClientResponse addCard(@RequestBody CardDto cardDto) {
         // 检查当前用户卡数量是否超过 4张
-        Integer holderCardNum = cardService.checkCardNum(cardHolderDto.getId(), cardHolderDto.getChannelId(), cardHolderDto.getCardCode(), cardHolderDto.getTpyshCardHolderId());
+        Integer holderCardNum = cardService.checkCardNum(cardDto.getChannelId(), cardDto.getCardCode(), cardDto.getTpyshCardHolderId());
         if (holderCardNum >= 4) {
             return ResultGenerator.genFailResult("当前持卡人数量超过4张，无法创建新卡");
         }
         // 创建卡
-        Card card = cardService.addCard(cardHolderDto);
+        Card card = cardService.addCard(cardDto);
         return ResultGenerator.genSuccessResult(card);
     }
 
@@ -275,8 +274,8 @@ public class CardController {
             return ResultGenerator.genFailResult("卡信息不存在");
         }
         try {
-            Boolean result = cardService.deleteCard(cardDto);
-            return ResultGenerator.genSuccessResult("申请销卡正在处理中");
+            Boolean result = cardService.updateLimit(cardDto);
+            return ResultGenerator.genSuccessResult(result);
         } catch (Exception e) {
             log.error("申请销卡失败", e);
             return ResultGenerator.genFailResult("申请销卡失败");
@@ -329,7 +328,7 @@ public class CardController {
             return ResultGenerator.genSuccessResult(result);
         } catch (Exception e) {
             log.error("申请销卡失败", e);
-            return ResultGenerator.genFailResult("服务异常，申请销卡失败");
+            return ResultGenerator.genFailResult("服务异常，解锁卡失败");
         }
     }
 }

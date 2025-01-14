@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 /**
@@ -65,7 +66,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     }
 
     @Override
-    public Integer checkCardNum(Long cardHolderId, Long channelId, String cardCode, String tpyshCardHolderId) {
+    public Integer checkCardNum(Long channelId, String cardCode, String tpyshCardHolderId) {
         LambdaQueryWrapper<Card> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Card::getCardCode, cardCode).eq(Card::getTpyshCardHolderId, tpyshCardHolderId);
         return this.count(lambdaQueryWrapper);
@@ -75,12 +76,12 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     /**
      * 创建持卡人 成功 预先存部分虚拟卡数据
      *
-     * @param cardHolder
+     * @param
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Card addCard(CardHolder cardHolder) {
+    public Card addCard(CardDto cardDto) {
         String token = null;
         try {
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
@@ -88,11 +89,11 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             System.out.println("token=>" + token);
 
             Card card = new Card();
-            card.setCardCode(cardHolder.getCardCode());
+            card.setCardCode(cardDto.getCardCode());
             //  生成一个唯一的订单号
             card.setSaveOrderId(OrderIdGenerator.generateOrderId("", "", 6));
             // 太平洋的持卡人唯一值
-            card.setTpyshCardHolderId(cardHolder.getTpyshCardHolderId());
+            card.setTpyshCardHolderId(cardDto.getTpyshCardHolderId());
             card.setCardStatus(CardStatusEnum.ACTIVATING.getCardStatus());
             card.setCreateStatus(0);
             card.setLocalCreateTime(LocalDateTime.now());
@@ -256,12 +257,37 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
                 LambdaUpdateWrapper<Card> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
                 lambdaUpdateWrapper.eq(Card::getCardId, returnCard.getCardId());
                 lambdaUpdateWrapper.eq(Card::getMerchantId, returnCard.getMerchantId());
-                lambdaUpdateWrapper.eq(Card::getCardCode, returnCard.getCardNo());
+                lambdaUpdateWrapper.eq(Card::getCardCode, returnCard.getCardCode());
                 lambdaUpdateWrapper.set(Card::getCardStatus, CardStatusEnum.UNACTIVATED.getCardStatus());
                 return this.update(lambdaUpdateWrapper);
             }
         } catch (Exception e) {
             log.error("服务异常", e);
+            return false;
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean updateLimit(CardDto cardDto) {
+        String token = null;
+        cardDto.setSingleLimit(cardDto.getSingleLimit().setScale(2, RoundingMode.HALF_UP));
+        try {
+            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.UPDATE_LIMIT, token, JSONObject.toJSONString(cardDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            log.info("返回的数据：{}", str);
+            Card returnCard = JSON.parseObject(str, Card.class);
+            if (returnCard != null) {
+                LambdaUpdateWrapper<Card> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+                lambdaUpdateWrapper.eq(Card::getCardId, returnCard.getCardId());
+                lambdaUpdateWrapper.eq(Card::getMerchantId, returnCard.getMerchantId());
+                lambdaUpdateWrapper.eq(Card::getCardCode, returnCard.getCardCode());
+                lambdaUpdateWrapper.set(Card::getSingleLimit, cardDto.getSingleLimit());
+                return this.update(lambdaUpdateWrapper);
+            }
+        } catch (Exception e) {
+            log.error("服务异常", e);
+            return false;
         }
         return false;
     }

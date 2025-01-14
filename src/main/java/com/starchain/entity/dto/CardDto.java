@@ -33,4 +33,6 @@ public class CardDto implements Serializable {
     private Long channelId;
     @ApiModelProperty(value = "客户卡充值交易唯一标识", example = "CARD123456")
     private String orderId;
+    @ApiModelProperty(value = "消费单笔限额-银行卡端返回", example = "消费单笔限额，可修改")
+    private BigDecimal singleLimit;
 }

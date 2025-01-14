@@ -233,14 +233,15 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
                 LambdaUpdateWrapper<Card> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
                 lambdaUpdateWrapper.eq(Card::getCardId, returnCard.getCardId());
                 lambdaUpdateWrapper.eq(Card::getMerchantId, returnCard.getMerchantId());
-                lambdaUpdateWrapper.eq(Card::getCardCode, returnCard.getCardNo());
+                lambdaUpdateWrapper.eq(Card::getCardCode, returnCard.getCardCode());
                 lambdaUpdateWrapper.set(Card::getCardStatus, CardStatusEnum.FREEZING.getCardStatus());
                 return this.update(lambdaUpdateWrapper);
             }
+            return false;
         } catch (Exception e) {
             log.error("服务异常", e);
+            return false;
         }
-        return false;
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.starchain;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.starchain.config.PacificPayConfig;
 import com.starchain.controller.CardController;
 import com.starchain.controller.CardHolderController;
 import com.starchain.controller.RemitCardController;

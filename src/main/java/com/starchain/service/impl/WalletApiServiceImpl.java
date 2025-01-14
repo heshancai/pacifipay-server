@@ -100,8 +100,6 @@ public class WalletApiServiceImpl implements WalletApiService {
     }
 
 
-
-
     protected String post(String url, String requestJsonStr) throws Exception {
         //对请求内容进行加密
         String encryptStr = AesUtils.encrypt(contentSecret, requestJsonStr);
@@ -109,9 +107,11 @@ public class WalletApiServiceImpl implements WalletApiService {
         encryptRequestParams.put("msg", encryptStr);
         JSONObject encryptRequestJson = new JSONObject(encryptRequestParams);
         String encryptRequestJsonStr = encryptRequestJson.toJSONString();
-        //签名
+        // 生成签名
         String sign = SignUtils.hmacEncode(encryptStr, signSecret);
-        log.info("签名sign:[{}],签名是否正确：[{}]", sign, SignUtils.validSign(encryptStr, sign, signSecret));
+        // 验证签名
+        boolean result = SignUtils.validSign(encryptStr, sign, signSecret);
+        log.info("签名sign:[{}],签名是否正确：[{}]", sign, result);
         Map<String, String> header = new HashMap<>(16);
         header.put("Sign", sign);
         //请求接口

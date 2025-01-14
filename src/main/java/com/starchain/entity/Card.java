@@ -82,7 +82,7 @@ public class Card {
     private String saveTradeId;
 
     @ApiModelProperty(value = "卡状态创建状态", example = "卡卡创建状态：0 创建中 1 创建成功 2 创建失败 3 已注销")
-    private Integer status;
+    private Integer createStatus;
 
     @ApiModelProperty(value = "卡状态-银行卡端返回", example = "normal initFail unactivated activating freezing cancelled")
     private String cardStatus;

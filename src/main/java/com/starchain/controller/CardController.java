@@ -101,7 +101,7 @@ public class CardController {
         lambdaQueryWrapper.orderByDesc(CardRechargeRecord::getId).last("LIMIT 1");
         CardRechargeRecord cardRechargeRecord = cardRechargeRecordService.getOne(lambdaQueryWrapper);
         if (cardRechargeRecord != null && cardRechargeRecord.getStatus() == 0) {
-            return ResultGenerator.genFailResult("当前卡充值未结束，无法进行新一轮充值");
+            return ResultGenerator.genFailResult("上一笔充值正在处理中，无法进行新一轮充值");
         }
         try {
             // 进行卡充值
@@ -208,37 +208,60 @@ public class CardController {
     /*
      * 作废 现无法使用-申请换卡
      */
-    @ApiOperation(value = "申请换卡")
-    @PostMapping("/changeCard")
-    public ClientResponse changeCard(@RequestBody CardDto cardDto) {
+//    @ApiOperation(value = "申请换卡")
+//    @PostMapping("/changeCard")
+//    public ClientResponse changeCard(@RequestBody CardDto cardDto) {
+//        if (cardDto.getCardId() == null) {
+//            return ResultGenerator.genFailResult("dto 不能为null");
+//        }
+//        if (cardDto.getCardCode() == null) {
+//            return ResultGenerator.genFailResult("dto 不能为null");
+//        }
+//        if (cardDto.getTpyshCardHolderId() == null) {
+//            return ResultGenerator.genFailResult("dto 不能为null");
+//        }
+//
+//        LambdaQueryWrapper<Card> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(Card::getCardId, cardDto.getCardId());
+//        queryWrapper.eq(Card::getCardCode, cardDto.getCardCode());
+//        queryWrapper.eq(Card::getStatus, 1);
+//        queryWrapper.eq(Card::getStatus, 1);
+//        queryWrapper.eq(Card::getTpyshCardHolderId, cardDto.getTpyshCardHolderId());
+//        Card card = cardService.getOne(queryWrapper);
+//        if (card == null) {
+//            return ResultGenerator.genFailResult("原卡信息不存在");
+//        }
+//        try {
+//            Card card1 = cardService.changeCard(card);
+//            return ResultGenerator.genSuccessResult(card1);
+//        } catch (Exception e) {
+//            log.error("申请销卡失败", e);
+//            return ResultGenerator.genFailResult("申请销卡失败");
+//        }
+//    }
+
+    @ApiOperation(value = "修改卡限额")
+    @PostMapping("/updateLimit")
+    public ClientResponse updateLimit(@RequestBody CardDto cardDto) {
         if (cardDto.getCardId() == null) {
             return ResultGenerator.genFailResult("dto 不能为null");
         }
         if (cardDto.getCardCode() == null) {
             return ResultGenerator.genFailResult("dto 不能为null");
         }
-        if (cardDto.getTpyshCardHolderId() == null) {
-            return ResultGenerator.genFailResult("dto 不能为null");
-        }
-
         LambdaQueryWrapper<Card> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Card::getCardId, cardDto.getCardId());
         queryWrapper.eq(Card::getCardCode, cardDto.getCardCode());
-        queryWrapper.eq(Card::getStatus, 1);
-        queryWrapper.eq(Card::getStatus, 1);
-        queryWrapper.eq(Card::getTpyshCardHolderId, cardDto.getTpyshCardHolderId());
         Card card = cardService.getOne(queryWrapper);
         if (card == null) {
-            return ResultGenerator.genFailResult("原卡信息不存在");
+            return ResultGenerator.genFailResult("卡信息不存在");
         }
         try {
-            Card card1 = cardService.changeCard(card);
-            return ResultGenerator.genSuccessResult(card1);
+            Boolean result = cardService.deleteCard(cardDto);
+            return ResultGenerator.genSuccessResult("申请销卡正在处理中");
         } catch (Exception e) {
             log.error("申请销卡失败", e);
             return ResultGenerator.genFailResult("申请销卡失败");
         }
     }
-
-
 }

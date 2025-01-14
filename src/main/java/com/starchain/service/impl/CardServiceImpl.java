@@ -93,7 +93,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             // 太平洋的持卡人唯一值
             card.setTpyshCardHolderId(cardHolder.getTpyshCardHolderId());
             card.setCardStatus(CardStatusEnum.CANCELLED.getCardStatus());
-            card.setStatus(3);
+            card.setCreateStatus(0);
             card.setLocalCreateTime(LocalDateTime.now());
             card.setLocalUpdateTime(LocalDateTime.now());
             card.setSaveAmount(BigDecimal.ZERO);
@@ -103,9 +103,9 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             log.info("返回的数据：{}", str);
             Card returnCard = JSON.parseObject(str, Card.class);
             if (CardStatusEnum.NORMAL.getCardStatus().equals(returnCard.getCardStatus())) {
-                returnCard.setStatus(1);
+                returnCard.setCreateStatus(1);
             } else {
-                returnCard.setStatus(card.getStatus());
+                returnCard.setCreateStatus(card.getCreateStatus());
             }
             returnCard.setId(card.getId());
             returnCard.setLocalCreateTime(card.getLocalCreateTime());
@@ -183,10 +183,12 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             CardHolder cardHolder = cardHolderService.getOne(lambdaQueryWrapper);
             Assert.notNull(cardHolder, "持卡人不存在");
 
-            // 卡校验
+            // 卡校验 必须为使用在才能充值
             LambdaQueryWrapper<Card> cardLambdaQueryWrapper = new LambdaQueryWrapper<>();
             cardLambdaQueryWrapper.eq(Card::getCardId, cardDto.getCardId());
             cardLambdaQueryWrapper.eq(Card::getTpyshCardHolderId, cardDto.getTpyshCardHolderId());
+            cardLambdaQueryWrapper.eq(Card::getCreateStatus, 1);
+            cardLambdaQueryWrapper.eq(Card::getCardStatus, CardStatusEnum.NORMAL.getCardStatus());
             Card card = this.getOne(cardLambdaQueryWrapper);
             Assert.notNull(card, "卡不存在");
 

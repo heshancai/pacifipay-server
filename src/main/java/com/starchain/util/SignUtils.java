@@ -27,9 +27,9 @@ public class SignUtils {
 
     /**
      * 验证签名
-     * @param message
-     * @param sign
-     * @param key
+     * @param message 加密后的数据
+     * @param sign 生成的签名
+     * @param key 签名秘钥
      * @return
      */
     public static boolean validSign(String message,String sign,String key){
@@ -38,8 +38,6 @@ public class SignUtils {
             if (sign.equalsIgnoreCase(expectedMAC)) {
                 return true;
             }
-
-
             return false;
         }
         catch (Exception e){

@@ -133,8 +133,7 @@ public class CardRechargeCallbackRecordServiceImpl extends ServiceImpl<CardRecha
 
     // 处理充值状态
     private boolean handleRechargeStatus(MiPayCardNotifyResponse response, CardRechargeRecord rechargeRecord, CardRechargeCallbackRecord callbackRecord) {
-        if (rechargeRecord.getStatus() == 0 && "SUCCESS".equals(response.getStatus())
-                && CardStatusDescEnum.CARD_RECHARGE_SUCCESS.getDescription().equalsIgnoreCase(response.getStatusDesc())) {
+        if (rechargeRecord.getStatus() == 0 && CardStatusDescEnum.SUCCESS.getDescription().equals(response.getStatus())) {
             // 修改卡充值状态为成功
             updateRechargeRecordStatus(response, rechargeRecord, callbackRecord);
 
@@ -145,7 +144,7 @@ public class CardRechargeCallbackRecordServiceImpl extends ServiceImpl<CardRecha
             updateCallbackRecord(callbackRecord, response);
 
             return true;
-        } else if ("FAILED".equals(response.getStatus())) {
+        } else if (CardStatusDescEnum.FAILED.getDescription().equals(response.getStatus())) {
             // 处理失败状态
             handleFailedStatus(callbackRecord);
             return false;

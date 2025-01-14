@@ -6,12 +6,8 @@ package com.starchain.enums;
  * @Description
  */
 public enum CardStatusDescEnum {
-    CARD_OPEN_SUCCESS("CardOpen Success"),
-    CARD_RECHARGE_SUCCESS("CardRecharge Success"),
-    CARD_WITHDRAW_SUCCESS("CardWithdraw Success"),
-    PRESAVE_SUCCESS("Presave success"),
-    TRADE_SUCCESS("Trade success"),
-    CARD_CANCEL_SUCCESS("CardCancel Success");
+    SUCCESS("SUCCESS"),
+    FAILED("FAILED");
 
     private final String description;
 

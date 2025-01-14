@@ -13,7 +13,7 @@ public enum MiPayNotifyType {
     /**
      * 卡充值通知
      */
-    CardRecharge("CardRecharge", "cardRechargeRecordServiceImpl"),
+    CardRecharge("CardRecharge", "cardRechargeCallbackRecordServiceImpl"),
 
     /**
      * 卡提现通知

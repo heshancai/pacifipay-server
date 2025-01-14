@@ -29,7 +29,7 @@ public class CardHolder {
     private Long userId;
 
     @ApiModelProperty(value = "渠道号", example = "100001")
-    private Integer channelId;
+    private Long channelId;
 
     @ApiModelProperty(value = "商户持卡人ID", example = "商户端生成")
     private String merchantCardHolderId;

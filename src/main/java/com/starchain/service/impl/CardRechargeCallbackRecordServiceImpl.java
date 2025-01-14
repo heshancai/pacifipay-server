@@ -9,6 +9,7 @@ import com.starchain.entity.CardRechargeCallbackRecord;
 import com.starchain.entity.CardRechargeRecord;
 import com.starchain.entity.UserWalletBalance;
 import com.starchain.entity.response.MiPayCardNotifyResponse;
+import com.starchain.enums.CardStatusDescEnum;
 import com.starchain.enums.RechargeRecordStatusEnum;
 import com.starchain.exception.StarChainException;
 import com.starchain.service.ICardRechargeCallbackRecordService;
@@ -62,13 +63,13 @@ public class CardRechargeCallbackRecordServiceImpl extends ServiceImpl<CardRecha
             BigDecimal actual = (BigDecimal) miPayCardNotifyResponse.getAmount().get("actual");
             Assert.isTrue(
                     rechargeRecord.getOrderAmount().compareTo(actual) == 0,
-                    "充值手续费不一致"
+                    "实际支付金额不一致"
             );
             Assert.isTrue(
                     rechargeRecord.getOrderFee().compareTo((BigDecimal) miPayCardNotifyResponse.getAmount().get("handleFee")) == 0,
                     "充值手续费不一致"
             );
-            log.info("卡开通手续费校验通过, 实际手续费: {}", actual);
+            log.info("卡开通手续费校验通过, 实际手续费: {}", rechargeRecord.getOrderFee());
 
             // 4. 查询或创建回调记录
             LambdaQueryWrapper<CardRechargeCallbackRecord> recordQueryWrapper = new LambdaQueryWrapper<>();
@@ -82,8 +83,13 @@ public class CardRechargeCallbackRecordServiceImpl extends ServiceImpl<CardRecha
                 cardRechargeCallbackRecord = new CardRechargeCallbackRecord();
                 cardRechargeCallbackRecord.setNotifyId(miPayCardNotifyResponse.getNotifyId());
                 cardRechargeCallbackRecord.setCardCode(miPayCardNotifyResponse.getCardCode());
+                cardRechargeCallbackRecord.setCardNo(miPayCardNotifyResponse.getCardNo());
                 cardRechargeCallbackRecord.setBusinessType(miPayCardNotifyResponse.getBusinessType());
                 cardRechargeCallbackRecord.setCardId(miPayCardNotifyResponse.getCardId());
+                cardRechargeCallbackRecord.setMchOrderId(miPayCardNotifyResponse.getMchOrderId());
+                cardRechargeCallbackRecord.setRecharge((BigDecimal) miPayCardNotifyResponse.getAmount().get("recharge"));
+                cardRechargeCallbackRecord.setActual((BigDecimal) miPayCardNotifyResponse.getAmount().get("actual"));
+                cardRechargeCallbackRecord.setHandleFee((BigDecimal) miPayCardNotifyResponse.getAmount().get("handleFee"));
                 cardRechargeCallbackRecord.setCreateTime(LocalDateTime.now());
                 cardRechargeCallbackRecord.setStatus(miPayCardNotifyResponse.getStatus());
                 cardRechargeCallbackRecord.setStatusDesc(miPayCardNotifyResponse.getStatusDesc());
@@ -91,11 +97,11 @@ public class CardRechargeCallbackRecordServiceImpl extends ServiceImpl<CardRecha
                 this.save(cardRechargeCallbackRecord);
                 log.info("创建新的回调记录, 通知ID: {}", miPayCardNotifyResponse.getNotifyId());
             } else {
-                log.info("回调记录已存在, 通知ID: {}", miPayCardNotifyResponse.getNotifyId());
+                log.info("回调记录已存在, 处理重复通知 ，通知ID: {}", miPayCardNotifyResponse.getNotifyId());
             }
 
-            // 5. 处理回调状态
-            if (rechargeRecord.getStatus() == 0 && "SUCCESS".equals(miPayCardNotifyResponse.getStatus()) && "CardOpen success".equals(miPayCardNotifyResponse.getStatusDesc())) {
+            // 5. 充值记录为充值中
+            if (rechargeRecord.getStatus() == 0 && "SUCCESS".equals(miPayCardNotifyResponse.getStatus()) && CardStatusDescEnum.CARD_RECHARGE_SUCCESS.getDescription().equalsIgnoreCase(miPayCardNotifyResponse.getStatusDesc())) {
                 // 5.1 修改卡充值状态为成功
                 LambdaUpdateWrapper<CardRechargeRecord> updateWrapper = new LambdaUpdateWrapper<>();
                 updateWrapper.eq(CardRechargeRecord::getCardId, miPayCardNotifyResponse.getCardId());

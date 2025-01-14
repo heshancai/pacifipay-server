@@ -36,9 +36,6 @@ public class UserWalletBalance {
     @ApiModelProperty(value = "渠道ID", example = "12345")
     private Long channelId;
 
-    @ApiModelProperty(value = "USDT 支持的网络类型：1=TRC20, 2=BEP20", example = "1")
-    private Integer usdtNetwork;
-
     @ApiModelProperty(value = "地址余额", example = "总余额")
     private BigDecimal balance;
 

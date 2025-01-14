@@ -64,7 +64,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     }
 
     @Override
-    public Integer checkCardNum(Long cardHolderId, Integer channelId, String cardCode, String tpyshCardHolderId) {
+    public Integer checkCardNum(Long cardHolderId, Long channelId, String cardCode, String tpyshCardHolderId) {
         LambdaQueryWrapper<Card> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Card::getCardCode, cardCode).eq(Card::getTpyshCardHolderId, tpyshCardHolderId);
         return this.count(lambdaQueryWrapper);
@@ -203,6 +203,11 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
 
             CardRechargeRecord cardRechargeRecord = JSON.parseObject(str, CardRechargeRecord.class);
             cardRechargeRecord.setStatus(0);
+            cardRechargeRecord.setUserId(cardDto.getUserId());
+            cardRechargeRecord.setTpyshCardHolderId(cardDto.getTpyshCardHolderId());
+            cardRechargeRecord.setChannelId(cardDto.getChannelId());
+            cardRechargeRecord.setCreateTime(LocalDateTime.now());
+            cardRechargeRecord.setUpdateTime(LocalDateTime.now());
             // 处理成功 等待回调结果
             cardRechargeRecordService.save(cardRechargeRecord);
             return cardRechargeRecord;

@@ -3,11 +3,8 @@ package com.starchain.callBack;
 import com.alibaba.fastjson2.JSON;
 import com.starchain.config.PacificPayConfig;
 import com.starchain.context.MiPayNotifyContext;
-import com.starchain.entity.RemitCardNotify;
 import com.starchain.entity.response.MiPayCardNotifyResponse;
-import com.starchain.service.ICardService;
 import com.starchain.service.IMiPayNotifyService;
-import com.starchain.service.IRemitCardNotifyService;
 import com.starchain.util.RSA2048Encrypt;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -42,10 +39,11 @@ public class MiPayNotifyController {
         String decrypt = null;
         try {
             decrypt = RSA2048Encrypt.decrypt(jsonObject, RSA2048Encrypt.getPrivateKey(pacificPayConfig.getPrivateKey()));
+            log.debug("字符串信息:{}", decrypt);
             MiPayCardNotifyResponse miPayNotifyResponse = JSON.parseObject(decrypt, MiPayCardNotifyResponse.class);
             // 参数检验
             checkRecharge(miPayNotifyResponse);
-            log.info("pacificPayNotify:{}", miPayNotifyResponse);
+            log.debug("pacificPayNotify:{}", miPayNotifyResponse);
             // 根据 businessType 获取对应的策略实现类
             IMiPayNotifyService miPayNotifyService = miPayNotifyContext.getMiPayNotifyService(miPayNotifyResponse.getBusinessType());
             Boolean callBack = miPayNotifyService.callBack(miPayNotifyResponse);

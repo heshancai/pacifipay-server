@@ -87,10 +87,10 @@ public class CardController {
         if (cardDto.getChannelId() == null) {
             return ResultGenerator.genFailResult("dto 不能为null");
         }
-        if (cardDto.getSaveAmount() == null) {
+        if (cardDto.getOrderAmount() == null) {
             return ResultGenerator.genFailResult("dto 不能为null");
         }
-        if (cardDto.getSaveAmount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (cardDto.getOrderAmount().compareTo(BigDecimal.ZERO) <= 0) {
             return ResultGenerator.genFailResult("输入的金额必须大于0");
         }
         //最新的卡充值未结束 无法进行新一轮充值
@@ -98,6 +98,7 @@ public class CardController {
         lambdaQueryWrapper.eq(CardRechargeRecord::getCardId, cardDto.getCardId());
         lambdaQueryWrapper.eq(CardRechargeRecord::getUserId, cardDto.getUserId());
         lambdaQueryWrapper.eq(CardRechargeRecord::getCardCode, cardDto.getCardCode());
+        lambdaQueryWrapper.orderByDesc(CardRechargeRecord::getId).last("LIMIT 1");
         CardRechargeRecord cardRechargeRecord = cardRechargeRecordService.getOne(lambdaQueryWrapper);
         if (cardRechargeRecord != null && cardRechargeRecord.getStatus() == 0) {
             return ResultGenerator.genFailResult("当前卡充值未结束，无法进行新一轮充值");

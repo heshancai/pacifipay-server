@@ -11,6 +11,7 @@ import com.starchain.entity.response.MiPayCardNotifyResponse;
 import com.starchain.enums.CardStatusEnum;
 import com.starchain.service.ICardCancelCallbackRecordService;
 import com.starchain.service.ICardService;
+import com.starchain.service.IMiPayNotifyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ import java.time.LocalDateTime;
  */
 @Service
 @Slf4j
-public class CardCancelCallbackRecordServiceImpl extends ServiceImpl<CardCancelCallbackRecordMapper, CardCancelCallbackRecord> implements ICardCancelCallbackRecordService {
+public class CardCancelCallbackRecordServiceImpl extends ServiceImpl<CardCancelCallbackRecordMapper, CardCancelCallbackRecord> implements IMiPayNotifyService, ICardCancelCallbackRecordService {
 
     @Autowired
     private ICardService cardService;

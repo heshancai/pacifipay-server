@@ -18,7 +18,7 @@ public interface ICardService extends IService<Card> {
      * @param channelId
      * @return
      */
-    Integer checkCardNum(Long cardHolderId, Integer channelId,String cardCode,String tpyshCardHolderId);
+    Integer checkCardNum(Long cardHolderId, Long channelId,String cardCode,String tpyshCardHolderId);
 
     /**
      *  创建卡

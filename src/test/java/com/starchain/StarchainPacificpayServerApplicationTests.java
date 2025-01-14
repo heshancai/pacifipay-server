@@ -1,6 +1,7 @@
 package com.starchain;
 
 import com.alibaba.fastjson2.JSONObject;
+import com.starchain.config.PacificPayConfig;
 import com.starchain.controller.CardController;
 import com.starchain.controller.CardHolderController;
 import com.starchain.controller.RemitCardController;
@@ -33,7 +34,7 @@ class StarchainPacificpayServerApplicationTests {
     @Test
     void contextLoads() {
         CardHolderDto cardHolder = new CardHolderDto();
-        cardHolder.setChannelId(100000);
+        cardHolder.setChannelId(100000L);
         cardHolder.setUserId(100001L);
         cardHolder.setFirstName("张");
         cardHolder.setLastName("三");
@@ -65,7 +66,7 @@ class StarchainPacificpayServerApplicationTests {
         cardHolder.setCardCode("TpyMDN6");
         cardHolder.setTpyshCardHolderId("2025010811491487397");
         cardHolder.setUserId(10000L);
-        cardHolder.setChannelId(100000);
+        cardHolder.setChannelId(100000L);
         cardHolder.setFirstName("hsc");
         cardHolder.setLastName("starChain");
         cardHolder.setId(13L);
@@ -80,7 +81,7 @@ class StarchainPacificpayServerApplicationTests {
         cardHolder.setCardCode("TpyMDN8");
         cardHolder.setTpyshCardHolderId("2025010811491487397");
         cardHolder.setUserId(10000L);
-        cardHolder.setChannelId(100000);
+        cardHolder.setChannelId(100000L);
         cardHolder.setFirstName("hsc");
         cardHolder.setLastName("starChain");
         cardHolder.setId(13L);
@@ -89,11 +90,12 @@ class StarchainPacificpayServerApplicationTests {
     }
 
 
+    // 查询卡
     @Test
     void getCardDetail() {
         CardDto cardDto = new CardDto();
         cardDto.setCardCode("TpyMDN6");
-        cardDto.setCardId("2025010910213120d78");
+        cardDto.setCardId("2025010910301416050");
         cardController.getCardDetail(cardDto);
     }
 
@@ -129,7 +131,7 @@ class StarchainPacificpayServerApplicationTests {
         cardDto.setUserId(10000L);
         cardDto.setTpyshCardHolderId("2025010811491487397");
         cardDto.setChannelId(100000L);
-        cardDto.setOrderAmount(BigDecimal.ONE);
+        cardDto.setOrderAmount(BigDecimal.TEN);
         System.out.println(cardController.applyRecharge(cardDto));
     }
 
@@ -193,4 +195,13 @@ class StarchainPacificpayServerApplicationTests {
         remitApplicationRecord.applyRemit(build);
 
     }
+
+
+
+
+
+
+
+
+
 }

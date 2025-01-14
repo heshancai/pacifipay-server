@@ -3,6 +3,7 @@ package com.starchain.controller;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.starchain.config.PacificPayConfig;
 import com.starchain.constants.CardUrlConstants;
 import com.starchain.entity.Card;
@@ -11,6 +12,7 @@ import com.starchain.entity.dto.CardDto;
 import com.starchain.entity.dto.CardHolderDto;
 import com.starchain.entity.dto.TradeDetailDto;
 import com.starchain.entity.response.TradeDetailResponse;
+import com.starchain.enums.CardStatusEnum;
 import com.starchain.result.ClientResponse;
 import com.starchain.result.ResultGenerator;
 import com.starchain.service.ICardRechargeRecordService;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -169,8 +172,23 @@ public class CardController {
         try {
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
             String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.GET_CARD_DETAIL, token, JSONObject.toJSONString(cardDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
-            Card card = JSON.parseObject(str, Card.class);
-            return ResultGenerator.genSuccessResult(card);
+            Card returnCard = JSON.parseObject(str, Card.class);
+            LambdaUpdateWrapper<Card> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(Card::getCardId, returnCard.getCardId());
+            updateWrapper.eq(Card::getCardCode, returnCard.getCardCode());
+            updateWrapper.eq(Card::getMerchantId, returnCard.getMerchantId());
+            updateWrapper.set(Card::getCardNo, returnCard.getCardNo());
+            updateWrapper.set(Card::getCardStatus, returnCard.getCardStatus());
+            updateWrapper.set(Card::getCreateTime, returnCard.getCreateTime());
+            updateWrapper.set(Card::getCardExpDate, returnCard.getCardExpDate());
+            updateWrapper.set(Card::getBankType, returnCard.getBankType());
+            updateWrapper.set(Card::getKycType, returnCard.getKycType());
+            updateWrapper.set(Card::getCardAmount, returnCard.getCardAmount());
+            updateWrapper.set(Card::getPhysicsType, returnCard.getPhysicsType());
+            updateWrapper.set(Card::getSingleLimit, returnCard.getSingleLimit());
+            updateWrapper.set(Card::getLocalUpdateTime, LocalDateTime.now());
+            cardService.update(updateWrapper);
+            return ResultGenerator.genSuccessResult(returnCard);
         } catch (Exception e) {
             log.error("查询卡失败", e);
             return ResultGenerator.genFailResult(e.getMessage());
@@ -262,6 +280,56 @@ public class CardController {
         } catch (Exception e) {
             log.error("申请销卡失败", e);
             return ResultGenerator.genFailResult("申请销卡失败");
+        }
+    }
+
+    @ApiOperation(value = "锁定卡")
+    @PostMapping("/lockCard")
+    public ClientResponse lockCard(@RequestBody CardDto cardDto) {
+        if (cardDto.getCardId() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        if (cardDto.getCardCode() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        LambdaQueryWrapper<Card> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Card::getCardId, cardDto.getCardId());
+        queryWrapper.eq(Card::getCardCode, cardDto.getCardCode());
+        Card card = cardService.getOne(queryWrapper);
+        if (card != null && !card.getCardStatus().equals(CardStatusEnum.NORMAL.getCardStatus())) {
+            return ResultGenerator.genFailResult("卡未在使用中 无须锁定");
+        }
+        try {
+            Boolean result = cardService.lockCard(card);
+            return ResultGenerator.genSuccessResult(result);
+        } catch (Exception e) {
+            log.error("申请销卡失败", e);
+            return ResultGenerator.genFailResult("服务异常，申请销卡失败");
+        }
+    }
+
+    @ApiOperation(value = "解锁卡")
+    @PostMapping("/unlockCard")
+    public ClientResponse unlockCard(@RequestBody CardDto cardDto) {
+        if (cardDto.getCardId() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        if (cardDto.getCardCode() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
+        LambdaQueryWrapper<Card> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Card::getCardId, cardDto.getCardId());
+        queryWrapper.eq(Card::getCardCode, cardDto.getCardCode());
+        Card card = cardService.getOne(queryWrapper);
+        if (card != null && !card.getCardStatus().equals(CardStatusEnum.FREEZING.getCardStatus())) {
+            return ResultGenerator.genFailResult("开未锁定 无须解锁");
+        }
+        try {
+            Boolean result = cardService.unlockCard(card);
+            return ResultGenerator.genSuccessResult(result);
+        } catch (Exception e) {
+            log.error("申请销卡失败", e);
+            return ResultGenerator.genFailResult("服务异常，申请销卡失败");
         }
     }
 }

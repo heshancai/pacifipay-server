@@ -3,6 +3,7 @@ package com.starchain.service.impl;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.config.PacificPayConfig;
 import com.starchain.constants.CardUrlConstants;
@@ -92,7 +93,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             card.setSaveOrderId(OrderIdGenerator.generateOrderId("", "", 6));
             // 太平洋的持卡人唯一值
             card.setTpyshCardHolderId(cardHolder.getTpyshCardHolderId());
-            card.setCardStatus(CardStatusEnum.CANCELLED.getCardStatus());
+            card.setCardStatus(CardStatusEnum.ACTIVATING.getCardStatus());
             card.setCreateStatus(0);
             card.setLocalCreateTime(LocalDateTime.now());
             card.setLocalUpdateTime(LocalDateTime.now());
@@ -143,7 +144,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     }
 
     /**
-     * 申请换卡
+     * 申请换卡 暂时没用
      *
      * @param card
      * @return
@@ -217,5 +218,50 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             log.error("服务异常", e);
         }
         return null;
+    }
+
+    // 锁卡
+    @Override
+    public Boolean lockCard(Card card) {
+        String token = null;
+        try {
+            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.LOCK_CARD, token, JSONObject.toJSONString(card), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            log.info("返回的数据：{}", str);
+            Card returnCard = JSON.parseObject(str, Card.class);
+            if (returnCard != null) {
+                LambdaUpdateWrapper<Card> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+                lambdaUpdateWrapper.eq(Card::getCardId, returnCard.getCardId());
+                lambdaUpdateWrapper.eq(Card::getMerchantId, returnCard.getMerchantId());
+                lambdaUpdateWrapper.eq(Card::getCardCode, returnCard.getCardNo());
+                lambdaUpdateWrapper.set(Card::getCardStatus, CardStatusEnum.FREEZING.getCardStatus());
+                return this.update(lambdaUpdateWrapper);
+            }
+        } catch (Exception e) {
+            log.error("服务异常", e);
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean unlockCard(Card card) {
+        String token = null;
+        try {
+            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.UNLOCK_CARD, token, JSONObject.toJSONString(card), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            log.info("返回的数据：{}", str);
+            Card returnCard = JSON.parseObject(str, Card.class);
+            if (returnCard != null) {
+                LambdaUpdateWrapper<Card> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+                lambdaUpdateWrapper.eq(Card::getCardId, returnCard.getCardId());
+                lambdaUpdateWrapper.eq(Card::getMerchantId, returnCard.getMerchantId());
+                lambdaUpdateWrapper.eq(Card::getCardCode, returnCard.getCardNo());
+                lambdaUpdateWrapper.set(Card::getCardStatus, CardStatusEnum.UNACTIVATED.getCardStatus());
+                return this.update(lambdaUpdateWrapper);
+            }
+        } catch (Exception e) {
+            log.error("服务异常", e);
+        }
+        return false;
     }
 }

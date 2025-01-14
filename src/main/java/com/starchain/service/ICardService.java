@@ -9,7 +9,7 @@ import com.starchain.entity.dto.CardDto;
 /**
  * @author
  * @date 2025-01-03
- * @Description
+ * @Description 卡操作服务
  */
 public interface ICardService extends IService<Card> {
     /**
@@ -49,4 +49,18 @@ public interface ICardService extends IService<Card> {
      * @return
      */
     CardRechargeRecord applyRecharge(CardDto cardDto);
+
+    /**
+     * 锁定卡
+     * @param cardDto
+     * @return
+     */
+    Boolean lockCard(Card cardDto);
+
+    /**
+     * 解锁卡
+     * @param card
+     * @return
+     */
+    Boolean unlockCard(Card card);
 }

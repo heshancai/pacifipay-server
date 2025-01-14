@@ -60,6 +60,9 @@ public class Card {
     @ApiModelProperty(value = "卡号-银行卡端返回", example = "1234567890123456")
     private String cardNo;
 
+    @ApiModelProperty(value = "卡余额", example = "")
+    private BigDecimal cardAmount;
+
     @ApiModelProperty(value = "卡CVV2-银行卡端返回", example = "123")
     private String cardCvn;
 
@@ -81,7 +84,7 @@ public class Card {
     @ApiModelProperty(value = "SO123456", example = "预存款客户订单号同saveOrderId 保持一致")
     private String saveTradeId;
 
-    @ApiModelProperty(value = "卡状态创建状态", example = "卡卡创建状态：0 创建中 1 创建成功 2 创建失败 3 已注销")
+    @ApiModelProperty(value = "卡状态创建状态", example = "卡卡创建状态：0 创建中 1 创建成功 2 创建失败")
     private Integer createStatus;
 
     @ApiModelProperty(value = "卡状态-银行卡端返回", example = "normal initFail unactivated activating freezing cancelled")

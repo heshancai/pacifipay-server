@@ -73,6 +73,7 @@ class StarchainPacificpayServerApplicationTests {
         System.out.println(cardHolder1);
     }
 
+    // 修改持卡人
     @Test
     void editCardHolder() {
         CardHolderDto cardHolder = new CardHolderDto();
@@ -124,6 +125,33 @@ class StarchainPacificpayServerApplicationTests {
     // 卡充值
     @Test
     void applyRecharge() {
+        CardDto cardDto = new CardDto();
+        cardDto.setCardId("2025010910301416050");
+        cardDto.setCardCode("TpyMDN6");
+        cardDto.setUserId(10000L);
+        cardDto.setTpyshCardHolderId("2025010811491487397");
+        cardDto.setChannelId(100000L);
+        cardDto.setOrderAmount(BigDecimal.TEN);
+        System.out.println(cardController.applyRecharge(cardDto));
+    }
+
+    // 卡充值
+    @Test
+    void lockCard() {
+        CardDto cardDto = new CardDto();
+        cardDto.setCardId("2025010910301416050");
+        cardDto.setCardCode("TpyMDN6");
+        cardDto.setUserId(10000L);
+        cardDto.setTpyshCardHolderId("2025010811491487397");
+        cardDto.setChannelId(100000L);
+        cardDto.setOrderAmount(BigDecimal.TEN);
+        System.out.println(cardController.applyRecharge(cardDto));
+    }
+
+
+    // 卡充值
+    @Test
+    void unlockCard() {
         CardDto cardDto = new CardDto();
         cardDto.setCardId("2025010910301416050");
         cardDto.setCardCode("TpyMDN6");
@@ -194,13 +222,6 @@ class StarchainPacificpayServerApplicationTests {
         remitApplicationRecord.applyRemit(build);
 
     }
-
-
-
-
-
-
-
 
 
 }

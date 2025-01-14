@@ -88,13 +88,10 @@ public class CardOpenCallbackRecordServiceImpl extends ServiceImpl<CardOpenCallb
             }
 
             // 5. 处理回调状态
-            if (card.getCardStatus().equals(CardStatusEnum.ACTIVATING.getCardStatus())
-                    && card.getStatus() == 0
-                    && "SUCCESS".equals(miPayCardNotifyResponse.getStatus())
-                    && "CardOpen success".equals(miPayCardNotifyResponse.getStatusDesc())) {
+            if (card.getCardStatus().equals(CardStatusEnum.ACTIVATING.getCardStatus()) && card.getCreateStatus() == 0 && "SUCCESS".equals(miPayCardNotifyResponse.getStatus())) {
                 // 5.1 修改卡状态为开通成功
                 card.setCardStatus(CardStatusEnum.NORMAL.getCardStatus());
-                card.setStatus(1);
+                card.setCreateStatus(1);
                 card.setLocalUpdateTime(LocalDateTime.now());
                 card.setFinishTime(LocalDateTime.now());
                 cardService.updateById(card);

@@ -87,7 +87,7 @@ public class CardCancelCallbackRecordServiceImpl extends ServiceImpl<CardCancelC
                     && "CardCancel success".equals(miPayCardNotifyResponse.getStatusDesc())) {
                 // 5.1 销卡成功
                 card.setCardStatus(CardStatusEnum.NORMAL.getCardStatus());
-                card.setStatus(3);
+                card.setCreateStatus(3);
                 card.setLocalUpdateTime(LocalDateTime.now());
                 card.setFinishTime(LocalDateTime.now());
                 card.setCancelTime(LocalDateTime.now());

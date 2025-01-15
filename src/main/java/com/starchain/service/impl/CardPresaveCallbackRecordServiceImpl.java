@@ -9,6 +9,7 @@ import com.starchain.entity.Card;
 import com.starchain.entity.CardPresaveCallbackRecord;
 import com.starchain.entity.response.MiPayCardNotifyResponse;
 import com.starchain.enums.CardStatusDescEnum;
+import com.starchain.enums.CreateStatusEnum;
 import com.starchain.exception.StarChainException;
 import com.starchain.service.ICardPresaveCallbackRecordService;
 import com.starchain.service.ICardService;
@@ -79,7 +80,8 @@ public class CardPresaveCallbackRecordServiceImpl extends ServiceImpl<CardPresav
                 .eq(Card::getCardId, response.getCardId())
                 .eq(Card::getSaveOrderId, response.getMchOrderId());
         Card record = cardService.getOne(queryWrapper);
-        Assert.isTrue(record != null, "核实卡充值记录不存在");
+        Assert.notNull(record, "核实卡充值记录不存在");
+        Assert.isTrue(record.getCreateStatus().equals(CreateStatusEnum.SUCCESS.getCode()), "卡未创建完成,忽略预存回调信息");
         log.info("卡信息校验通过, 卡ID: {}", response.getCardId());
         return record;
     }

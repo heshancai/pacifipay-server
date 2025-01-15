@@ -28,7 +28,7 @@ public enum MiPayNotifyType {
     /**
      * 卡流水通知
      */
-    CardTrade("CardTrade", "cardServiceImpl"),
+    CardTrade("CardTrade", "cardTradeCallbackRecordServiceImpl"),
     /**
      * 销卡通知
      */

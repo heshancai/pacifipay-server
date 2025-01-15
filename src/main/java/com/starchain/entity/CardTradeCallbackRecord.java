@@ -74,29 +74,8 @@ public class CardTradeCallbackRecord {
     @ApiModelProperty(value = "交易币种")
     private String tradeCurrency;
 
-    @ApiModelProperty(value = "网关费")
-    private BigDecimal gatewayFee;
-
-    @ApiModelProperty(value = "验证费")
-    private BigDecimal verifyFee;
-
-    @ApiModelProperty(value = "冲正费")
-    private BigDecimal voidFee;
-
-    @ApiModelProperty(value = "退款费")
-    private BigDecimal refundFee;
-
-    @ApiModelProperty(value = "授权失败费")
-    private BigDecimal authFailFee;
-
-    @ApiModelProperty(value = "授权成功费")
-    private BigDecimal authSuccessFee;
-
-    @ApiModelProperty(value = "授权小额费")
-    private BigDecimal authLittleFee;
-
-    @ApiModelProperty(value = "授权跨境费")
-    private BigDecimal authBorderFee;
+    @ApiModelProperty(value = "重试次数")
+    private Integer retries;
 
     @ApiModelProperty(value = "创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
@@ -105,4 +84,8 @@ public class CardTradeCallbackRecord {
     @ApiModelProperty(value = "更新时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime updateTime;
+
+    @ApiModelProperty(value = "更新时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime finishTime;
 }

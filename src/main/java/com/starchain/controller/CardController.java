@@ -53,7 +53,7 @@ public class CardController {
     private ICardRechargeRecordService cardRechargeRecordService;
 
     /**
-     * 创建卡 每种类型限制一张
+     * 创建卡 每种类型限制4张
      */
     @ApiOperation(value = "根据持卡人创建卡")
     @PostMapping("/addCard")

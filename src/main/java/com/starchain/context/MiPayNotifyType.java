@@ -23,7 +23,7 @@ public enum MiPayNotifyType {
     /**
      * 卡预存通知
      */
-    Presave("Presave", "cardServiceImpl"),
+    Presave("Presave", "cardPresaveCallbackRecordServiceImpl"),
 
     /**
      * 卡流水通知

@@ -61,6 +61,8 @@ public class CardRechargeCallbackRecord {
     @ApiModelProperty(value = "实际支付金额")
     private BigDecimal actual;
 
+    @ApiModelProperty(value = "重试次数")
+    private Integer retries;
 
     @ApiModelProperty(value = "创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

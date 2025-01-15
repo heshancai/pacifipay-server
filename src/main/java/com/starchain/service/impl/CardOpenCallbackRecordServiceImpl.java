@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 /**
  * @author
  * @date 2025-01-06
- * @Description
+ * @Description 卡开通通知
  */
 @Slf4j
 @Service

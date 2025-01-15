@@ -9,8 +9,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
-import java.time.LocalDateTime;
-
 /**
  * @author
  * @date 2025-01-02
@@ -50,7 +48,8 @@ public class RemitCard {
     @ApiModelProperty(name = "银行卡号", example = "1234567890123456")
     private String remitBankNo;
 
-
+    @ApiModelProperty(value = "创建状态", example = "创建状态：0 创建中 1 创建成功 2 创建失败")
+    private Integer createStatus;
 
     @ApiModelProperty(name = "状态", example = "SUCCESS")
     private String status;

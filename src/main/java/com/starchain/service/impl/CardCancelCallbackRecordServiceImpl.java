@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 /**
  * @author
  * @date 2025-01-06
- * @Description 申请销卡回调
+ * @Description 销卡通知
  */
 @Service
 @Slf4j

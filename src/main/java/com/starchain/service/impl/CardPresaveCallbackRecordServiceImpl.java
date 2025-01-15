@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 /**
  * @author
  * @date 2025-01-06
- * @Description 卡预存回调记录表 创建卡同时会进行预存
+ * @Description 卡预存通知： 创建卡同时会进行预存 并且进行回调
  */
 @Service
 @Slf4j
@@ -38,7 +38,7 @@ public class CardPresaveCallbackRecordServiceImpl extends ServiceImpl<CardPresav
             // 1. 校验业务类型
             validateBusinessType(miPayCardNotifyResponse);
 
-            // 2. 核实卡开通记录是否存在
+            // 2. 核实卡开通记录是否存在 卡开通成功才会处理预存
             Card card = validateAndGetRechargeRecord(miPayCardNotifyResponse);
 
 

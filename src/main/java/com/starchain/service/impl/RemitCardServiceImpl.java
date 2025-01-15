@@ -12,8 +12,8 @@ import com.starchain.entity.response.MiPayCardNotifyResponse;
 import com.starchain.entity.response.RemitCardResponse;
 import com.starchain.exception.StarChainException;
 import com.starchain.service.IRemitCardService;
+import com.starchain.service.IdWorker;
 import com.starchain.util.HttpUtils;
-import com.starchain.util.OrderIdGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +30,14 @@ import java.util.Map;
  * @Description
  */
 @Slf4j
-@Service("remitCardServiceImpl")
+@Service
 public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard> implements IRemitCardService {
 
     @Autowired
     private PacificPayConfig pacificPayConfig;
+
+    @Autowired
+    private IdWorker idWorker;
 
     @Override
     public Boolean addRemitCard(RemitCardDto remitCardDto) {
@@ -43,7 +46,7 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             validateRemitCardDto(remitCardDto);
 
             // 设置 remitCode 和 cardId
-            String cardId = OrderIdGenerator.generateOrderId("", "", 6);
+            String cardId = String.valueOf(idWorker.nextId());
             remitCardDto.setCardId(cardId);
             log.info("汇款卡唯一标识生成,{}", cardId);
 
@@ -221,6 +224,7 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
 
     /**
      * 申请汇款卡审核通知
+     *
      * @param miPayCardNotifyResponse
      * @return
      */

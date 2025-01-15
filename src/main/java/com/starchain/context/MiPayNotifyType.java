@@ -41,7 +41,7 @@ public enum MiPayNotifyType {
     /**
      * 申请汇款卡审核通知
      */
-    RemitCard("RemitCard", "RemitCardServiceImpl");
+    RemitCard("RemitCard", "remitCardServiceImpl");
 
     private final String type;
     private final String serviceName;

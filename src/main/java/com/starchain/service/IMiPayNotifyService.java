@@ -1,7 +1,8 @@
 package com.starchain.service;
 
-import com.starchain.entity.RemitCardNotify;
+import com.alibaba.fastjson2.JSON;
 import com.starchain.entity.response.MiPayCardNotifyResponse;
+import com.starchain.entity.response.MiPayRemitNotifyResponse;
 
 /**
  * @author
@@ -12,6 +13,13 @@ public interface IMiPayNotifyService {
     /**
      * 结果回调
      */
-    Boolean callBack(MiPayCardNotifyResponse miPayCardNotifyResponse);
+    Boolean callBack(String callBackJson);
+
+    default MiPayCardNotifyResponse covertToMiPayCardNotifyResponse(String callBackJson) {
+        return JSON.parseObject(callBackJson, MiPayCardNotifyResponse.class);
+    }
+    default MiPayRemitNotifyResponse covertToMiPayRemitNotifyResponse(String callBackJson) {
+        return JSON.parseObject(callBackJson, MiPayRemitNotifyResponse.class);
+    }
 
 }

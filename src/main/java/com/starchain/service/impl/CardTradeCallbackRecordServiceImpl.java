@@ -37,7 +37,9 @@ public class CardTradeCallbackRecordServiceImpl extends ServiceImpl<CardTradeCal
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Boolean callBack(MiPayCardNotifyResponse miPayCardNotifyResponse) {
+    public Boolean callBack(String callBackJson) {
+
+        MiPayCardNotifyResponse miPayCardNotifyResponse = this.covertToMiPayCardNotifyResponse(callBackJson);
         try {
             // 1. 校验业务类型
             validateBusinessType(miPayCardNotifyResponse);

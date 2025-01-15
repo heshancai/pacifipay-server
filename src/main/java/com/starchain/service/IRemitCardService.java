@@ -2,7 +2,6 @@ package com.starchain.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.starchain.entity.RemitCard;
-import com.starchain.entity.RemitCardNotify;
 import com.starchain.entity.dto.RemitCardDto;
 import com.starchain.entity.dto.RemitRateDto;
 
@@ -11,7 +10,7 @@ import com.starchain.entity.dto.RemitRateDto;
  * @date 2025-01-02
  * @Description
  */
-public interface IRemitCardService extends IService<RemitCard>,IMiPayNotifyService {
+public interface IRemitCardService extends IService<RemitCard> {
     /**
      * 添加收款卡信息
      * @param

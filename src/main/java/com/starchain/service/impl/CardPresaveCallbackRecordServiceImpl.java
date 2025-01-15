@@ -33,7 +33,9 @@ public class CardPresaveCallbackRecordServiceImpl extends ServiceImpl<CardPresav
     private ICardService cardService;
 
     @Override
-    public Boolean callBack(MiPayCardNotifyResponse miPayCardNotifyResponse) {
+    public Boolean callBack(String callBackJson) {
+
+        MiPayCardNotifyResponse miPayCardNotifyResponse = this.covertToMiPayCardNotifyResponse(callBackJson);
         try {
             // 1. 校验业务类型
             validateBusinessType(miPayCardNotifyResponse);
@@ -131,6 +133,7 @@ public class CardPresaveCallbackRecordServiceImpl extends ServiceImpl<CardPresav
             LambdaUpdateWrapper<CardPresaveCallbackRecord> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.eq(CardPresaveCallbackRecord::getNotifyId, response.getNotifyId())
                     .set(CardPresaveCallbackRecord::getStatusDesc, response.getStatusDesc())
+                    .set(CardPresaveCallbackRecord::getStatus, response.getStatus())
                     .set(CardPresaveCallbackRecord::getUpdateTime, LocalDateTime.now());
             return this.update(updateWrapper);
         } else if (CardStatusDescEnum.FAILED.getDescription().equals(response.getStatus())) {

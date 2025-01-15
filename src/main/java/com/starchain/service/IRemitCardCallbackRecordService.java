@@ -1,8 +1,6 @@
 package com.starchain.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.starchain.dao.RemitCardCallbackRecordMapper;
 import com.starchain.entity.RemitCardCallbackRecord;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +10,7 @@ import org.springframework.stereotype.Service;
  * @Description
  */
 @Service
-public interface IRemitCardCallbackRecordService  extends IService<RemitCardCallbackRecord> {
+public interface IRemitCardCallbackRecordService  extends IService<RemitCardCallbackRecord>,IMiPayNotifyService {
+
     // 自定义方法实现可以在这里定义
 }

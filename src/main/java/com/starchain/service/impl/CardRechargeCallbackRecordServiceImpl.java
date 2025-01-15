@@ -40,7 +40,9 @@ public class CardRechargeCallbackRecordServiceImpl extends ServiceImpl<CardRecha
 
 
     @Override
-    public Boolean callBack(MiPayCardNotifyResponse miPayCardNotifyResponse) {
+    public Boolean callBack(String callBackJson) {
+
+        MiPayCardNotifyResponse miPayCardNotifyResponse = this.covertToMiPayCardNotifyResponse(callBackJson);
         try {
             // 1. 校验业务类型
             validateBusinessType(miPayCardNotifyResponse);
@@ -135,7 +137,7 @@ public class CardRechargeCallbackRecordServiceImpl extends ServiceImpl<CardRecha
     private boolean handleRechargeStatus(MiPayCardNotifyResponse response, CardRechargeRecord rechargeRecord, CardRechargeCallbackRecord callbackRecord) {
         if (rechargeRecord.getStatus() == 0 && CardStatusDescEnum.SUCCESS.getDescription().equals(response.getStatus())) {
             // 修改卡充值状态为成功
-            updateRechargeRecordStatus(response, rechargeRecord, callbackRecord);
+            updateRechargeRecordStatus(response, callbackRecord);
 
             // 修改用户钱包余额
             updateUserWalletBalance(rechargeRecord, callbackRecord);
@@ -155,10 +157,9 @@ public class CardRechargeCallbackRecordServiceImpl extends ServiceImpl<CardRecha
     }
 
     // 更新充值记录状态
-    private void updateRechargeRecordStatus(MiPayCardNotifyResponse response, CardRechargeRecord rechargeRecord, CardRechargeCallbackRecord callbackRecord) {
+    private void updateRechargeRecordStatus(MiPayCardNotifyResponse response, CardRechargeCallbackRecord callbackRecord) {
         LambdaUpdateWrapper<CardRechargeRecord> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(CardRechargeRecord::getCardId, response.getCardId())
-                .eq(CardRechargeRecord::getStatus, 0) // 确保状态为未处理
                 .set(CardRechargeRecord::getStatus, RechargeRecordStatusEnum.SUCCESS.getKey())
                 .set(CardRechargeRecord::getUpdateTime, LocalDateTime.now())
                 .set(CardRechargeRecord::getActAmount, callbackRecord.getActual())

@@ -35,11 +35,14 @@ public class CardCancelCallbackRecordServiceImpl extends ServiceImpl<CardCancelC
     /**
      * 申请销卡回调
      *
-     * @param miPayCardNotifyResponse
+     * @param callBackJson
      * @return
      */
     @Override
-    public Boolean callBack(MiPayCardNotifyResponse miPayCardNotifyResponse) {
+    public Boolean callBack(String callBackJson) {
+
+        MiPayCardNotifyResponse miPayCardNotifyResponse = this.covertToMiPayCardNotifyResponse(callBackJson);
+
         try {
             // 1. 校验业务类型
             Assert.isTrue(

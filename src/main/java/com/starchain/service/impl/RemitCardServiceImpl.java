@@ -22,6 +22,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
@@ -69,7 +70,8 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             Assert.notNull(remitCardResponse.getTpyCardId(), "汇款卡ID-银行卡端响应不能为空");
             RemitCard remitCard = new RemitCard();
             BeanUtils.copyProperties(remitCardResponse, remitCard);
-
+            remitCard.setCreateTime(LocalDateTime.now());
+            remitCard.setUpdateTime(LocalDateTime.now());
             // 如果 extraParams 不为空，设置相关字段到 remitCard 对象中
             JSONObject extraParam = remitCardResponse.getExtraParams();
             if (!ObjectUtils.isEmpty(extraParam)) {

@@ -46,7 +46,7 @@ public class MiPayNotifyController {
             log.debug("pacificPayNotify:{}", miPayNotifyResponse);
             // 根据 businessType 获取对应的策略实现类
             IMiPayNotifyService miPayNotifyService = miPayNotifyContext.getMiPayNotifyService(miPayNotifyResponse.getBusinessType());
-            Boolean callBack = miPayNotifyService.callBack(miPayNotifyResponse);
+            Boolean callBack = miPayNotifyService.callBack(decrypt);
             if (callBack) {
                 return "success";
             }

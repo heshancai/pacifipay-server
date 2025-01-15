@@ -32,16 +32,23 @@ public enum MiPayNotifyType {
     /**
      * 销卡通知
      */
-    CardCancel("CardCancel", "cardServiceImpl"),
+    CardCancel("CardCancel", "cardCancelCallbackRecordServiceImpl"),
+
+
     /**
-     * 卡验证码通知
+     * 汇款撤销通知
      */
-    VerifyCode("VerifyCode", "cardServiceImpl"),
+    RemitCancel("RemitCancel", "remitCancelCallbackRecordServiceImpl"),
+
+    /**
+     * 申请汇款通知
+     */
+    Remit("Remit", "remitCallbackRecordServiceImpl"),
 
     /**
      * 申请汇款卡审核通知
      */
-    RemitCard("RemitCard", "remitCardServiceImpl");
+    RemitCard("RemitCard", "remitCardCallbackRecordServiceImpl");
 
     private final String type;
     private final String serviceName;

@@ -8,6 +8,6 @@ import com.starchain.entity.RemitCallbackRecord;
  * @date 2025-01-06
  * @Description
  */
-public interface IRemitCallbackRecordService extends IService<RemitCallbackRecord> {
+public interface IRemitCallbackRecordService extends IService<RemitCallbackRecord>,IMiPayNotifyService {
     // 自定义方法可以在这里定义
 }

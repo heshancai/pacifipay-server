@@ -1,6 +1,8 @@
 package com.starchain.service.impl;
 
 import com.alibaba.fastjson2.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.config.PacificPayConfig;
 import com.starchain.constants.CardRemittanceUrlConstants;
@@ -8,7 +10,6 @@ import com.starchain.dao.RemitCardMapper;
 import com.starchain.entity.RemitCard;
 import com.starchain.entity.dto.RemitCardDto;
 import com.starchain.entity.dto.RemitRateDto;
-import com.starchain.entity.response.MiPayCardNotifyResponse;
 import com.starchain.entity.response.RemitCardResponse;
 import com.starchain.exception.StarChainException;
 import com.starchain.service.IRemitCardService;
@@ -224,14 +225,53 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
         }
     }
 
-    /**
-     * 申请汇款卡审核通知
-     *
-     * @param miPayCardNotifyResponse
-     * @return
-     */
     @Override
-    public Boolean callBack(MiPayCardNotifyResponse miPayCardNotifyResponse) {
+    public Boolean updateRemitCard(RemitCardDto remitCardDto) {
+        LambdaQueryWrapper<RemitCard> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(RemitCard::getTpyCardId, remitCardDto.getCardId());
+        RemitCard remitCard = this.getOne(queryWrapper);
+        if (remitCard == null) {
+            throw new StarChainException("汇款卡不存在");
+        }
+        validateRemitCardDto(remitCardDto);
+        // 获取 Token
+        String token = null;
+        try {
+            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            log.info("成功获取 Token：{}", token);
+
+            String requestUrl = pacificPayConfig.getBaseUrl() + CardRemittanceUrlConstants.UPDATE_REMIT_CARD;
+            String requestBody = JSONObject.toJSONString(remitCardDto);
+            log.info("发送请求，URL：{}，请求体：{}", requestUrl, requestBody);
+
+            String responseStr = HttpUtils.doPostMiPay(requestUrl, token, requestBody, pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            log.info("收到响应：{}", responseStr);
+            // 解析响应
+            RemitCardResponse remitCardResponse = JSONObject.parseObject(responseStr, RemitCardResponse.class);
+
+            // 如果 extraParams 不为空，设置相关字段到 remitCard 对象中
+            LambdaUpdateWrapper<RemitCard> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(RemitCard::getTpyCardId, remitCardResponse.getCardId());
+            updateWrapper.set(RemitCard::getUpdateTime, LocalDateTime.now());
+            updateWrapper.set(RemitCard::getRemitBankNo, remitCardResponse.getRemitBankNo());
+            updateWrapper.set(RemitCard::getRemitFirstName, remitCardResponse.getRemitFirstName());
+            updateWrapper.set(RemitCard::getRemitLastName, remitCardResponse.getRemitLastName());
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
+        return null;
+    }
+
+    @Override
+    public Boolean delRemitCard(RemitCardDto remitCardDto) {
+        return null;
+    }
+
+    @Override
+    public Boolean remitDetail(RemitCardDto remitCardDto) {
         return null;
     }
 }

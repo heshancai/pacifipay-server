@@ -21,6 +21,9 @@ public class RemitCardDto {
     @ApiModelProperty(name = "汇款类型编码", example = "LNR_IND")
     private String remitCode;
 
+    @ApiModelProperty(name = "汇款卡ID", example = "Tpysh的唯一标识ID")
+    private String tpyCardId;
+
     @ApiModelProperty(name = "汇款卡标识", example = "客户汇款卡唯一标识，唯一标识至少填写一个")
     private String cardId;
 

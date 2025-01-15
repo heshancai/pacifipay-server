@@ -52,6 +52,59 @@ public class RemitCardController {
     }
 
     /**
+     * 修改收款卡信息
+     */
+    @ApiOperation(value = "修改收款卡信息")
+    @PostMapping("/updateRemitCard")
+    public ClientResponse updateRemitCard(@RequestBody RemitCardDto remitCardDto) {
+        if (remitCardDto.getTpyCardId() == null) {
+            return ResultGenerator.genFailResult("TpyCardId不能为空");
+        }
+        try {
+            Boolean result = remitCardService.updateRemitCard(remitCardDto);
+
+
+            return ResultGenerator.genSuccessResult(result);
+        } catch (Exception e) {
+            log.error("服务异常", e);
+            return ResultGenerator.genFailResult("服务异常");
+        }
+    }
+
+
+    /**
+     * 添加收款卡
+     */
+    @ApiOperation(value = "删除收款卡信息")
+    @PostMapping("/delRemitCard")
+    public ClientResponse delRemitCard(@RequestBody RemitCardDto remitCardDto) {
+
+        try {
+            Boolean result = remitCardService.delRemitCard(remitCardDto);
+            return ResultGenerator.genSuccessResult(result);
+        } catch (Exception e) {
+            log.error("服务异常", e);
+            return ResultGenerator.genFailResult("服务异常");
+        }
+    }
+
+    /**
+     * 汇款单详情
+     */
+    @ApiOperation(value = "汇款单详情")
+    @PostMapping("/remitDetail")
+    public ClientResponse remitDetail(@RequestBody RemitCardDto remitCardDto) {
+
+        try {
+            Boolean result = remitCardService.remitDetail(remitCardDto);
+            return ResultGenerator.genSuccessResult(result);
+        } catch (Exception e) {
+            log.error("服务异常", e);
+            return ResultGenerator.genFailResult("服务异常");
+        }
+    }
+
+    /**
      * 申请汇款
      */
     @ApiOperation(value = "申请汇款")
@@ -63,16 +116,6 @@ public class RemitCardController {
         if (ObjectUtils.isEmpty(remitApplicationRecordDto.getChannelId())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
-//        if (!StringUtils.hasText(remitApplicationRecordDto.getRemitFirstName())) {
-//            return ResultGenerator.genFailResult("dto不能为空");
-//        }
-//        if (!StringUtils.hasText(remitApplicationRecordDto.getRemitLastName())) {
-//            return ResultGenerator.genFailResult("dto不能为空");
-//        }
-//        if (!StringUtils.hasText(remitApplicationRecordDto.getRemitBankNo())) {
-//            return ResultGenerator.genFailResult("dto不能为空");
-//        }
-
         Boolean result = remitApplicationRecord.applyRemit(remitApplicationRecordDto);
         return ResultGenerator.genSuccessResult(result);
     }

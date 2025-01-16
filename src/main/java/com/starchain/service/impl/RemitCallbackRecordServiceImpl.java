@@ -75,7 +75,7 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
     // 2. 核实申请汇款的记录是否存在
     private RemitApplicationRecord validateAndGetRecord(MiPayRemitNotifyResponse response) {
         LambdaQueryWrapper<RemitApplicationRecord> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(RemitApplicationRecord::getTradeId, response.getTradeId())
+        queryWrapper.eq(RemitApplicationRecord::getTradeId, response.getTradeId()).eq(RemitApplicationRecord::getOrderId, response.getOrderId())
                 .eq(RemitApplicationRecord::getRemitCode, response.getRemitCode());
         RemitApplicationRecord record = remitApplicationRecordService.getOne(queryWrapper);
         Assert.isTrue(record != null, "数据异常，申请汇款记录不存在");

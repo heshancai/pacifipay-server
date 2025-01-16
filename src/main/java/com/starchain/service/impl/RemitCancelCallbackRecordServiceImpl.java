@@ -76,7 +76,7 @@ public class RemitCancelCallbackRecordServiceImpl extends ServiceImpl<RemitCance
     // 2. 核实申请汇款的记录是否存在
     private RemitApplicationRecord validateAndGetRecord(MiPayRemitNotifyResponse response) {
         LambdaQueryWrapper<RemitApplicationRecord> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(RemitApplicationRecord::getTradeId, response.getTradeId())
+        queryWrapper.eq(RemitApplicationRecord::getTradeId, response.getTradeId()).eq(RemitApplicationRecord::getOrderId, response.getOrderId())
                 .eq(RemitApplicationRecord::getRemitCode, response.getRemitCode());
         RemitApplicationRecord record = remitApplicationRecordService.getOne(queryWrapper);
         Assert.isTrue(record != null, "数据异常，申请汇款记录不存在");
@@ -111,7 +111,7 @@ public class RemitCancelCallbackRecordServiceImpl extends ServiceImpl<RemitCance
     }
 
 
-    // 汇款卡审核状态
+    // 汇款撤销
     private boolean handleRechargeStatus(MiPayRemitNotifyResponse response, RemitApplicationRecord remitApplicationRecord, RemitCancelCallbackRecord callbackRecord) {
         if (CardStatusDescEnum.SUCCESS.getDescription().equals(response.getStatus())) {
             // 修改用户钱包余额

@@ -66,6 +66,8 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
             String responseStr = HttpUtils.doPostMiPay(requestUrl, token, requestBody, pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             log.info("收到响应：{}", responseStr);
             RemitApplicationRecord remitApplicationRecord = JSONObject.parseObject(responseStr, RemitApplicationRecord.class);
+            remitApplicationRecord.setUserId(remitApplicationRecordDto.getUserId());
+            remitApplicationRecord.setChannelId(remitApplicationRecordDto.getChannelId());
             remitApplicationRecord.setStatus(0);
             this.save(remitApplicationRecord);
         } catch (Exception e) {

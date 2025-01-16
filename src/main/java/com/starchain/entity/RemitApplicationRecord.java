@@ -89,7 +89,7 @@ public class RemitApplicationRecord {
     @ApiModelProperty(value = "更新时间", example = "2023-10-01 12:00:00")
     private LocalDateTime updateTime;
 
-    @ApiModelProperty(value = "汇款申请状态", example = "创建状态 0创建中 1 创建成功  2 创建失败")
+    @ApiModelProperty(value = "汇款申请状态", example = "创建状态 0创建中 1 创建成功  2 创建失败 3撤销")
     private Integer status;
 
     @ApiModelProperty(value = "备注信息", example = "这是一条测试汇款申请")

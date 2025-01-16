@@ -11,8 +11,8 @@ import io.swagger.annotations.ApiModel;
 public enum CreateStatusEnum {
     CREATING(0, "创建中"),
     SUCCESS(1, "创建成功"),
-    FAILED(2, "创建失败");
-
+    FAILED(2, "创建失败"),
+    CANCEL(3, "撤销");
     private final int code;
     private final String description;
 

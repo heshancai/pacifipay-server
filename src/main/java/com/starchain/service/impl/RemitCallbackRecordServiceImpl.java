@@ -56,7 +56,7 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
             RemitCallbackRecord callbackRecord = createOrUpdateCallbackRecord(miPayRemitNotifyResponse);
 
             // 5.如果对用户钱包余额进行扣款
-            return handleRechargeStatus(miPayRemitNotifyResponse,remitApplicationRecord, callbackRecord);
+            return handleRechargeStatus(miPayRemitNotifyResponse, remitApplicationRecord, callbackRecord);
         } catch (Exception e) {
             log.error("申请汇款, 通知ID: {}, 错误信息: {}", miPayRemitNotifyResponse.getNotifyId(), e.getMessage(), e);
             throw new StarChainException("申请汇款处理失败");
@@ -79,6 +79,7 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
                 .eq(RemitApplicationRecord::getRemitCode, response.getRemitCode());
         RemitApplicationRecord record = remitApplicationRecordService.getOne(queryWrapper);
         Assert.isTrue(record != null, "数据异常，申请汇款记录不存在");
+        Assert.isTrue(record.getStatus().equals(CreateStatusEnum.CREATING.getCode()), "数据异常，申请汇款已处理完成");
         log.info("卡信息校验通过, 卡ID: {}", response.getCardId());
         return record;
     }
@@ -111,10 +112,10 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
     }
 
     // 汇款卡审核状态
-    private boolean handleRechargeStatus(MiPayRemitNotifyResponse response,RemitApplicationRecord remitApplicationRecord, RemitCallbackRecord callbackRecord) {
+    private boolean handleRechargeStatus(MiPayRemitNotifyResponse response, RemitApplicationRecord remitApplicationRecord, RemitCallbackRecord callbackRecord) {
         if (CardStatusDescEnum.SUCCESS.getDescription().equals(response.getStatus())) {
             // 修改用户钱包余额
-            updateUserWalletBalance(remitApplicationRecord, callbackRecord);
+            updateUserWalletBalance(remitApplicationRecord);
             // 修改卡汇款申请记录状态为成功
             updateRecordStatus(response);
             // 更新卡汇款回调记录
@@ -163,7 +164,7 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
     }
 
     // 更新用户钱包余额
-    private void updateUserWalletBalance(RemitApplicationRecord rechargeRecord, RemitCallbackRecord callbackRecord) {
+    private void updateUserWalletBalance(RemitApplicationRecord rechargeRecord) {
         LambdaUpdateWrapper<UserWalletBalance> balanceUpdateWrapper = new LambdaUpdateWrapper<>();
         balanceUpdateWrapper.eq(UserWalletBalance::getUserId, rechargeRecord.getUserId())
                 .setSql("balance = balance - " + rechargeRecord.getToAmount())

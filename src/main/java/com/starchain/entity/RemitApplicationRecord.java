@@ -59,8 +59,6 @@ public class RemitApplicationRecord {
     @ApiModelProperty(value = "银行端返回的汇款汇率", example = "6.500000")
     private BigDecimal tradeRate;
 
-    @ApiModelProperty(value = "额外参数", example = "{\"key\": \"value\"}")
-    private String extraParams;
 
     @ApiModelProperty(value = "汇款人姓名拼音大写字母", example = "ZHANGSAN")
     private String remitName;

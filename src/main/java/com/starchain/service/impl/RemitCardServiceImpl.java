@@ -257,12 +257,23 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             updateWrapper.set(RemitCard::getRemitFirstName, remitCardResponse.getRemitFirstName());
             updateWrapper.set(RemitCard::getRemitLastName, remitCardResponse.getRemitLastName());
 
+            // 根据响应体设置保存数据库
+            if (remitCardResponse.getExtraParams() != null) {
+                // 设置额外参数
+                updateWrapper.set(RemitCard::getEmail, remitCardResponse.getExtraParams().getString("email"));
+                updateWrapper.set(RemitCard::getSwiftCode, remitCardResponse.getExtraParams().getString("swiftCode"));
+                updateWrapper.set(RemitCard::getBankCode, remitCardResponse.getExtraParams().getString("bankCode"));
+                updateWrapper.set(RemitCard::getRemitBank, remitCardResponse.getExtraParams().getString("remitBank"));
+                updateWrapper.set(RemitCard::getRemitBankBranchCode, remitCardResponse.getExtraParams().getString("remitBankBranchCode"));
+                updateWrapper.set(RemitCard::getRemitBankAddress, remitCardResponse.getExtraParams().getString("remitBankAddress"));
+                updateWrapper.set(RemitCard::getToMoneyKind, remitCardResponse.getExtraParams().getString("toMoneyKind"));
+                updateWrapper.set(RemitCard::getToMoneyCountry2, remitCardResponse.getExtraParams().getString("toMoneyCountry2"));
+            }
+            return update(updateWrapper);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-
-        return null;
     }
 
     @Override

@@ -67,6 +67,9 @@ public class RemitCard {
     @ApiModelProperty(name = "姓名", example = "John Doe")
     private String remitName;
 
+    @ApiModelProperty(name = "邮箱", example = "john.doe@example.com")
+    private String email;
+
     @ApiModelProperty(name = "银行编码", example = "BANK123")
     private String bankCode;
 

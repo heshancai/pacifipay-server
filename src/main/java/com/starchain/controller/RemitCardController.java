@@ -62,8 +62,6 @@ public class RemitCardController {
         }
         try {
             Boolean result = remitCardService.updateRemitCard(remitCardDto);
-
-
             return ResultGenerator.genSuccessResult(result);
         } catch (Exception e) {
             log.error("服务异常", e);

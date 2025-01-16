@@ -166,7 +166,7 @@ public class RemitCancelCallbackRecordServiceImpl extends ServiceImpl<RemitCance
     private void updateUserWalletBalance(RemitApplicationRecord rechargeRecord, BigDecimal cancelAmount) {
         LambdaUpdateWrapper<UserWalletBalance> balanceUpdateWrapper = new LambdaUpdateWrapper<>();
         balanceUpdateWrapper.eq(UserWalletBalance::getUserId, rechargeRecord.getUserId()).eq(UserWalletBalance::getChannelId, rechargeRecord.getChannelId())
-                .setSql("balance = balance + " + cancelAmount)
+                .setSql("balance = balance + " + cancelAmount) // 撤销的会的金额 会跟发起汇款的金额不 一直 这里扣除了手续费
                 .set(UserWalletBalance::getUpdateTime, LocalDateTime.now());
         userWalletBalanceService.update(balanceUpdateWrapper);
     }

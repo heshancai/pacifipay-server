@@ -123,8 +123,8 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
             return true;
         } else if (CardStatusDescEnum.FAILED.getDescription().equals(response.getStatus())) {
             // 处理失败状态
-            handleFailedStatus(callbackRecord);
-            return false;
+            handleFailedStatus(callbackRecord, response);
+            return true;
         }
         log.info("回调处理完成, 无须重复处理,通知ID: {}", response.getNotifyId());
         return true;
@@ -155,10 +155,11 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
     }
 
     // 处理失败状态
-    private void handleFailedStatus(RemitCallbackRecord callbackRecord) {
+    private void handleFailedStatus(RemitCallbackRecord callbackRecord, MiPayRemitNotifyResponse response) {
         LambdaUpdateWrapper<RemitCallbackRecord> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(RemitCallbackRecord::getNotifyId, callbackRecord.getNotifyId())
-                .setSql("retries = retries + 1")
+                .set(RemitCallbackRecord::getStatus, CardStatusDescEnum.FAILED.getDescription())
+                .set(RemitCallbackRecord::getStatusDesc, response.getStatusDesc())
                 .set(RemitCallbackRecord::getUpdateTime, LocalDateTime.now());
         this.update(updateWrapper);
     }
@@ -167,7 +168,7 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
     private void updateUserWalletBalance(RemitApplicationRecord rechargeRecord) {
         LambdaUpdateWrapper<UserWalletBalance> balanceUpdateWrapper = new LambdaUpdateWrapper<>();
         balanceUpdateWrapper.eq(UserWalletBalance::getUserId, rechargeRecord.getUserId())
-                .setSql("balance = balance - " + rechargeRecord.getToAmount())
+                .setSql("balance = balance - " + rechargeRecord.getFromAmount()) // 银行卡端实际扣款金额为准
                 .set(UserWalletBalance::getUpdateTime, LocalDateTime.now());
         userWalletBalanceService.update(balanceUpdateWrapper);
     }

@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 public class MiPayRemitNotifyResponse extends BaseMiPayNotifyResponse {
     @ApiModelProperty(value = "太平洋唯一订单号", example = "汇款撤销 特有字段")
     private String orderId;
+
+    // 撤销的会的金额 会跟发起汇款的金额不 会比发起的少 一直 这里扣除了手续费
     @ApiModelProperty(value = "退回金额", example = "汇款撤销 特有字段")
     private BigDecimal cancelAmount;
     @ApiModelProperty(value = "汇款卡ID", example = "TPY12345")

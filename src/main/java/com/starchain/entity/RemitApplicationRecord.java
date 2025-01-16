@@ -38,17 +38,26 @@ public class RemitApplicationRecord {
     @ApiModelProperty(value = "汇款类型编码", example = "ELR")
     private String remitCode;
 
+    @ApiModelProperty(value = "扣款对应币种", example = "CNY")
+    private String fromMoneyKind;
+
     @ApiModelProperty(value = "汇款目标币种", example = "CNY")
     private String toMoneyKind;
 
-    @ApiModelProperty(value = "汇款目标金额", example = "1000.00")
+    @ApiModelProperty(value = "汇款目标金额", example = "可以是 人民币和美元")
     private BigDecimal toAmount;
+
+    @ApiModelProperty(value = "扣款金额", example = "扣除的是美元 包含手续费")
+    private BigDecimal fromAmount;
 
     @ApiModelProperty(value = "汇款交易单号", example = "ORDER123456789")
     private String orderId;
 
     @ApiModelProperty(value = "汇款汇率", example = "6.500000")
     private BigDecimal remitRate;
+
+    @ApiModelProperty(value = "银行端返回的汇款汇率", example = "6.500000")
+    private BigDecimal tradeRate;
 
     @ApiModelProperty(value = "额外参数", example = "{\"key\": \"value\"}")
     private String extraParams;

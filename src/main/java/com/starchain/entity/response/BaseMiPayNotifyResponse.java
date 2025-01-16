@@ -24,4 +24,6 @@ public class BaseMiPayNotifyResponse {
     private String statusDesc;
     @ApiModelProperty(value = "卡ID", example = "CARD_123456")
     private String cardId;
+    @ApiModelProperty(value = "交易流水号", example = "卡流水、申请汇款、汇款撤销 特有字段")
+    private String tradeId;
 }

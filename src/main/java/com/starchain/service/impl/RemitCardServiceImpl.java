@@ -277,8 +277,91 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
     }
 
     @Override
+    public RemitCard getRemitCard(RemitCardDto remitCardDto) {
+        // 查询汇款卡是否已经删除
+
+        try {
+            // 获取 Token
+            String token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            log.info("成功获取 Token：{}", token);
+
+            // 发送请求并获取响应
+            String requestUrl = pacificPayConfig.getBaseUrl() + CardRemittanceUrlConstants.GET_REMIT_CARD;
+            String requestBody = JSONObject.toJSONString(remitCardDto);
+            log.info("发送请求，URL：{}，请求体：{}", requestUrl, requestBody);
+
+            String responseStr = HttpUtils.doPostMiPay(requestUrl, token, requestBody, pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            log.info("收到响应：{}", responseStr);
+
+            // 解析响应
+            RemitCardResponse remitCardResponse = JSONObject.parseObject(responseStr, RemitCardResponse.class);
+            Assert.notNull(remitCardResponse.getTpyCardId(), "汇款卡ID-银行卡端响应不能为空");
+
+            // 更新数据库
+            LambdaUpdateWrapper<RemitCard> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(RemitCard::getTpyCardId, remitCardResponse.getTpyCardId());
+            updateWrapper.set(RemitCard::getUpdateTime, LocalDateTime.now());
+            updateWrapper.set(RemitCard::getRemitBankNo, remitCardResponse.getRemitBankNo());
+            updateWrapper.set(RemitCard::getRemitFirstName, remitCardResponse.getRemitFirstName());
+            updateWrapper.set(RemitCard::getRemitLastName, remitCardResponse.getRemitLastName());
+
+            if (remitCardResponse.getExtraParams() != null) {
+                updateWrapper.set(RemitCard::getEmail, remitCardResponse.getExtraParams().getString("email"));
+                updateWrapper.set(RemitCard::getSwiftCode, remitCardResponse.getExtraParams().getString("swiftCode"));
+                updateWrapper.set(RemitCard::getBankCode, remitCardResponse.getExtraParams().getString("bankCode"));
+                updateWrapper.set(RemitCard::getRemitBank, remitCardResponse.getExtraParams().getString("remitBank"));
+                updateWrapper.set(RemitCard::getRemitBankBranchCode, remitCardResponse.getExtraParams().getString("remitBankBranchCode"));
+                updateWrapper.set(RemitCard::getRemitBankAddress, remitCardResponse.getExtraParams().getString("remitBankAddress"));
+                updateWrapper.set(RemitCard::getToMoneyKind, remitCardResponse.getExtraParams().getString("toMoneyKind"));
+                updateWrapper.set(RemitCard::getToMoneyCountry2, remitCardResponse.getExtraParams().getString("toMoneyCountry2"));
+            }
+
+            boolean updateResult = update(updateWrapper);
+            if (!updateResult) {
+                throw new StarChainException("更新汇款卡信息失败");
+            }
+
+            // 返回数据库完整对象
+            LambdaQueryWrapper<RemitCard> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(RemitCard::getTpyCardId, remitCardResponse.getTpyCardId());
+            return this.getOne(queryWrapper);
+        } catch (Exception e) {
+            log.error("查询获取收款卡信息时发生异常", e);
+            throw new StarChainException("查询获取收款卡信息失败");
+        }
+    }
+
+    @Override
     public Boolean delRemitCard(RemitCardDto remitCardDto) {
-        return null;
+        Assert.notNull(remitCardDto.getCardId(), "CardId不能为空");
+        try {
+            // 获取 Token
+            String token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            log.info("成功获取 Token：{}", token);
+
+            // 发送请求并获取响应
+            String requestUrl = pacificPayConfig.getBaseUrl() + CardRemittanceUrlConstants.DEL_REMIT_CARD;
+            String requestBody = JSONObject.toJSONString(remitCardDto);
+            log.info("发送请求，URL：{}，请求体：{}", requestUrl, requestBody);
+
+            String responseStr = HttpUtils.doPostMiPay(requestUrl, token, requestBody, pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            log.info("收到响应：{}", responseStr);
+
+            // 解析响应
+            RemitCardResponse remitCardResponse = JSONObject.parseObject(responseStr, RemitCardResponse.class);
+            Assert.notNull(remitCardResponse, "删除收款卡失败");
+
+            // 更新数据库
+            LambdaUpdateWrapper<RemitCard> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(RemitCard::getTpyCardId, remitCardDto.getCardId());
+            updateWrapper.set(RemitCard::getCardStatus, 1); // 设置为已删除状态
+            updateWrapper.set(RemitCard::getUpdateTime, LocalDateTime.now());
+
+            return update(updateWrapper);
+        } catch (Exception e) {
+            log.error("删除收款卡时发生异常", e);
+            throw new StarChainException("删除收款卡失败");
+        }
     }
 
     @Override

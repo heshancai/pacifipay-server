@@ -62,7 +62,7 @@ public class RemitCardCallbackRecordServiceImpl extends ServiceImpl<RemitCardCal
     // 1. 校验业务类型
     private void validateBusinessType(MiPayRemitNotifyResponse response) {
         Assert.isTrue(
-                MiPayNotifyType.CardRecharge.getType().equals(response.getBusinessType()),
+                MiPayNotifyType.RemitCard.getType().equals(response.getBusinessType()),
                 "回调业务类型与接口调用不匹配"
         );
         log.info("回调业务类型校验通过: {}", response.getBusinessType());

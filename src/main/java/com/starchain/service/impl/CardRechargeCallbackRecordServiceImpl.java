@@ -136,12 +136,10 @@ public class CardRechargeCallbackRecordServiceImpl extends ServiceImpl<CardRecha
     // 处理充值状态
     private boolean handleRechargeStatus(MiPayCardNotifyResponse response, CardRechargeRecord rechargeRecord, CardRechargeCallbackRecord callbackRecord) {
         if (rechargeRecord.getStatus() == 0 && CardStatusDescEnum.SUCCESS.getDescription().equals(response.getStatus())) {
-            // 修改卡充值状态为成功
-            updateRechargeRecordStatus(response, callbackRecord);
-
             // 修改用户钱包余额
             updateUserWalletBalance(rechargeRecord, callbackRecord);
-
+            // 修改卡充值状态为成功
+            updateRechargeRecordStatus(response, callbackRecord);
             // 更新回调记录
             updateCallbackRecord(callbackRecord, response);
 

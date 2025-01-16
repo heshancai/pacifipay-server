@@ -291,4 +291,15 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         }
         return false;
     }
+
+    @Override
+    public boolean isRechargeInProgress(CardDto cardDto) {
+        LambdaQueryWrapper<CardRechargeRecord> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(CardRechargeRecord::getCardId, cardDto.getCardId());
+        lambdaQueryWrapper.eq(CardRechargeRecord::getUserId, cardDto.getUserId());
+        lambdaQueryWrapper.eq(CardRechargeRecord::getChannelId, cardDto.getChannelId());
+        lambdaQueryWrapper.orderByDesc(CardRechargeRecord::getId).last("LIMIT 1");
+        CardRechargeRecord cardRechargeRecord = cardRechargeRecordService.getOne(lambdaQueryWrapper);
+        return cardRechargeRecord != null && cardRechargeRecord.getStatus() == 0;
+    }
 }

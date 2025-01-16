@@ -16,6 +16,7 @@ import com.starchain.result.ClientResponse;
 import com.starchain.result.ResultGenerator;
 import com.starchain.service.ICardRechargeRecordService;
 import com.starchain.service.ICardService;
+import com.starchain.service.IRemitApplicationRecordService;
 import com.starchain.util.HttpUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -51,6 +52,9 @@ public class CardController {
 
     @Autowired
     private ICardRechargeRecordService cardRechargeRecordService;
+
+    @Autowired
+    private IRemitApplicationRecordService remitApplicationRecordService;
 
     /**
      * 创建卡 每种类型限制4张
@@ -96,14 +100,12 @@ public class CardController {
             return ResultGenerator.genFailResult("输入的金额必须大于0");
         }
         //最新的卡充值未结束 无法进行新一轮充值
-        LambdaQueryWrapper<CardRechargeRecord> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(CardRechargeRecord::getCardId, cardDto.getCardId());
-        lambdaQueryWrapper.eq(CardRechargeRecord::getUserId, cardDto.getUserId());
-        lambdaQueryWrapper.eq(CardRechargeRecord::getCardCode, cardDto.getCardCode());
-        lambdaQueryWrapper.orderByDesc(CardRechargeRecord::getId).last("LIMIT 1");
-        CardRechargeRecord cardRechargeRecord = cardRechargeRecordService.getOne(lambdaQueryWrapper);
-        if (cardRechargeRecord != null && cardRechargeRecord.getStatus() == 0) {
-            return ResultGenerator.genFailResult("上一笔充值正在处理中，无法进行新一轮充值");
+        if (cardService.isRechargeInProgress(cardDto)) {
+            return ResultGenerator.genFailResult("最新的卡充值未结束 无法进行新一轮充值");
+        }
+        //最新的汇款未结束 无法进行新一轮充值
+        if (remitApplicationRecordService.isRemitInProgress(cardDto.getUserId(),cardDto.getChannelId())) {
+            return ResultGenerator.genFailResult("最新的汇款未结束 无法进行新一轮充值");
         }
         try {
             // 进行卡充值
@@ -114,6 +116,9 @@ public class CardController {
             return ResultGenerator.genFailResult(e.getMessage());
         }
     }
+
+
+
 
 
     /**

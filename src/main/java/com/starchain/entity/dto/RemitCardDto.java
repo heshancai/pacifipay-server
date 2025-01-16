@@ -27,6 +27,9 @@ public class RemitCardDto {
     @ApiModelProperty(name = "汇款卡标识", example = "客户汇款卡唯一标识，唯一标识至少填写一个")
     private String cardId;
 
+    @ApiModelProperty(name = "汇款交易单号", example = "客户汇款交易唯一标识。")
+    private String orderId;
+
     @ApiModelProperty(name = "名", example = "John")
     private String remitFirstName;
 

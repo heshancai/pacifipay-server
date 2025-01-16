@@ -47,4 +47,10 @@ public interface IRemitCardService extends IService<RemitCard> {
      */
     Boolean remitDetail(RemitCardDto remitCardDto);
 
+    /**
+     * 获取收款卡信息
+     * @param remitCardDto
+     * @return
+     */
+    RemitCard getRemitCard(RemitCardDto remitCardDto);
 }

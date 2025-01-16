@@ -34,8 +34,8 @@ public class MiPayCardNotifyResponse extends BaseMiPayNotifyResponse{
     private LocalDateTime tradeTime;
     @ApiModelProperty(value = "交易类型", example = "卡流水 枚举值，范围Purchase：授权已结算，Refund：退款，PrePurchase：授权未结算，VoidPurchase：授权撤销")
     private String tradeType;
-    @ApiModelProperty(value = "交易流水号", example = "卡流水、申请汇款、汇款撤销 特有字段")
-    private String tradeId;
+//    @ApiModelProperty(value = "交易流水号", example = "卡流水、申请汇款、汇款撤销 特有字段")
+//    private String tradeId;
     @ApiModelProperty(value = "原单号 原单交易流水号", example = "卡流水 特有字段")
     private String originalTradeId;
     @ApiModelProperty(value = "卡余额",example = "卡流水 特有字段")

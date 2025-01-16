@@ -54,11 +54,14 @@ public class RemitCard {
     @ApiModelProperty(value = "创建状态", example = "创建状态：0 创建中 1 创建成功 2 创建失败")
     private Integer createStatus;
 
-    @ApiModelProperty(name = "状态", example = "SUCCESS")
+    @ApiModelProperty(name = "创建收款卡 的 响应状态", example = "SUCCESS")
     private String status;
 
     @ApiModelProperty(name = "状态描述", example = "操作成功")
     private String statusDesc;
+
+    @ApiModelProperty(name = "收款卡状态", example = "1 已删除 0 未删除")
+    private Integer cardStatus;
 
     // 以下为 extraParams 对应的字段
     @ApiModelProperty(name = "Swift码", example = "ABCDEF123")

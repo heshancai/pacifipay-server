@@ -1,6 +1,7 @@
 package com.starchain.service.impl;
 
 import com.alibaba.fastjson2.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.config.PacificPayConfig;
 import com.starchain.constants.CardRemittanceUrlConstants;
@@ -48,6 +49,7 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
             String token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
             RemitRateDto remitRateDto = new RemitRateDto();
             remitRateDto.setRemitCode(RemitCodeEnum.UQR_CNH.getRemitCode()).setToMoneyKind(MoneyKindEnum.CNY.getMoneyKindCode());
+            // 获取实时汇率
             RemitRateDto remitRate = remitCardService.getRemitRate(token, remitRateDto);
             log.info("实时汇率，{}", remitRate);
             Assert.notNull(remitRate.getTradeRate(), "汇款汇率为null");
@@ -64,11 +66,22 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
             String responseStr = HttpUtils.doPostMiPay(requestUrl, token, requestBody, pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             log.info("收到响应：{}", responseStr);
             RemitApplicationRecord remitApplicationRecord = JSONObject.parseObject(responseStr, RemitApplicationRecord.class);
+            remitApplicationRecord.setStatus(0);
             this.save(remitApplicationRecord);
         } catch (Exception e) {
-            log.error("添加汇款卡时发生异常", e);
+            log.error("申请汇款失败", e);
             throw new StarChainException("申请汇款失败");
         }
         return null;
+    }
+
+    @Override
+    public boolean isRemitInProgress(Long userId, Long channelId) {
+        LambdaQueryWrapper<RemitApplicationRecord> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(RemitApplicationRecord::getUserId, userId);
+        queryWrapper.eq(RemitApplicationRecord::getChannelId, channelId);
+        queryWrapper.orderByDesc(RemitApplicationRecord::getId).last("LIMIT 1");
+        RemitApplicationRecord remitApplicationRecord = this.getOne(queryWrapper);
+        return remitApplicationRecord != null && remitApplicationRecord.getStatus() == 0;
     }
 }

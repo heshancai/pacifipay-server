@@ -3,6 +3,7 @@ package com.starchain.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
@@ -88,8 +89,8 @@ public class RemitApplicationRecord {
     @ApiModelProperty(value = "更新时间", example = "2023-10-01 12:00:00")
     private LocalDateTime updateTime;
 
-    @ApiModelProperty(value = "汇款申请状态", example = "待处理")
-    private String status;
+    @ApiModelProperty(value = "汇款申请状态", example = "创建状态 0创建中 1 创建成功  2 创建失败")
+    private Integer status;
 
     @ApiModelProperty(value = "备注信息", example = "这是一条测试汇款申请")
     private String remarks;
@@ -108,4 +109,8 @@ public class RemitApplicationRecord {
 
     @ApiModelProperty(value = "PIN Number", example = "123456")
     private String pinNumber;
+
+    @ApiModelProperty(value = "更新时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime finishTime;
 }

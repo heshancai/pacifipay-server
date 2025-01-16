@@ -16,4 +16,12 @@ public interface IRemitApplicationRecordService extends IService<RemitApplicatio
      * @return
      */
     Boolean applyRemit(RemitApplicationRecordDto remitApplicationRecordDto);
+
+    /**
+     * 检查用户是否有汇款正在进行
+     * @param userId
+     * @param channelId
+     * @return
+     */
+    boolean isRemitInProgress(Long userId, Long channelId);
 }

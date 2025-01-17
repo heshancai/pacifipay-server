@@ -23,7 +23,8 @@ public class UserWalletTransactionServiceImpl extends ServiceImpl<UserWalletTran
     @Override
     public void dealRecodeTransaction(BigDecimal localFee, BigDecimal actAmount, UserWallet userWallet, WalletCallbackRecord walletCallbackRecord) {
         // 充值金额 实际到账金额 扣除手续费金额
-        UserWalletTransaction userWalletTransaction = UserWalletTransaction.builder().fee(localFee)
+        UserWalletTransaction userWalletTransaction = UserWalletTransaction.builder()
+                .fee(localFee)
                 .userId(userWallet.getUserId())
                 .coinName(walletCallbackRecord.getSymbol())
                 .amount(walletCallbackRecord.getAmount())

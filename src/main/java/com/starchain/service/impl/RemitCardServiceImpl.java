@@ -71,6 +71,8 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             Assert.notNull(remitCardResponse.getTpyCardId(), "汇款卡ID-银行卡端响应不能为空");
             RemitCard remitCard = new RemitCard();
             BeanUtils.copyProperties(remitCardResponse, remitCard);
+            remitCard.setUserId(remitCardDto.getUserId());
+            remitCard.setChannelId(remitCardDto.getChannelId());
             remitCard.setCreateTime(LocalDateTime.now());
             remitCard.setUpdateTime(LocalDateTime.now());
             // 如果 extraParams 不为空，设置相关字段到 remitCard 对象中

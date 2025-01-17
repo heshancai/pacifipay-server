@@ -59,6 +59,7 @@ public class WalletCallbackImpl implements IWalletCallbackService {
 
             // 3. 计算手续费和实际到账金额
             BigDecimal localFee = calculateFee(coin, walletRechargeCallbackResponse.getDepositAmount());
+            // 实际充值余额
             BigDecimal actAmount = walletCallbackRecord.getAmount().subtract(localFee);
             log.debug("手续费: {}, 实际到账金额: {}", localFee, actAmount);
 

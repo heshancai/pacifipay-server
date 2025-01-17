@@ -107,12 +107,13 @@ public class WalletApiServiceImpl implements WalletApiService {
         encryptRequestParams.put("msg", encryptStr);
         JSONObject encryptRequestJson = new JSONObject(encryptRequestParams);
         String encryptRequestJsonStr = encryptRequestJson.toJSONString();
-        // 生成签名
+        // 根据生成加密内容和内容秘钥 生成签名
         String sign = SignUtils.hmacEncode(encryptStr, signSecret);
         // 验证签名
         boolean result = SignUtils.validSign(encryptStr, sign, signSecret);
         log.info("签名sign:[{}],签名是否正确：[{}]", sign, result);
         Map<String, String> header = new HashMap<>(16);
+        // 签名后的数据
         header.put("Sign", sign);
         //请求接口
         return OkHttpUtils.postDataByForm(url, encryptRequestJsonStr, header);

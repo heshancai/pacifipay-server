@@ -152,7 +152,7 @@ public class CardTradeCallbackRecordServiceImpl extends ServiceImpl<CardTradeCal
         } else if (CardStatusDescEnum.FAILED.getDescription().equals(response.getStatus())) {
             // 处理失败状态
             handleFailedStatus(tradeRecord);
-            return false;
+            return true;
         }
         log.info("回调处理完成, 无须重复处理,通知ID: {}", response.getNotifyId());
         return true;

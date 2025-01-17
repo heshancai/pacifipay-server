@@ -53,10 +53,10 @@ public class RemitApplicationRecord {
     @ApiModelProperty(value = "汇款交易单号", example = "ORDER123456789")
     private String orderId;
 
-    @ApiModelProperty(value = "汇款汇率", example = "6.500000")
+    @ApiModelProperty(value = "发送端汇款", example = "6.500000")
     private BigDecimal remitRate;
 
-    @ApiModelProperty(value = "银行端返回的汇款汇率", example = "6.500000")
+    @ApiModelProperty(value = "返回端汇率", example = "6.500000")
     private BigDecimal tradeRate;
 
 

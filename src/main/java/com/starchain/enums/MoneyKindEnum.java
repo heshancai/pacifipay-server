@@ -25,4 +25,6 @@ public enum MoneyKindEnum {
     public String getMoneyKindDesc() {
         return moneyKindDesc;
     }
+
+
 }

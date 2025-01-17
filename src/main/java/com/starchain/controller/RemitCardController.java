@@ -6,6 +6,7 @@ import com.starchain.entity.RemitCard;
 import com.starchain.entity.dto.RemitApplicationRecordDto;
 import com.starchain.entity.dto.RemitCardDto;
 import com.starchain.entity.dto.RemitRateDto;
+import com.starchain.enums.MoneyKindEnum;
 import com.starchain.result.ClientResponse;
 import com.starchain.result.ResultGenerator;
 import com.starchain.service.IRemitApplicationRecordService;
@@ -50,7 +51,15 @@ public class RemitCardController {
     @ApiOperation(value = "添加收款卡信息")
     @PostMapping("/addRemitCard")
     public ClientResponse addRemitCard(@RequestBody RemitCardDto remitCardDto) {
-
+        if (remitCardDto.getUserId() == null) {
+            return ResultGenerator.genFailResult("userId不能为空");
+        }
+        if (remitCardDto.getChannelId() == null) {
+            return ResultGenerator.genFailResult("channelId不能为空");
+        }
+        if (remitCardDto.getRemitBankNo() == null) {
+            return ResultGenerator.genFailResult("银行卡号");
+        }
         try {
             Boolean result = remitCardService.addRemitCard(remitCardDto);
             return ResultGenerator.genSuccessResult(result);
@@ -127,6 +136,15 @@ public class RemitCardController {
         if (remitCardDto.getCardId() == null) {
             return ResultGenerator.genFailResult("cardId不能为空");
         }
+        if (remitCardDto.getRemitCode() == null) {
+            return ResultGenerator.genFailResult("remitCode不能为空");
+        }
+        if (remitCardDto.getUserId() == null) {
+            return ResultGenerator.genFailResult("cardId不能为空");
+        }
+        if (remitCardDto.getChannelId() == null) {
+            return ResultGenerator.genFailResult("channelId不能为空");
+        }
         try {
             Boolean result = remitCardService.delRemitCard(remitCardDto);
             return ResultGenerator.genSuccessResult(result);
@@ -137,9 +155,9 @@ public class RemitCardController {
     }
 
     /**
-     * 汇款单详情
+     * 查询汇款单详情
      */
-    @ApiOperation(value = "汇款单详情")
+    @ApiOperation(value = "查询汇款单详情")
     @PostMapping("/remitDetail")
     public ClientResponse remitDetail(@RequestBody RemitCardDto remitCardDto) {
 
@@ -173,19 +191,21 @@ public class RemitCardController {
         if (ObjectUtils.isEmpty(remitApplicationRecordDto.getRemitCode())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
-        if (!StringUtils.hasText(remitApplicationRecordDto.getToMoneyKind())) {
-            return ResultGenerator.genFailResult("dto不能为空");
+        if (!StringUtils.hasText(remitApplicationRecordDto.getToMoneyKind())
+                && (MoneyKindEnum.CNY.getMoneyKindCode().equals(remitApplicationRecordDto.getToMoneyKind())
+                || MoneyKindEnum.USD.getMoneyKindCode().equals(remitApplicationRecordDto.getToMoneyKind()))) {
+            return ResultGenerator.genFailResult("dto不能为空 或者不支持的币种");
         }
         if (ObjectUtils.isEmpty(remitApplicationRecordDto.getToAmount())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
+
         // 交易上一笔交易是否完成
         LambdaQueryWrapper<RemitApplicationRecord> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(RemitApplicationRecord::getUserId, remitApplicationRecordDto.getUserId());
         queryWrapper.eq(RemitApplicationRecord::getChannelId, remitApplicationRecordDto.getChannelId());
         queryWrapper.eq(RemitApplicationRecord::getRemitCode, remitApplicationRecordDto.getRemitCode());
         queryWrapper.eq(RemitApplicationRecord::getToMoneyKind, remitApplicationRecordDto.getToMoneyKind());
-        queryWrapper.eq(RemitApplicationRecord::getToAmount, remitApplicationRecordDto.getToAmount());
         queryWrapper.orderByDesc(RemitApplicationRecord::getId).last("LIMIT 1");
         RemitApplicationRecord remitApplicationRecord = remitApplicationRecordService.getOne(queryWrapper);
         if (remitApplicationRecord != null && remitApplicationRecord.getStatus() == 0) {

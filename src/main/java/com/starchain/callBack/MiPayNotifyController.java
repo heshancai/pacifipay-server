@@ -55,7 +55,6 @@ public class MiPayNotifyController {
             log.error("数据异常,{}", e.getMessage());
             return "fail";
         }
-        // 记录失败原因
     }
 
     /**

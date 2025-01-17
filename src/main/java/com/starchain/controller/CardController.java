@@ -8,20 +8,24 @@ import com.starchain.config.PacificPayConfig;
 import com.starchain.constants.CardUrlConstants;
 import com.starchain.entity.Card;
 import com.starchain.entity.CardRechargeRecord;
+import com.starchain.entity.MerchantWallet;
 import com.starchain.entity.dto.CardDto;
 import com.starchain.entity.dto.TradeDetailDto;
 import com.starchain.entity.response.TradeDetailResponse;
 import com.starchain.enums.CardStatusEnum;
+import com.starchain.enums.MoneyKindEnum;
 import com.starchain.result.ClientResponse;
 import com.starchain.result.ResultGenerator;
 import com.starchain.service.ICardRechargeRecordService;
 import com.starchain.service.ICardService;
+import com.starchain.service.IMerchantWalletService;
 import com.starchain.service.IRemitApplicationRecordService;
 import com.starchain.util.HttpUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,6 +59,13 @@ public class CardController {
 
     @Autowired
     private IRemitApplicationRecordService remitApplicationRecordService;
+
+    @Autowired
+    private IMerchantWalletService merchantWalletService;
+
+    @Value("${app.id}")
+    private String appId;
+
 
     /**
      * 创建卡 每种类型限制4张
@@ -135,7 +146,26 @@ public class CardController {
         }
         String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.MCH_INFO, token, "", pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
         JSONObject jsonObject = JSON.parseObject(str);
-        return ResultGenerator.genSuccessResult(jsonObject);
+        LambdaUpdateWrapper<MerchantWallet> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(MerchantWallet::getMerchantId, appId);
+        MerchantWallet merchantWallet = merchantWalletService.getOne(updateWrapper);
+      if (merchantWallet == null) {
+    merchantWallet = new MerchantWallet();
+    merchantWallet.setAmount((BigDecimal) jsonObject.get("amount"));
+    merchantWallet.setMerchantId(appId);
+    merchantWallet.setAppId(appId);
+    merchantWallet.setFreeze((BigDecimal) jsonObject.get("freeze"));
+    merchantWallet.setCreateTime(LocalDateTime.now());
+    merchantWallet.setUpdateTime(LocalDateTime.now());
+    merchantWallet.setMoneyKind(MoneyKindEnum.USD.getMoneyKindCode());
+    merchantWalletService.save(merchantWallet);
+} else {
+    merchantWallet.setAmount((BigDecimal) jsonObject.get("amount"));
+    merchantWallet.setFreeze((BigDecimal) jsonObject.get("freeze"));
+    merchantWallet.setUpdateTime(LocalDateTime.now());
+    merchantWalletService.updateById(merchantWallet);
+}
+        return ResultGenerator.genSuccessResult(merchantWallet);
     }
 
     /*

@@ -9,8 +9,6 @@ import com.starchain.dao.RemitApplicationRecordMapper;
 import com.starchain.entity.RemitApplicationRecord;
 import com.starchain.entity.dto.RemitApplicationRecordDto;
 import com.starchain.entity.dto.RemitRateDto;
-import com.starchain.enums.MoneyKindEnum;
-import com.starchain.enums.RemitCodeEnum;
 import com.starchain.exception.StarChainException;
 import com.starchain.service.IRemitApplicationRecordService;
 import com.starchain.service.IRemitCardService;
@@ -20,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
+import java.time.LocalDateTime;
 
 /**
  * @author
@@ -48,14 +48,15 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
         try {
             String token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
             RemitRateDto remitRateDto = new RemitRateDto();
-            remitRateDto.setRemitCode(RemitCodeEnum.UQR_CNH.getRemitCode()).setToMoneyKind(MoneyKindEnum.CNY.getMoneyKindCode());
+            remitRateDto.setRemitCode(remitApplicationRecordDto.getRemitCode()).setToMoneyKind(remitApplicationRecordDto.getToMoneyKind());
             // 获取实时汇率
             RemitRateDto remitRate = remitCardService.getRemitRate(token, remitRateDto);
             log.info("实时汇率，{}", remitRate);
             Assert.notNull(remitRate.getTradeRate(), "汇款汇率为null");
             String orderId = OrderIdGenerator.generateOrderId(String.valueOf(remitApplicationRecordDto.getChannelId()), String.valueOf(remitApplicationRecordDto.getUserId()), 6);
-            remitApplicationRecordDto.setRemitCode(remitRate.getRemitCode())
-                    .setToMoneyKind(remitRate.getToMoneyKind())
+            remitApplicationRecordDto
+                    .setRemitCode(remitApplicationRecordDto.getRemitCode())
+                    .setToMoneyKind(remitApplicationRecordDto.getToMoneyKind())
                     .setToAmount(remitApplicationRecordDto.getToAmount())
                     .setOrderId(orderId)
                     .setRemitRate(remitRate.getTradeRate());
@@ -67,6 +68,9 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
             log.info("收到响应：{}", responseStr);
             RemitApplicationRecord remitApplicationRecord = JSONObject.parseObject(responseStr, RemitApplicationRecord.class);
             remitApplicationRecord.setUserId(remitApplicationRecordDto.getUserId());
+            remitApplicationRecord.setCreateTime(LocalDateTime.now());
+            remitApplicationRecord.setUpdateTime(LocalDateTime.now());
+            remitApplicationRecord.setRemitRate(remitRate.getTradeRate());
             remitApplicationRecord.setChannelId(remitApplicationRecordDto.getChannelId());
             remitApplicationRecord.setStatus(0);
             this.save(remitApplicationRecord);

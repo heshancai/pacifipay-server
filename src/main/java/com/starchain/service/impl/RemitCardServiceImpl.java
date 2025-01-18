@@ -367,7 +367,28 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
     }
 
     @Override
-    public Boolean remitDetail(RemitCardDto remitCardDto) {
-        return null;
+    public JSONObject remitDetail(RemitCardDto remitCardDto) {
+        try {
+            // 获取 Token
+            String token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            log.info("成功获取 Token：{}", token);
+
+            // 发送请求并获取响应
+            String requestUrl = pacificPayConfig.getBaseUrl() + CardRemittanceUrlConstants.REMIT_DETAIL;
+            String requestBody = JSONObject.toJSONString(remitCardDto);
+            log.info("发送请求，URL：{}，请求体：{}", requestUrl, requestBody);
+
+            String responseStr = HttpUtils.doPostMiPay(requestUrl, token, requestBody, pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            log.info("收到响应：{}", responseStr);
+
+            // 解析响应
+            JSONObject jsonObject = JSONObject.parseObject(responseStr);
+
+            // 更新数据库
+            return jsonObject;
+        } catch (Exception e) {
+            log.error("删除收款卡时发生异常", e);
+            throw new StarChainException("删除收款卡失败");
+        }
     }
 }

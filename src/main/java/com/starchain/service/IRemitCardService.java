@@ -1,5 +1,6 @@
 package com.starchain.service;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.starchain.entity.RemitCard;
 import com.starchain.entity.dto.RemitCardDto;
@@ -45,7 +46,7 @@ public interface IRemitCardService extends IService<RemitCard> {
      * @param remitCardDto
      * @return
      */
-    Boolean remitDetail(RemitCardDto remitCardDto);
+    JSONObject remitDetail(RemitCardDto remitCardDto);
 
     /**
      * 获取收款卡信息

@@ -115,7 +115,7 @@ public class CardController {
             return ResultGenerator.genFailResult("最新的卡充值未结束 无法进行新一轮充值");
         }
         //最新的汇款未结束 无法进行新一轮充值
-        if (remitApplicationRecordService.isRemitInProgress(cardDto.getUserId(),cardDto.getChannelId())) {
+        if (remitApplicationRecordService.isRemitInProgress(cardDto.getUserId(), cardDto.getChannelId())) {
             return ResultGenerator.genFailResult("最新的汇款未结束 无法进行新一轮充值");
         }
         try {
@@ -127,9 +127,6 @@ public class CardController {
             return ResultGenerator.genFailResult(e.getMessage());
         }
     }
-
-
-
 
 
     /**
@@ -149,22 +146,22 @@ public class CardController {
         LambdaUpdateWrapper<MerchantWallet> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(MerchantWallet::getMerchantId, appId);
         MerchantWallet merchantWallet = merchantWalletService.getOne(updateWrapper);
-      if (merchantWallet == null) {
-    merchantWallet = new MerchantWallet();
-    merchantWallet.setAmount((BigDecimal) jsonObject.get("amount"));
-    merchantWallet.setMerchantId(appId);
-    merchantWallet.setAppId(appId);
-    merchantWallet.setFreeze((BigDecimal) jsonObject.get("freeze"));
-    merchantWallet.setCreateTime(LocalDateTime.now());
-    merchantWallet.setUpdateTime(LocalDateTime.now());
-    merchantWallet.setMoneyKind(MoneyKindEnum.USD.getMoneyKindCode());
-    merchantWalletService.save(merchantWallet);
-} else {
-    merchantWallet.setAmount((BigDecimal) jsonObject.get("amount"));
-    merchantWallet.setFreeze((BigDecimal) jsonObject.get("freeze"));
-    merchantWallet.setUpdateTime(LocalDateTime.now());
-    merchantWalletService.updateById(merchantWallet);
-}
+        if (merchantWallet == null) {
+            merchantWallet = new MerchantWallet();
+            merchantWallet.setAmount((BigDecimal) jsonObject.get("amount"));
+            merchantWallet.setMerchantId(appId);
+            merchantWallet.setAppId(appId);
+            merchantWallet.setFreeze((BigDecimal) jsonObject.get("freeze"));
+            merchantWallet.setCreateTime(LocalDateTime.now());
+            merchantWallet.setUpdateTime(LocalDateTime.now());
+            merchantWallet.setMoneyKind(MoneyKindEnum.USD.getMoneyKindCode());
+            merchantWalletService.save(merchantWallet);
+        } else {
+            merchantWallet.setAmount((BigDecimal) jsonObject.get("amount"));
+            merchantWallet.setFreeze((BigDecimal) jsonObject.get("freeze"));
+            merchantWallet.setUpdateTime(LocalDateTime.now());
+            merchantWalletService.updateById(merchantWallet);
+        }
         return ResultGenerator.genSuccessResult(merchantWallet);
     }
 

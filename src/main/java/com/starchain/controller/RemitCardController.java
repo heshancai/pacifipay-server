@@ -1,5 +1,6 @@
 package com.starchain.controller;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.starchain.entity.RemitApplicationRecord;
 import com.starchain.entity.RemitCard;
@@ -168,8 +169,8 @@ public class RemitCardController {
             return ResultGenerator.genFailResult("remitCode不能为空");
         }
         try {
-            Boolean result = remitCardService.remitDetail(remitCardDto);
-            return ResultGenerator.genSuccessResult(result);
+            JSONObject b = remitCardService.remitDetail(remitCardDto);
+            return ResultGenerator.genSuccessResult(b);
         } catch (Exception e) {
             log.error("服务异常", e);
             return ResultGenerator.genFailResult("服务异常");

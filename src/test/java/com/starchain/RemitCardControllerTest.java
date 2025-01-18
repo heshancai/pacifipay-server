@@ -60,12 +60,12 @@ public class RemitCardControllerTest {
     }
 
     /**
-     * 添加收款卡信息
+     * 删除收款卡信息
      */
     @Test
     void delRemitCard() {
         /**
-         * 添加收款卡信息
+         * 删除收款卡信息
          * Account holder name: Progressive Solutions
          * Account number:  GB55TCCL12345618629629
          * Swift code: TCCLGB3L

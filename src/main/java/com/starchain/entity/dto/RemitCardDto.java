@@ -2,13 +2,19 @@ package com.starchain.entity.dto;
 
 import com.alibaba.fastjson2.JSONObject;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author
  * @date 2025-01-07
  * @Description
  */
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class RemitCardDto {
 

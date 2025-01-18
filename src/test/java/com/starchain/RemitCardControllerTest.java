@@ -110,4 +110,19 @@ public class RemitCardControllerTest {
     }
 
 
+    // 查询汇款单详情
+    @Test
+    void remitDetail() {
+        /**
+         * Account holder name: Progressive Solutions
+         * Account number:  GB55TCCL12345618629629
+         * Swift code: TCCLGB3L
+         * Bank name: The Currency Cloud Limited
+         * Bank address: 12 Steward Street, The Steward Building, London, E1 6FQ, GB
+         */
+        RemitCardDto build = RemitCardDto.builder().remitCode(RemitCodeEnum.UQR_CNH.getRemitCode()).orderId("123456987654202501171747479482fc458").build();
+        remitCardController.remitDetail(build);
+
+    }
+
 }

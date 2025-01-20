@@ -1,13 +1,11 @@
 package com.starchain;
 
-import com.alibaba.fastjson2.JSONObject;
 import com.starchain.controller.CardController;
 import com.starchain.controller.CardHolderController;
-import com.starchain.controller.RemitCardController;
-import com.starchain.entity.dto.*;
-import com.starchain.enums.MoneyKindEnum;
+import com.starchain.entity.dto.CardDto;
+import com.starchain.entity.dto.CardHolderDto;
+import com.starchain.entity.dto.TradeDetailDto;
 import com.starchain.result.ClientResponse;
-import com.starchain.service.IRemitApplicationRecordService;
 import com.starchain.service.impl.CardHolderServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,17 +56,14 @@ class StarchainPacificpayServerApplicationTests {
         System.out.println(cardHolder1);
     }
 
+    // 创建卡
     @Test
     void addCard() {
-        CardHolderDto cardHolder = new CardHolderDto();
-        cardHolder.setMerchantCardHolderId("2025010811491392234e378");
+        CardDto cardHolder = new CardDto();
         cardHolder.setCardCode("TpyMDN6");
-        cardHolder.setTpyshCardHolderId("2025010811491487397");
+        cardHolder.setTpyshCardHolderId("2025010811465785377");
         cardHolder.setUserId(10000L);
         cardHolder.setChannelId(100000L);
-        cardHolder.setFirstName("hsc");
-        cardHolder.setLastName("starChain");
-        cardHolder.setId(13L);
         ClientResponse cardHolder1 = cardController.addCard(cardHolder);
         System.out.println(cardHolder1);
     }
@@ -90,21 +85,12 @@ class StarchainPacificpayServerApplicationTests {
     }
 
 
-    // 查询卡
-    @Test
-    void getCardDetail() {
-        CardDto cardDto = new CardDto();
-        cardDto.setCardCode("TpyMDN6");
-        cardDto.setCardId("2025010910301416050");
-        cardController.getCardDetail(cardDto);
-    }
-
     // 卡注销
     @Test
     void deleteCard() {
         CardDto cardDto = new CardDto();
         cardDto.setCardCode("TpyMDN6");
-        cardDto.setCardId("2025010910213120d78");
+        cardDto.setCardId("20250109102203cbd5d");
         ClientResponse clientResponse = cardController.deleteCard(cardDto);
         System.out.println(clientResponse);
     }
@@ -135,93 +121,47 @@ class StarchainPacificpayServerApplicationTests {
         System.out.println(cardController.applyRecharge(cardDto));
     }
 
-    // 卡充值
+    // 查询卡
+    @Test
+    void getCardDetail() {
+        CardDto cardDto = new CardDto();
+        cardDto.setCardCode("TpyMDN6");
+        cardDto.setCardId("20250114180009ee7c1");
+        cardController.getCardDetail(cardDto);
+    }
+
+
+    // 卡锁
     @Test
     void lockCard() {
         CardDto cardDto = new CardDto();
-        cardDto.setCardId("2025010910301416050");
+        cardDto.setCardId("2025010910294680992");
         cardDto.setCardCode("TpyMDN6");
-        cardDto.setUserId(10000L);
-        cardDto.setTpyshCardHolderId("2025010811491487397");
-        cardDto.setChannelId(100000L);
-        cardDto.setOrderAmount(BigDecimal.TEN);
-        System.out.println(cardController.applyRecharge(cardDto));
+        System.out.println(cardController.lockCard(cardDto));
     }
 
 
-    // 卡充值
+    // 卡解锁
     @Test
     void unlockCard() {
         CardDto cardDto = new CardDto();
-        cardDto.setCardId("2025010910301416050");
+        cardDto.setCardId("2025010910294680992");
         cardDto.setCardCode("TpyMDN6");
-        cardDto.setUserId(10000L);
-        cardDto.setTpyshCardHolderId("2025010811491487397");
-        cardDto.setChannelId(100000L);
-        cardDto.setOrderAmount(BigDecimal.TEN);
-        System.out.println(cardController.applyRecharge(cardDto));
+        System.out.println(cardController.unlockCard(cardDto));
     }
 
-    @Autowired
-    RemitCardController remitCardController;
-
-    /**
-     * 添加收款卡信息
-     */
+    // 修改卡限制额度
     @Test
-    void addRemitCard() {
-        /**
-         * 添加收款卡信息
-         * Account holder name: Progressive Solutions
-         * Account number:  GB55TCCL12345618629629
-         * Swift code: TCCLGB3L
-         * Bank name: The Currency Cloud Limited
-         * Bank address: 12 Steward Street, The Steward Building, London, E1 6FQ, GB
-         */
-        RemitCardDto remitCard = new RemitCardDto();
-        remitCard.setUserId(10000L);
-        remitCard.setChannelId(1000001L);
-        remitCard.setRemitFirstName("Progressive");
-        remitCard.setRemitLastName("Solutions");
-        remitCard.setRemitBankNo("GB55TCCL12345618629629");
-        remitCard.setRemitCode("UQR_CNH");
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("swiftCode", "TCCLGB3L");
-        jsonObject.put("remitName", "Progressive Solutions");
-        jsonObject.put("remitBank", "The Currency Cloud Limited");
-        jsonObject.put("remitBankAddress", "12 Steward Street, The Steward Building, London, E1 6FQ, GB");
-        jsonObject.put("toMoneyKind", MoneyKindEnum.CNY.getMoneyKindCode());
-        jsonObject.put("toMoneyCountry2", "CN");
-        jsonObject.put("idNumber", "GB55TCCL12345618629629");
-        jsonObject.put("remitBankBranchCode", "1234567891011"); // 13位数字
-        remitCard.setExtraParams(jsonObject);
-        ClientResponse response = remitCardController.addRemitCard(remitCard);
-        System.out.println(response);
-
+    void updateLimit() {
+        CardDto cardDto = new CardDto();
+        cardDto.setCardId("2025010910294680992");
+        cardDto.setCardCode("TpyMDN6");
+        cardDto.setSingleLimit(new BigDecimal(11.133));
+        System.out.println(cardController.updateLimit(cardDto));
     }
 
-    @Autowired
-    IRemitApplicationRecordService remitApplicationRecord;
 
-    // 申请汇款
-    @Test
-    void applyRemit() {
-        /**
-         * Account holder name: Progressive Solutions
-         * Account number:  GB55TCCL12345618629629
-         * Swift code: TCCLGB3L
-         * Bank name: The Currency Cloud Limited
-         * Bank address: 12 Steward Street, The Steward Building, London, E1 6FQ, GB
-         */
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("remitName", "Progressive Solutions");
-        jsonObject.put("remitLastName", "Progressive");
-        jsonObject.put("remitFirstName", "Solutions");
-        jsonObject.put("remitBankNo", "GB55TCCL12345618629629");
-        RemitApplicationRecordDto build = RemitApplicationRecordDto.builder().toAmount(BigDecimal.valueOf(10)).userId(123456L).channelId(987654L).extraParams(jsonObject).build();
-        remitApplicationRecord.applyRemit(build);
 
-    }
 
 
 }

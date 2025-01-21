@@ -133,7 +133,7 @@ public class RemitCardCallbackRecordServiceImpl extends ServiceImpl<RemitCardCal
         LambdaUpdateWrapper<RemitCard> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(RemitCard::getCardId, response.getCardId())
                 .set(RemitCard::getStatus, response.getStatus())
-                .set(RemitCard::getCardStatus, CreateStatusEnum.SUCCESS.getCode()).set(RemitCard::getFinishTime, LocalDateTime.now())
+                .set(RemitCard::getCreateStatus, CreateStatusEnum.SUCCESS.getCode()).set(RemitCard::getFinishTime, LocalDateTime.now())
                 .set(RemitCard::getUpdateTime, LocalDateTime.now());
         boolean isUpdated = remitCardService.update(updateWrapper);
         if (!isUpdated) {

@@ -48,12 +48,12 @@ public class MiPayNotifyController {
             IMiPayNotifyService miPayNotifyService = miPayNotifyContext.getMiPayNotifyService(miPayNotifyResponse.getBusinessType());
             Boolean callBack = miPayNotifyService.callBack(decrypt);
             if (callBack) {
-                return "success";
+                return "SUCCESS";
             }
-            return "fail";
+            return "FAIL";
         } catch (Exception e) {
             log.error("数据异常,{}", e.getMessage());
-            return "fail";
+            return "FAIL";
         }
     }
 

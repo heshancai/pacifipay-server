@@ -73,7 +73,7 @@ public class RemitCardControllerTest {
          * Bank address: 12 Steward Street, The Steward Building, London, E1 6FQ, GB
          */
         RemitCardDto remitCard = new RemitCardDto();
-        remitCard.setUserId(10000L);
+//        remitCard.setUserId(10000L);
         remitCard.setChannelId(1000001L);
         remitCard.setRemitCode("UQR_CNH");
         remitCard.setCardId("1880688340244627456");

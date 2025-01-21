@@ -76,6 +76,7 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             remitCard.setCreateTime(LocalDateTime.now());
             remitCard.setUpdateTime(LocalDateTime.now());
             remitCard.setCreateStatus(0);
+            remitCard.setCanCelStatus(0);
             // 如果 extraParams 不为空，设置相关字段到 remitCard 对象中
             JSONObject extraParam = remitCardResponse.getExtraParams();
             if (!ObjectUtils.isEmpty(extraParam)) {
@@ -357,7 +358,7 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             // 更新数据库
             LambdaUpdateWrapper<RemitCard> updateWrapper = new LambdaUpdateWrapper<>();
             updateWrapper.eq(RemitCard::getTpyCardId, remitCardDto.getCardId());
-            updateWrapper.set(RemitCard::getCardStatus, 1); // 设置为已删除状态
+            updateWrapper.set(RemitCard::getCanCelStatus, 1); // 设置为已删除状态
             updateWrapper.set(RemitCard::getUpdateTime, LocalDateTime.now());
 
             return update(updateWrapper);

@@ -87,7 +87,7 @@ public class RemitCardController {
         }
         LambdaQueryWrapper<RemitCard> checkQueryWrapper = new LambdaQueryWrapper<>();
         checkQueryWrapper.eq(RemitCard::getTpyCardId, remitCardDto.getCardId());
-        checkQueryWrapper.eq(RemitCard::getCardStatus, 0);
+        checkQueryWrapper.eq(RemitCard::getCanCelStatus, 0);
         RemitCard remitCard = remitCardService.getOne(checkQueryWrapper);
         Assert.notNull(remitCard, "汇款卡不存在或已删除");
         try {
@@ -109,12 +109,12 @@ public class RemitCardController {
         if (remitCardDto.getTpyCardId() == null) {
             return ResultGenerator.genFailResult("TpyCardId不能为空");
         }
-        LambdaQueryWrapper<RemitCard> checkQueryWrapper = new LambdaQueryWrapper<>();
-        checkQueryWrapper.eq(RemitCard::getTpyCardId, remitCardDto.getCardId());
-        checkQueryWrapper.eq(RemitCard::getCardStatus, 0);
-        RemitCard remitCard = remitCardService.getOne(checkQueryWrapper);
-        Assert.notNull(remitCard, "汇款卡不存在或已删除");
         try {
+            LambdaQueryWrapper<RemitCard> checkQueryWrapper = new LambdaQueryWrapper<>();
+            checkQueryWrapper.eq(RemitCard::getTpyCardId, remitCardDto.getCardId());
+            checkQueryWrapper.eq(RemitCard::getCanCelStatus, 0);
+            RemitCard remitCard = remitCardService.getOne(checkQueryWrapper);
+            Assert.notNull(remitCard, "汇款卡不存在或已删除");
             Boolean result = remitCardService.updateRemitCard(remitCardDto);
             return ResultGenerator.genSuccessResult(result);
         } catch (Exception e) {

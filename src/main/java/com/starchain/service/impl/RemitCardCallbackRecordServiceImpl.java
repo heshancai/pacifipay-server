@@ -132,7 +132,8 @@ public class RemitCardCallbackRecordServiceImpl extends ServiceImpl<RemitCardCal
     private void updateRecordStatus(MiPayRemitNotifyResponse response, RemitCardCallbackRecord callbackRecord) {
         LambdaUpdateWrapper<RemitCard> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(RemitCard::getCardId, response.getCardId())
-                .set(RemitCard::getStatus, CreateStatusEnum.SUCCESS.getCode())
+                .set(RemitCard::getStatus, response.getStatus())
+                .set(RemitCard::getCardStatus, CreateStatusEnum.SUCCESS.getCode()).set(RemitCard::getFinishTime, LocalDateTime.now())
                 .set(RemitCard::getUpdateTime, LocalDateTime.now());
         boolean isUpdated = remitCardService.update(updateWrapper);
         if (!isUpdated) {

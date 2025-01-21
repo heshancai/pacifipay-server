@@ -24,7 +24,7 @@ public class MiPayNotifyTest {
     private PacificPayConfig pacificPayConfig;
     @Autowired
     private MiPayNotifyController miPayNotifyController;
-    // 测试miPay 回调
+    // 测试miPay 卡充值回调
     @Test
     void miPayNotify() {
         MiPayCardNotifyResponse response = new MiPayCardNotifyResponse();

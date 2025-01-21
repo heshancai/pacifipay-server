@@ -34,7 +34,10 @@ public class UserWalletTransaction {
     @ApiModelProperty(value = "币种名称")
     private String coinName;
 
-    @ApiModelProperty(value = "充值金额")
+    @ApiModelProperty(value = "钱包原始余额")
+    private BigDecimal balance;
+
+    @ApiModelProperty(value = "充值金额/汇款金额/提现金额")
     private BigDecimal amount;
 
     @ApiModelProperty(value = "手续费")
@@ -43,7 +46,10 @@ public class UserWalletTransaction {
     @ApiModelProperty(value = "实际到账金额")
     private BigDecimal actAmount;
 
-    @ApiModelProperty(value = "交易类型：1-充币 2-提币")
+    @ApiModelProperty(value = "钱包最终余额")
+    private BigDecimal finaBalance;
+
+    @ApiModelProperty(value = "交易类型：1-充币 2-提币 3-汇款")
     private Integer type;
 
     @ApiModelProperty(value = "业务编号")

@@ -100,10 +100,10 @@ public class RemitCardControllerTest {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("remitLastName", "Progressive");
         jsonObject.put("remitFirstName", "Solutions");
-        jsonObject.put("remitTpyCardId", "202501171625450d067");
+        jsonObject.put("remitTpyCardId", "2025012114081850c57");
         jsonObject.put("remitBankNo", "GB55TCCL12345618629629");
         RemitApplicationRecordDto build = RemitApplicationRecordDto.builder()
-                .toAmount(BigDecimal.valueOf(10)).userId(123456L).channelId(987654L).toMoneyKind(MoneyKindEnum.CNY.getMoneyKindCode()).remitCode(RemitCodeEnum.UQR_CNH.getRemitCode())
+                .toAmount(BigDecimal.valueOf(10)).userId(10000L).channelId(987654L).toMoneyKind(MoneyKindEnum.CNY.getMoneyKindCode()).remitCode(RemitCodeEnum.UQR_CNH.getRemitCode())
                 .extraParams(jsonObject).build();
         remitApplicationRecord.applyRemit(build);
 

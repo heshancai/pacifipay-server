@@ -35,7 +35,8 @@ public class UserWalletTransactionServiceImpl extends ServiceImpl<UserWalletTran
                 .businessId(walletCallbackRecord.getNotifyId())
                 .remark(walletCallbackRecord.getDepositId().equals("deposit") ? "充币" : "提币")
                 .address(walletCallbackRecord.getAddress())
-                .txId(walletCallbackRecord.getTxid()).tradeId(walletCallbackRecord.getTxid()).build();
+                .txId(walletCallbackRecord.getTxid())
+                .tradeId(walletCallbackRecord.getDepositId()).build();
         this.save(userWalletTransaction);
         log.info("记录交易记录成功,交易信息为:{}", userWalletTransaction);
     }

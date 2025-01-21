@@ -3,6 +3,7 @@ package com.starchain.callBack;
 import com.alibaba.fastjson2.JSON;
 import com.starchain.config.PacificPayConfig;
 import com.starchain.context.MiPayNotifyContext;
+import com.starchain.context.MiPayNotifyType;
 import com.starchain.entity.response.MiPayCardNotifyResponse;
 import com.starchain.service.IMiPayNotifyService;
 import com.starchain.util.RSA2048Encrypt;
@@ -39,11 +40,11 @@ public class MiPayNotifyController {
         String decrypt = null;
         try {
             decrypt = RSA2048Encrypt.decrypt(jsonObject, RSA2048Encrypt.getPrivateKey(pacificPayConfig.getPrivateKey()));
-            log.debug("字符串信息:{}", decrypt);
+            log.info("字符串信息:{}", decrypt);
             MiPayCardNotifyResponse miPayNotifyResponse = JSON.parseObject(decrypt, MiPayCardNotifyResponse.class);
             // 参数检验
             checkRecharge(miPayNotifyResponse);
-            log.debug("pacificPayNotify:{}", miPayNotifyResponse);
+            log.info("pacificPayNotify:{}", miPayNotifyResponse);
             // 根据 businessType 获取对应的策略实现类
             IMiPayNotifyService miPayNotifyService = miPayNotifyContext.getMiPayNotifyService(miPayNotifyResponse.getBusinessType());
             Boolean callBack = miPayNotifyService.callBack(decrypt);
@@ -65,8 +66,9 @@ public class MiPayNotifyController {
     private void checkRecharge(MiPayCardNotifyResponse miPayNotifyResponse) {
         Assert.notNull(miPayNotifyResponse, "回调信息为空");
         Assert.hasText(miPayNotifyResponse.getNotifyId(), "通知ID不能为空");
-        Assert.hasText(miPayNotifyResponse.getBusinessType(), "业务类型不能为空");
-        Assert.hasText(miPayNotifyResponse.getCardId(), "卡ID不能为空");
+        if (!miPayNotifyResponse.getBusinessType().equals(MiPayNotifyType.Remit.getType())) {
+            Assert.hasText(miPayNotifyResponse.getCardId(), "卡ID不能为空");
+        }
         Assert.hasText(miPayNotifyResponse.getStatus(), "状态不能为空");
         Assert.hasText(miPayNotifyResponse.getStatusDesc(), "状态描述不能为空");
     }

@@ -1,7 +1,6 @@
 package com.starchain.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.starchain.entity.UserWallet;
 import com.starchain.entity.UserWalletTransaction;
 import com.starchain.entity.WalletCallbackRecord;
 
@@ -20,5 +19,5 @@ public interface IUserWalletTransactionService extends IService<UserWalletTransa
      * @param
      * @param walletCallbackRecord
      */
-    void dealRecodeTransaction(BigDecimal localFee, BigDecimal actAmount, UserWallet userWallet, WalletCallbackRecord walletCallbackRecord);
+    void dealRecodeTransaction(BigDecimal localFee, BigDecimal actAmount,BigDecimal balance,BigDecimal finalBalance,Long userId, WalletCallbackRecord walletCallbackRecord);
 }

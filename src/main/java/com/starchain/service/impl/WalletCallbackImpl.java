@@ -56,18 +56,25 @@ public class WalletCallbackImpl implements IWalletCallbackService {
             // 2. 获取用户钱包信息
             UserWallet userWallet = getUserWallet(walletRechargeCallbackResponse.getDepositAddress());
             Assert.notNull(userWallet, "用户钱包信息不存在");
+            UserWalletBalance userWalletBalance=userWalletBalanceService.getUserWalletBalance(userWallet.getUserId(), userWallet.getChannelId());
+            Assert.notNull(userWalletBalance, "用户钱包余额信息不存在");
 
-            // 3. 计算手续费和实际到账金额
+            // 3. 手续费
             BigDecimal localFee = calculateFee(coin, walletRechargeCallbackResponse.getDepositAmount());
-            // 充值实际到账金额
+            // 扣减手续费后的金额
             BigDecimal actAmount = walletCallbackRecord.getAmount().subtract(localFee);
             log.debug("手续费: {}, 实际到账金额: {}", localFee, actAmount);
+            // 钱包原始余额
+            BigDecimal balance = userWalletBalance.getBalance();
+            // 充值后的钱包余额
+            BigDecimal finalBalance = balance.add(actAmount);
+            log.debug("钱包原始余额: {}, 充值后的余额: {}", balance, finalBalance);
 
             // 4. 更新充值记录状态
             walletCallbackRecord.setStatus(RechargeRecordStatusEnum.SUCCESS.getKey());
 
-            // 5. 记录交易记录
-            recordTransaction(localFee, actAmount, userWallet, walletCallbackRecord);
+            // 5. 记录交易流水
+            recordTransaction(localFee, actAmount,balance,finalBalance,userWalletBalance.getUserId(), walletCallbackRecord);
 
             // 6. 更新钱包余额
             updateWalletBalance(userWallet, actAmount);
@@ -115,9 +122,9 @@ public class WalletCallbackImpl implements IWalletCallbackService {
     /**
      * 记录交易记录
      */
-    private void recordTransaction(BigDecimal localFee, BigDecimal actAmount, UserWallet userWallet, WalletCallbackRecord walletCallbackRecord) {
-        log.debug("记录交易记录, 用户ID: {}, 实际到账金额: {}", userWallet.getUserId(), actAmount);
-        userWalletTransactionService.dealRecodeTransaction(localFee, actAmount, userWallet, walletCallbackRecord);
+    private void recordTransaction(BigDecimal localFee, BigDecimal actAmount,BigDecimal balance,BigDecimal finalBalance,Long userId, WalletCallbackRecord walletCallbackRecord) {
+        log.debug("记录交易记录, 用户ID: {}, 实际到账金额: {}",userId, actAmount);
+        userWalletTransactionService.dealRecodeTransaction(localFee, actAmount, balance,finalBalance, userId,walletCallbackRecord);
     }
 
     /**

@@ -46,7 +46,7 @@ public class UserWalletTransaction {
     @ApiModelProperty(value = "实际到账金额")
     private BigDecimal actAmount;
 
-    @ApiModelProperty(value = "钱包最终余额")
+    @ApiModelProperty(value = "钱包余额")
     private BigDecimal finaBalance;
 
     @ApiModelProperty(value = "交易类型：1-充币 2-提币 3-汇款")
@@ -72,4 +72,7 @@ public class UserWalletTransaction {
 
     @ApiModelProperty(value = "链上交易ID")
     private String tradeId;
+
+    @ApiModelProperty(value = "订单id")
+    private String orderId;
 }

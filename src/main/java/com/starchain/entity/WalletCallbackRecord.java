@@ -53,4 +53,6 @@ public class WalletCallbackRecord {
     private Integer successConfirm;
     @ApiModelProperty(value = "分区键(格式：yyyyMM)")
     private Integer partitionKey;
+    @ApiModelProperty(value = "客户汇款交易唯一标识")
+    private String orderId;
 }

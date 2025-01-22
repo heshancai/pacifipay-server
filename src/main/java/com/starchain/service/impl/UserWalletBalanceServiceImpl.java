@@ -1,5 +1,6 @@
 package com.starchain.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.dao.UserWalletBalanceMapper;
@@ -37,5 +38,13 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
         if (balance.compareTo(BigDecimal.ZERO) <= 0 || balance.compareTo(saveAmount) < 0) {
             throw new StarChainException("余额不足");
         }
+    }
+
+    @Override
+    public UserWalletBalance getUserWalletBalance(Long userId, Long channelId) {
+        LambdaQueryWrapper<UserWalletBalance> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserWalletBalance::getUserId, userId);
+        queryWrapper.eq(UserWalletBalance::getChannelId, channelId);
+        return this.getOne(queryWrapper);
     }
 }

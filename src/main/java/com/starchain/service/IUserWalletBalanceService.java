@@ -18,4 +18,6 @@ public interface IUserWalletBalanceService extends IService<UserWalletBalance> {
      * @param saveAmount
      */
     void checkUserBalance(Long userId, Long channelId, BigDecimal saveAmount);
+
+    UserWalletBalance getUserWalletBalance(Long userId, Long channelId);
 }

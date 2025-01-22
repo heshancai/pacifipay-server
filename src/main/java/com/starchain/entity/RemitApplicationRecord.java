@@ -108,8 +108,8 @@ public class RemitApplicationRecord {
     @ApiModelProperty(value = "手续费金额", example = "50.00")
     private BigDecimal handlingFeeAmount;
 
-    @ApiModelProperty(value = "充值交易单号", example = "RECHARGE123456789")
-    private String rechargeOrderId;
+//    @ApiModelProperty(value = "充值交易单号", example = "RECHARGE123456789")
+//    private String rechargeOrderId;
 
     @ApiModelProperty(value = "交易流水号", example = "TRADE123456789")
     private String tradeId;

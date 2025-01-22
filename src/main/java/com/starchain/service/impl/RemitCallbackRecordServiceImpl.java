@@ -13,12 +13,15 @@ import com.starchain.exception.StarChainException;
 import com.starchain.service.IRemitApplicationRecordService;
 import com.starchain.service.IRemitCallbackRecordService;
 import com.starchain.service.IUserWalletBalanceService;
+import com.starchain.service.IUserWalletTransactionService;
+import com.starchain.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -35,6 +38,8 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
     @Autowired
     private IRemitApplicationRecordService remitApplicationRecordService;
 
+    @Autowired
+    private IUserWalletTransactionService userWalletTransactionService;
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean callBack(String callBackJson) {
@@ -46,7 +51,8 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
 
             // 2. 申请汇款记录是否存在 没有则抛出异常
             RemitApplicationRecord remitApplicationRecord = validateAndGetRecord(miPayRemitNotifyResponse);
-
+            UserWalletBalance userWalletBalance = userWalletBalanceService.getUserWalletBalance(remitApplicationRecord.getUserId(), remitApplicationRecord.getChannelId());
+            Assert.notNull(userWalletBalance, "用户钱包余额信息不存在");
             // 3. 检查是否已经处理成功（幂等性）
             if (remitApplicationRecord.getStatus() == CreateStatusEnum.SUCCESS.getCode()) {
                 log.info("充值记录已处理成功，无需重复处理，通知ID: {}", miPayRemitNotifyResponse.getNotifyId());
@@ -55,12 +61,44 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
             // 4. 查询或创建回调记录
             RemitCallbackRecord callbackRecord = createOrUpdateCallbackRecord(miPayRemitNotifyResponse);
 
-            // 5.如果对用户钱包余额进行扣款
+            // 5.记录汇款交易流水
+            createUserWalletTransaction(userWalletBalance,remitApplicationRecord, callbackRecord);
+
+            // 6.如果对用户钱包余额进行扣款
             return handleRechargeStatus(miPayRemitNotifyResponse, remitApplicationRecord, callbackRecord);
         } catch (Exception e) {
             log.error("申请汇款, 通知ID: {}, 错误信息: {}", miPayRemitNotifyResponse.getNotifyId(), e.getMessage(), e);
             throw new StarChainException("申请汇款处理失败");
         }
+    }
+
+    private void createUserWalletTransaction(UserWalletBalance userWalletBalance, RemitApplicationRecord remitApplicationRecord, RemitCallbackRecord callbackRecord) {
+        // 总扣款金额 包含手续费
+        BigDecimal fromAmount = remitApplicationRecord.getFromAmount();
+        // 手续费
+        BigDecimal handlingFeeAmount = remitApplicationRecord.getHandlingFeeAmount();
+        // 实际到账金额
+        BigDecimal actAmount = fromAmount.subtract(handlingFeeAmount);
+        // 钱包扣减后余额
+        BigDecimal finalBalance = userWalletBalance.getBalance().subtract(remitApplicationRecord.getFromAmount());
+
+        UserWalletTransaction userWalletTransaction = UserWalletTransaction.builder()
+                .userId(userWalletBalance.getUserId())
+                .coinName(remitApplicationRecord.getFromMoneyKind())
+                .balance(userWalletBalance.getBalance())
+                .amount(actAmount)
+                .fee(handlingFeeAmount)
+                .actAmount(actAmount)
+                .finaBalance(finalBalance)
+                .type(3)
+                .businessId(callbackRecord.getNotifyId())
+                .partitionKey(DateUtil.getMonth())
+                .remark("汇款")
+                .createTime(LocalDateTime.now())
+                .orderId(remitApplicationRecord.getOrderId())
+                .tradeId(remitApplicationRecord.getTradeId()).build();
+        userWalletTransactionService.save(userWalletTransaction);
+        log.info("记录交易记录成功,交易信息为:{}", userWalletTransaction);
     }
 
     // 1. 校验业务类型

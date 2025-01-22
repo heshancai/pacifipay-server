@@ -6,9 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
@@ -25,6 +23,8 @@ import java.time.LocalDateTime;
 @TableName("remit_application_record")
 @ApiModel(value = "RemitApplicationRecord", description = "汇款申请记录表")
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class RemitApplicationRecord {
     @ApiModelProperty(value = "主键ID", example = "1")
     @TableId(value = "id", type = IdType.AUTO)

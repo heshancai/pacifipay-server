@@ -66,13 +66,43 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
             log.info("发送请求，URL：{}，请求体：{}", requestUrl, requestBody);
             String responseStr = HttpUtils.doPostMiPay(requestUrl, token, requestBody, pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             log.info("收到响应：{}", responseStr);
-            RemitApplicationRecord remitApplicationRecord = JSONObject.parseObject(responseStr, RemitApplicationRecord.class);
+            RemitApplicationRecordDto remitApplicationRecordDtoResponse = JSONObject.parseObject(responseStr, RemitApplicationRecordDto.class);
+            RemitApplicationRecord remitApplicationRecord = new RemitApplicationRecord();
+            remitApplicationRecord.setRemitCode(remitApplicationRecordDto.getRemitCode());
+            remitApplicationRecord.setToMoneyKind(remitApplicationRecordDto.getToMoneyKind());
+            remitApplicationRecord.setToAmount(remitApplicationRecordDto.getToAmount());
+            remitApplicationRecord.setOrderId(remitApplicationRecordDto.getOrderId());
+            remitApplicationRecord.setRemitRate(remitApplicationRecordDto.getRemitRate());
+            if (remitApplicationRecordDto.getExtraParams()!=null){
+                remitApplicationRecord.setRemitName(remitApplicationRecordDto.getExtraParams().getString("remitName"));
+                remitApplicationRecord.setRemitLastName(remitApplicationRecordDto.getExtraParams().getString("remitLastName"));
+                remitApplicationRecord.setRemitFirstName(remitApplicationRecordDto.getExtraParams().getString("remitFirstName"));
+                remitApplicationRecord.setRemitBankNo(remitApplicationRecordDto.getExtraParams().getString("remitBankNo"));
+                remitApplicationRecord.setToMoneyCountry3(remitApplicationRecordDto.getExtraParams().getString("toMoneyCountry3"));
+                remitApplicationRecord.setBankCode(remitApplicationRecordDto.getExtraParams().getString("bankCode"));
+                remitApplicationRecord.setBankBranchCode(remitApplicationRecordDto.getExtraParams().getString("bankBranchCode"));
+                remitApplicationRecord.setRemitTpyCardId(remitApplicationRecordDto.getExtraParams().getString("remitTpyCardId"));
+                remitApplicationRecord.setMobileNumber(remitApplicationRecordDto.getExtraParams().getString("mobileNumber"));
+                remitApplicationRecord.setEmail(remitApplicationRecordDto.getExtraParams().getString("email"));
+            }
             remitApplicationRecord.setUserId(remitApplicationRecordDto.getUserId());
             remitApplicationRecord.setCreateTime(LocalDateTime.now());
             remitApplicationRecord.setUpdateTime(LocalDateTime.now());
-            remitApplicationRecord.setRemitRate(remitRate.getTradeRate());
             remitApplicationRecord.setChannelId(remitApplicationRecordDto.getChannelId());
             remitApplicationRecord.setStatus(0);
+
+            // 更新remitApplicationRecordDtoResponse 返回的数据
+            remitApplicationRecord.setRemitCode(remitApplicationRecordDtoResponse.getRemitCode());
+            remitApplicationRecord.setTradeRate(remitApplicationRecordDtoResponse.getTradeRate());
+            remitApplicationRecord.setFromMoneyKind(remitApplicationRecordDtoResponse.getFromMoneyKind());
+            remitApplicationRecord.setFromAmount(remitApplicationRecordDtoResponse.getFromAmount());
+            remitApplicationRecord.setToMoneyKind(remitApplicationRecordDtoResponse.getToMoneyKind());
+            remitApplicationRecord.setToAmount(remitApplicationRecordDtoResponse.getToAmount());
+            remitApplicationRecord.setHandlingFeeAmount(remitApplicationRecordDtoResponse.getHandlingFeeAmount());
+            remitApplicationRecord.setHandlingFeeMoneyKind(remitApplicationRecordDtoResponse.getHandlingFeeMoneyKind());
+            remitApplicationRecord.setOrderId(remitApplicationRecordDtoResponse.getOrderId());
+            remitApplicationRecord.setTradeId(remitApplicationRecordDtoResponse.getTradeId());
+            remitApplicationRecord.setPinNumber(remitApplicationRecordDtoResponse.getPinNumber());
             this.save(remitApplicationRecord);
         } catch (Exception e) {
             log.error("申请汇款失败", e);

@@ -34,8 +34,8 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
 
         BigDecimal balance = userWalletBalance.getBalance();
 
-        // Check if the balance is greater than 0 and greater than the input amount
-        if (balance.compareTo(BigDecimal.ZERO) <= 0 || balance.compareTo(saveAmount) < 0) {
+        // 钱包余额必须大于等于汇款金额+手续费（1 USD）
+        if ( balance.compareTo(saveAmount.add(BigDecimal.ONE)) < 0) {
             throw new StarChainException("余额不足");
         }
     }

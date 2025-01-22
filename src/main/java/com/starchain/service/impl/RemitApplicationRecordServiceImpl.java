@@ -45,6 +45,7 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
      */
     @Override
     public Boolean applyRemit(RemitApplicationRecordDto remitApplicationRecordDto) {
+        // 参数检查
         try {
             String token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
             RemitRateDto remitRateDto = new RemitRateDto();

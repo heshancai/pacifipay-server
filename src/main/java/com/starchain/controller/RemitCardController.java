@@ -201,6 +201,9 @@ public class RemitCardController {
             return ResultGenerator.genFailResult("dto不能为空");
         }
 
+        if (remitApplicationRecordDto.getExtraParams() != null) {
+            validateRemitApplicationRecord(remitApplicationRecordDto);
+        }
         // 交易上一笔交易是否完成
         LambdaQueryWrapper<RemitApplicationRecord> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(RemitApplicationRecord::getUserId, remitApplicationRecordDto.getUserId());
@@ -221,6 +224,66 @@ public class RemitCardController {
             log.error("服务异常", e);
             return ResultGenerator.genFailResult(e.getMessage());
         }
+    }
+
+    public ClientResponse validateRemitApplicationRecord(RemitApplicationRecordDto remitApplicationRecordDto) {
+
+        String remitTypeCode = remitApplicationRecordDto.getRemitCode();
+
+        switch (remitTypeCode) {
+            case "ELR":
+            case "VNPR_IND":
+                if (!StringUtils.hasText(remitApplicationRecordDto.getRemitName())) {
+                    return ResultGenerator.genFailResult("姓名不能为空");
+                }
+                if (!StringUtils.hasText(remitApplicationRecordDto.getRemitBankNo())) {
+                    return ResultGenerator.genFailResult("银行卡号不能为空");
+                }
+                if ("VNPR_IND".equals(remitTypeCode)) {
+                    if (!StringUtils.hasText(remitApplicationRecordDto.getMobileNumber())) {
+                        return ResultGenerator.genFailResult("手机号不能为空");
+                    }
+                    if (!StringUtils.hasText(remitApplicationRecordDto.getEmail())) {
+                        return ResultGenerator.genFailResult("邮箱不能为空");
+                    }
+                    if (!StringUtils.hasText(remitApplicationRecordDto.getBankBranchCode())) {
+                        return ResultGenerator.genFailResult("支行编码不能为空");
+                    }
+                }
+                break;
+
+            case "LNR_IND":
+                if (!StringUtils.hasText(remitApplicationRecordDto.getRemitLastName())) {
+                    return ResultGenerator.genFailResult("姓不能为空");
+                }
+                if (!StringUtils.hasText(remitApplicationRecordDto.getRemitFirstName())) {
+                    return ResultGenerator.genFailResult("名不能为空");
+                }
+                if (!StringUtils.hasText(remitApplicationRecordDto.getRemitBankNo())) {
+                    return ResultGenerator.genFailResult("银行卡号不能为空");
+                }
+                if (!StringUtils.hasText(remitApplicationRecordDto.getToMoneyCountry3())) {
+                    return ResultGenerator.genFailResult("汇款国家编码不能为空");
+                }
+                if (!StringUtils.hasText(remitApplicationRecordDto.getBankCode())) {
+                    return ResultGenerator.genFailResult("银行编码不能为空");
+                }
+                if (!StringUtils.hasText(remitApplicationRecordDto.getBankBranchCode())) {
+                    return ResultGenerator.genFailResult("支行编码不能为空");
+                }
+                break;
+
+            case "UQR":
+                if (!StringUtils.hasText(remitApplicationRecordDto.getRemitTpyCardId())) {
+                    return ResultGenerator.genFailResult("Tpy汇款卡ID不能为空");
+                }
+                break;
+
+            default:
+                return ResultGenerator.genFailResult("不支持的汇款类型编码");
+        }
+
+        return ResultGenerator.genSuccessResult(); // 所有校验通过，返回成功
     }
 
     /**

@@ -76,7 +76,7 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             remitCard.setCreateTime(LocalDateTime.now());
             remitCard.setUpdateTime(LocalDateTime.now());
             remitCard.setCreateStatus(0);
-            remitCard.setCanCelStatus(0);
+            remitCard.setCancelStatus(0);
             // 如果 extraParams 不为空，设置相关字段到 remitCard 对象中
             JSONObject extraParam = remitCardResponse.getExtraParams();
             if (!ObjectUtils.isEmpty(extraParam)) {

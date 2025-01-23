@@ -34,7 +34,7 @@ dubbo:
     name: dubbo # 协议名称
     port: 20880 # 服务暴露端口
   registry:
-    address: nacos://localhost:8848
+    address: nacos://127.0.0.1:8848
     parameters.registry-consumer: true # 是否将消费者注册到注册中心
   scan:
-    base-packages: com.starchain.dubbo # 扫描 Dubbo 服务的包路径
+    base-packages: com.starchain.common.dubbo # 扫描 Dubbo 服务的包路径

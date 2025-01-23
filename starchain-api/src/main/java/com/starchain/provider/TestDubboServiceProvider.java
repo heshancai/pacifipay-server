@@ -11,12 +11,12 @@ import org.apache.dubbo.config.annotation.DubboService;
  * @date 2025-01-23
  * @Description
  */
-@DubboService
+@DubboService(version = "1.0") // 提供和消费者需要指定同一个version
 @Slf4j
 public class TestDubboServiceProvider implements ITestDubboService {
 
     @Override
     public ClientResponse test() {
-        return ResultGenerator.genSuccessResult();
+        return ResultGenerator.genSuccessResult("test");
     }
 }

@@ -337,7 +337,6 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
 
     @Override
     public Boolean delRemitCard(RemitCardDto remitCardDto) {
-        Assert.notNull(remitCardDto.getCardId(), "CardId不能为空");
         try {
             // 获取 Token
             String token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
@@ -357,8 +356,8 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
 
             // 更新数据库
             LambdaUpdateWrapper<RemitCard> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(RemitCard::getTpyCardId, remitCardDto.getCardId());
-            updateWrapper.set(RemitCard::getCanCelStatus, 1); // 设置为已删除状态
+            updateWrapper.eq(RemitCard::getTpyCardId, remitCardDto.getTpyCardId());
+            updateWrapper.set(RemitCard::getCancelStatus, 1); // 设置为已删除状态
             updateWrapper.set(RemitCard::getUpdateTime, LocalDateTime.now());
 
             return update(updateWrapper);

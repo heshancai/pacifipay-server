@@ -73,11 +73,11 @@ public class RemitCardControllerTest {
          * Bank address: 12 Steward Street, The Steward Building, London, E1 6FQ, GB
          */
         RemitCardDto remitCard = new RemitCardDto();
-//        remitCard.setUserId(10000L);
+        remitCard.setUserId(10000L);
         remitCard.setChannelId(1000001L);
         remitCard.setRemitCode("UQR_CNH");
-        remitCard.setCardId("1880688340244627456");
-        remitCard.setTpyCardId("202501171625450d067");
+        remitCard.setCardId("1882057489940217856");
+        remitCard.setTpyCardId("2025012114081850c57");
         ClientResponse response = remitCardController.delRemitCard(remitCard);
         System.out.println(response);
 
@@ -102,10 +102,15 @@ public class RemitCardControllerTest {
         jsonObject.put("remitFirstName", "Solutions");
         jsonObject.put("remitTpyCardId", "2025012114081850c57");
         jsonObject.put("remitBankNo", "GB55TCCL12345618629629");
-        RemitApplicationRecordDto build = RemitApplicationRecordDto.builder()
-                .toAmount(BigDecimal.valueOf(10)).userId(10000L).channelId(987654L).toMoneyKind(MoneyKindEnum.CNY.getMoneyKindCode()).remitCode(RemitCodeEnum.UQR_CNH.getRemitCode())
-                .extraParams(jsonObject).build();
-        remitApplicationRecord.applyRemit(build);
+        RemitApplicationRecordDto remitApplicationRecordDto = new RemitApplicationRecordDto();
+        remitApplicationRecordDto.setToAmount(BigDecimal.valueOf(10));
+        remitApplicationRecordDto.setUserId(10000L);
+        remitApplicationRecordDto.setChannelId(987654L);
+        remitApplicationRecordDto.setToMoneyKind(MoneyKindEnum.CNY.getMoneyKindCode());
+        remitApplicationRecordDto.setRemitCode(RemitCodeEnum.UQR_CNH.getRemitCode());
+        remitApplicationRecordDto.setExtraParams(jsonObject);
+
+        remitApplicationRecord.applyRemit(remitApplicationRecordDto);
 
     }
 

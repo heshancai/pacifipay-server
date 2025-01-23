@@ -4,7 +4,6 @@ import com.alibaba.fastjson2.JSONObject;
 import com.starchain.entity.RemitApplicationRecord;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -19,7 +18,6 @@ import java.math.BigDecimal;
 @Data
 @ApiModel(value = "申请汇款", description = "申请汇款")
 @Accessors(chain = true)
-@Builder
 public class RemitApplicationRecordDto extends RemitApplicationRecord implements Serializable {
     private static final long serialVersionUID = 1L;
 

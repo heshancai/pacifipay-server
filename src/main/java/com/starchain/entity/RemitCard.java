@@ -61,7 +61,7 @@ public class RemitCard {
     private String statusDesc;
 
     @ApiModelProperty(name = "删除收款卡状态", example = "1 已删除 0 未删除")
-    private Integer canCelStatus;
+    private Integer cancelStatus;
 
     // 以下为 extraParams 对应的字段
     @ApiModelProperty(name = "Swift码", example = "ABCDEF123")

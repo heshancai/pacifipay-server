@@ -5,8 +5,15 @@
     <groupId>com.starchain</groupId>
     <artifactId>starchain-pacificpay-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
     <name>starchain-pacificpay-server</name>
     <description>starchain-pacificpay-server</description>
+    <modules>
+        <module>starchain-api</module>
+        <module>starchain-common</module>
+        <module>starchain-dao</module>
+        <module>starchain-service</module>
+    </modules>
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

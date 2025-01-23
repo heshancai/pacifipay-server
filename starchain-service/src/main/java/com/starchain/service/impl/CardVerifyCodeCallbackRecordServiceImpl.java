@@ -1,8 +1,8 @@
 package com.starchain.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.starchain.common.entity.CardVerifyCodeCallbackRecord;
 import com.starchain.dao.CardVerifyCodeCallbackRecordMapper;
-import com.starchain.entity.CardVerifyCodeCallbackRecord;
 import com.starchain.service.ICardVerifyCodeCallbackRecordService;
 import org.springframework.stereotype.Service;
 

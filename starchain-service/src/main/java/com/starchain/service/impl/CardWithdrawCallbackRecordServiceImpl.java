@@ -1,8 +1,8 @@
 package com.starchain.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.starchain.common.entity.CardWithdrawCallbackRecord;
 import com.starchain.dao.CardWithdrawCallbackRecordMapper;
-import com.starchain.entity.CardWithdrawCallbackRecord;
 import com.starchain.service.ICardWithdrawCallbackRecordService;
 import org.springframework.stereotype.Service;
 

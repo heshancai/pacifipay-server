@@ -1,7 +1,7 @@
 package com.starchain.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.starchain.entity.RemitApplicationRecord;
+import com.starchain.common.entity.RemitApplicationRecord;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

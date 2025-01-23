@@ -1,6 +1,6 @@
 package com.starchain.context;
 
-import com.starchain.enums.MiPayNotifyType;
+import com.starchain.common.enums.MiPayNotifyType;
 import com.starchain.service.IMiPayNotifyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;

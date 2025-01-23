@@ -1,8 +1,8 @@
 package com.starchain.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.starchain.common.entity.CardRechargeRecord;
 import com.starchain.dao.CardRechargeRecordMapper;
-import com.starchain.entity.CardRechargeRecord;
 import com.starchain.service.ICardRechargeRecordService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

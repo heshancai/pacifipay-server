@@ -1,7 +1,7 @@
 package com.starchain.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.starchain.entity.UserWalletTransaction;
+import com.starchain.common.entity.UserWalletTransaction;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -10,6 +10,5 @@ import org.apache.ibatis.annotations.Mapper;
  * @Description
  */
 @Mapper
-
 public interface UserWalletTransactionMapper extends BaseMapper<UserWalletTransaction> {
 }

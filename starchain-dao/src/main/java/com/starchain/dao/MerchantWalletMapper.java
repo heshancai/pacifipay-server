@@ -1,7 +1,7 @@
 package com.starchain.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.starchain.entity.MerchantWallet;
+import com.starchain.common.entity.MerchantWallet;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

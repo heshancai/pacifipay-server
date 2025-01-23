@@ -2,12 +2,12 @@ package com.starchain.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.starchain.entity.SysCoin;
-import com.starchain.entity.UserWallet;
-import com.starchain.entity.UserWalletBalance;
-import com.starchain.entity.WalletCallbackRecord;
-import com.starchain.entity.response.WalletRechargeCallbackResponse;
-import com.starchain.enums.RechargeRecordStatusEnum;
+import com.starchain.common.entity.SysCoin;
+import com.starchain.common.entity.UserWallet;
+import com.starchain.common.entity.UserWalletBalance;
+import com.starchain.common.entity.WalletCallbackRecord;
+import com.starchain.common.entity.response.WalletRechargeCallbackResponse;
+import com.starchain.common.enums.RechargeRecordStatusEnum;
 import com.starchain.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

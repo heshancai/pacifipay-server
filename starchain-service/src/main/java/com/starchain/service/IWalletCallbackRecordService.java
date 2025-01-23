@@ -1,10 +1,8 @@
 package com.starchain.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.starchain.entity.WalletCallbackRecord;
-import com.starchain.entity.response.WalletRechargeCallbackResponse;
-
-import java.math.BigDecimal;
+import com.starchain.common.entity.WalletCallbackRecord;
+import com.starchain.common.entity.response.WalletRechargeCallbackResponse;
 
 /**
  * @author

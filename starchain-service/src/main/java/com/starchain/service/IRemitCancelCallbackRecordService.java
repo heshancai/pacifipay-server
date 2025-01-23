@@ -1,7 +1,7 @@
 package com.starchain.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.starchain.entity.RemitCancelCallbackRecord;
+import com.starchain.common.entity.RemitCancelCallbackRecord;
 
 /**
  * @author

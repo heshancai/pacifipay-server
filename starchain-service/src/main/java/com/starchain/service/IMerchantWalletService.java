@@ -1,7 +1,7 @@
 package com.starchain.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.starchain.entity.MerchantWallet;
+import com.starchain.common.entity.MerchantWallet;
 
 /**
  * @author

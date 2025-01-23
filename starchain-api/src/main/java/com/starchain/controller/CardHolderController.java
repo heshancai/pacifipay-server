@@ -1,10 +1,10 @@
 package com.starchain.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.starchain.entity.CardHolder;
-import com.starchain.entity.dto.CardHolderDto;
-import com.starchain.result.ClientResponse;
-import com.starchain.result.ResultGenerator;
+import com.starchain.common.entity.CardHolder;
+import com.starchain.common.entity.dto.CardHolderDto;
+import com.starchain.common.result.ClientResponse;
+import com.starchain.common.result.ResultGenerator;
 import com.starchain.service.ICardHolderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

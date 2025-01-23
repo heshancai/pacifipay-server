@@ -1,9 +1,9 @@
 package com.starchain.controller;
 
-import com.starchain.entity.UserWallet;
-import com.starchain.entity.dto.UserWalletDto;
-import com.starchain.result.ClientResponse;
-import com.starchain.result.ResultGenerator;
+import com.starchain.common.entity.UserWallet;
+import com.starchain.common.entity.dto.UserWalletDto;
+import com.starchain.common.result.ClientResponse;
+import com.starchain.common.result.ResultGenerator;
 import com.starchain.service.IUserWalletService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

@@ -2,10 +2,10 @@ package com.starchain.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.starchain.common.entity.UserWallet;
+import com.starchain.common.entity.UserWalletBalance;
+import com.starchain.common.entity.dto.UserWalletDto;
 import com.starchain.dao.UserWalletMapper;
-import com.starchain.entity.UserWallet;
-import com.starchain.entity.UserWalletBalance;
-import com.starchain.entity.dto.UserWalletDto;
 import com.starchain.service.IUserWalletBalanceService;
 import com.starchain.service.IUserWalletService;
 import com.starchain.service.IdWorker;

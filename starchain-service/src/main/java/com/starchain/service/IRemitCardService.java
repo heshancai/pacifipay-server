@@ -2,7 +2,7 @@ package com.starchain.service;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.starchain.entity.RemitCard;
+import com.starchain.common.entity.RemitCard;
 import com.starchain.entity.dto.RemitCardDto;
 import com.starchain.entity.dto.RemitRateDto;
 

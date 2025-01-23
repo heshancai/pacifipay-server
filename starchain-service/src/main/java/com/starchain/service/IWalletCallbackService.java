@@ -1,7 +1,7 @@
 package com.starchain.service;
 
-import com.starchain.entity.WalletCallbackRecord;
-import com.starchain.entity.response.WalletRechargeCallbackResponse;
+import com.starchain.common.entity.WalletCallbackRecord;
+import com.starchain.common.entity.response.WalletRechargeCallbackResponse;
 
 import java.math.BigDecimal;
 

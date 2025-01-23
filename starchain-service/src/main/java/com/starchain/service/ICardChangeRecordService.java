@@ -1,7 +1,7 @@
 package com.starchain.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.starchain.entity.CardChangeRecord;
+import com.starchain.common.entity.CardChangeRecord;
 
 /**
  * @author

@@ -1,7 +1,7 @@
 package com.starchain.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.starchain.entity.WalletCoinConfig;
+import com.starchain.common.entity.WalletCoinConfig;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

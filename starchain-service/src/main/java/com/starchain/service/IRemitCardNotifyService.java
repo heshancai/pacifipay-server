@@ -1,8 +1,8 @@
 package com.starchain.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.starchain.entity.RemitCardNotify;
-import com.starchain.entity.response.MiPayCardNotifyResponse;
+import com.starchain.common.entity.RemitCardNotify;
+import com.starchain.common.entity.response.MiPayCardNotifyResponse;
 
 /**
  * @author

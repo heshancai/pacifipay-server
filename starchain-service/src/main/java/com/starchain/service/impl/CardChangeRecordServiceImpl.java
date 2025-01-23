@@ -1,8 +1,8 @@
 package com.starchain.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.starchain.common.entity.CardChangeRecord;
 import com.starchain.dao.CardChangeRecordDao;
-import com.starchain.entity.CardChangeRecord;
 import com.starchain.service.ICardChangeRecordService;
 import org.springframework.stereotype.Service;
 

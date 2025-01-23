@@ -1,8 +1,8 @@
 package com.starchain.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.starchain.entity.CardHolder;
-import com.starchain.entity.dto.CardHolderDto;
+import com.starchain.common.entity.CardHolder;
+import com.starchain.common.entity.dto.CardHolderDto;
 
 /**
  * @author

@@ -2,12 +2,12 @@ package com.starchain.service.impl;
 
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.starchain.entity.response.WalletRechargeAddressResponse;
+import com.starchain.common.entity.response.WalletRechargeAddressResponse;
+import com.starchain.common.util.AesUtils;
+import com.starchain.common.util.OkHttpUtils;
+import com.starchain.common.util.SignUtils;
 import com.starchain.service.IWalletCoinConfigService;
 import com.starchain.service.WalletApiService;
-import com.starchain.util.AesUtils;
-import com.starchain.util.OkHttpUtils;
-import com.starchain.util.SignUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

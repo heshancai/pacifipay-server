@@ -1,7 +1,7 @@
 package com.starchain.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.starchain.entity.RemitCardCallbackRecord;
+import com.starchain.common.entity.RemitCardCallbackRecord;
 import org.springframework.stereotype.Service;
 
 /**

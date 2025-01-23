@@ -1,7 +1,7 @@
 package com.starchain.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.starchain.entity.UserWalletBalance;
+import com.starchain.common.entity.UserWalletBalance;
 
 import java.math.BigDecimal;
 

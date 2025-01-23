@@ -1,8 +1,8 @@
 package com.starchain.service;
 
 import com.alibaba.fastjson2.JSON;
-import com.starchain.entity.response.MiPayCardNotifyResponse;
-import com.starchain.entity.response.MiPayRemitNotifyResponse;
+import com.starchain.common.entity.response.MiPayCardNotifyResponse;
+import com.starchain.common.entity.response.MiPayRemitNotifyResponse;
 
 /**
  * @author

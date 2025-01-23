@@ -1,8 +1,8 @@
 package com.starchain.provider;
 
-import com.starchain.dubbo.ITestDubboService;
-import com.starchain.result.ClientResponse;
-import com.starchain.result.ResultGenerator;
+import com.starchain.common.dubbo.ITestDubboService;
+import com.starchain.common.result.ClientResponse;
+import com.starchain.common.result.ResultGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 

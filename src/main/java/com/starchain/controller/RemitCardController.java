@@ -151,7 +151,7 @@ public class RemitCardController {
             return ResultGenerator.genSuccessResult(result);
         } catch (Exception e) {
             log.error("服务异常", e);
-            return ResultGenerator.genFailResult("服务异常");
+            return ResultGenerator.genFailResult(e.getMessage());
         }
     }
 

@@ -3,7 +3,7 @@ package com.starchain.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.starchain.common.entity.Card;
 import com.starchain.common.entity.CardRechargeRecord;
-import com.starchain.entity.dto.CardDto;
+import com.starchain.common.entity.dto.CardDto;
 
 /**
  * @author

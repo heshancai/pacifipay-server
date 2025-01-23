@@ -2,11 +2,11 @@ package com.starchain;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.starchain.common.entity.dto.RemitApplicationRecordDto;
+import com.starchain.common.entity.dto.RemitCardDto;
 import com.starchain.common.enums.MoneyKindEnum;
 import com.starchain.common.enums.RemitCodeEnum;
 import com.starchain.common.result.ClientResponse;
 import com.starchain.controller.RemitCardController;
-import com.starchain.entity.dto.RemitCardDto;
 import com.starchain.service.IRemitApplicationRecordService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

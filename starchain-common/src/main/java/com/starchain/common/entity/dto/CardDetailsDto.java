@@ -1,4 +1,4 @@
-package com.starchain.entity.dto;
+package com.starchain.common.entity.dto;
 
 /**
  * @author

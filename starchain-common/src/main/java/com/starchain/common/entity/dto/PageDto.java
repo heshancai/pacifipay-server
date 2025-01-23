@@ -1,4 +1,4 @@
-package com.starchain.entity.dto;
+package com.starchain.common.entity.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

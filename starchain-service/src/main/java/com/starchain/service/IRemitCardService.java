@@ -3,8 +3,8 @@ package com.starchain.service;
 import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.starchain.common.entity.RemitCard;
-import com.starchain.entity.dto.RemitCardDto;
-import com.starchain.entity.dto.RemitRateDto;
+import com.starchain.common.entity.dto.RemitCardDto;
+import com.starchain.common.entity.dto.RemitRateDto;
 
 /**
  * @author
@@ -24,7 +24,7 @@ public interface IRemitCardService extends IService<RemitCard> {
      * @param remitRateDto
      * @return
      */
-    RemitRateDto getRemitRate(String token,RemitRateDto remitRateDto);
+    RemitRateDto getRemitRate(String token, RemitRateDto remitRateDto);
 
 
     /**

@@ -1,4 +1,4 @@
-package com.starchain.entity.dto;
+package com.starchain.common.entity.dto;
 
 import com.alibaba.fastjson2.JSONObject;
 import io.swagger.annotations.ApiModelProperty;

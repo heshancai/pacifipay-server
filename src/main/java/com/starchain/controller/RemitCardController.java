@@ -200,6 +200,12 @@ public class RemitCardController {
         if (ObjectUtils.isEmpty(remitApplicationRecordDto.getToAmount())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
+        if (remitApplicationRecordDto.getExtraParams() == null) {
+            return ResultGenerator.genFailResult("dto不能为空");
+        }
+        if (!StringUtils.hasText(remitApplicationRecordDto.getExtraParams().getString("remitBankNo"))) {
+            return ResultGenerator.genFailResult("银行卡号不能为空");
+        }
 
         if (remitApplicationRecordDto.getExtraParams() != null) {
             validateRemitApplicationRecord(remitApplicationRecordDto);
@@ -233,12 +239,10 @@ public class RemitCardController {
         switch (remitTypeCode) {
             case "ELR":
             case "VNPR_IND":
-                if (!StringUtils.hasText(remitApplicationRecordDto.getRemitName())) {
+                if (!StringUtils.hasText(remitApplicationRecordDto.getExtraParams().getString("remitName"))) {
                     return ResultGenerator.genFailResult("姓名不能为空");
                 }
-                if (!StringUtils.hasText(remitApplicationRecordDto.getRemitBankNo())) {
-                    return ResultGenerator.genFailResult("银行卡号不能为空");
-                }
+
                 if ("VNPR_IND".equals(remitTypeCode)) {
                     if (!StringUtils.hasText(remitApplicationRecordDto.getMobileNumber())) {
                         return ResultGenerator.genFailResult("手机号不能为空");

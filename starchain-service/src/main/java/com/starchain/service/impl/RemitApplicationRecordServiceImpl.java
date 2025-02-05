@@ -54,7 +54,7 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
             RemitRateDto remitRate = remitCardService.getRemitRate(token, remitRateDto);
             log.info("实时汇率，{}", remitRate);
             Assert.notNull(remitRate.getTradeRate(), "汇款汇率为null");
-            String orderId = OrderIdGenerator.generateOrderId(String.valueOf(remitApplicationRecordDto.getChannelId()), String.valueOf(remitApplicationRecordDto.getUserId()), 6);
+            String orderId = OrderIdGenerator.generateOrderId(String.valueOf(remitApplicationRecordDto.getBusinessId()), String.valueOf(remitApplicationRecordDto.getUserId()), 6);
             remitApplicationRecordDto
                     .setRemitCode(remitApplicationRecordDto.getRemitCode())
                     .setToMoneyKind(remitApplicationRecordDto.getToMoneyKind())
@@ -89,7 +89,7 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
             remitApplicationRecord.setUserId(remitApplicationRecordDto.getUserId());
             remitApplicationRecord.setCreateTime(LocalDateTime.now());
             remitApplicationRecord.setUpdateTime(LocalDateTime.now());
-            remitApplicationRecord.setChannelId(remitApplicationRecordDto.getChannelId());
+            remitApplicationRecord.setBusinessId(remitApplicationRecordDto.getBusinessId());
             remitApplicationRecord.setStatus(0);
 
             // 更新remitApplicationRecordDtoResponse 返回的数据
@@ -116,7 +116,7 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
     public boolean isRemitInProgress(Long userId, Long channelId) {
         LambdaQueryWrapper<RemitApplicationRecord> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(RemitApplicationRecord::getUserId, userId);
-        queryWrapper.eq(RemitApplicationRecord::getChannelId, channelId);
+        queryWrapper.eq(RemitApplicationRecord::getBusinessId, channelId);
         queryWrapper.orderByDesc(RemitApplicationRecord::getId).last("LIMIT 1");
         RemitApplicationRecord remitApplicationRecord = this.getOne(queryWrapper);
         return remitApplicationRecord != null && remitApplicationRecord.getStatus() == 0;

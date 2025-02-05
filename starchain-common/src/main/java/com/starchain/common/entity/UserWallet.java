@@ -30,8 +30,8 @@ public class UserWallet {
     private Long id;
     @ApiModelProperty(value = "用户ID", example = "12345")
     private Long userId;
-    @ApiModelProperty(value = "渠道Id", example = "12345")
-    private Long channelId;
+    @ApiModelProperty(value = "商家Id", example = "12345")
+    private Long businessId;
 
     @ApiModelProperty(value = "USDT 钱包地址", example = "1AaBbCcDdEeFfGgHh12345")
     private String address;

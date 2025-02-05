@@ -14,10 +14,10 @@ public interface ICardHolderService extends IService<CardHolder> {
      * 判断当前用户是否为持卡人
      *
      * @param userId
-     * @param channelId
+     * @param businessId
      * @return
      */
-    boolean isExitHolder(Long userId, Integer channelId);
+    boolean isExitHolder(Long userId, Integer businessId);
 
     /**
      * 添加持卡人

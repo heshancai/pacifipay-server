@@ -38,7 +38,7 @@ public class CardHolderController {
         if (ObjectUtils.isEmpty(cardHolderDto.getUserId())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
-        if (ObjectUtils.isEmpty(cardHolderDto.getChannelId())) {
+        if (ObjectUtils.isEmpty(cardHolderDto.getBusinessId())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
         // 创建持卡人
@@ -55,7 +55,7 @@ public class CardHolderController {
         if (ObjectUtils.isEmpty(cardHolderDto.getUserId())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
-        if (ObjectUtils.isEmpty(cardHolderDto.getChannelId())) {
+        if (ObjectUtils.isEmpty(cardHolderDto.getBusinessId())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
         if (ObjectUtils.isEmpty(cardHolderDto.getCardCode())) {
@@ -70,7 +70,7 @@ public class CardHolderController {
         LambdaQueryWrapper<CardHolder> cardHolderQueryWrapper = new LambdaQueryWrapper<>();
         cardHolderQueryWrapper.eq(CardHolder::getUserId, cardHolderDto.getUserId());
         cardHolderQueryWrapper.eq(CardHolder::getId, cardHolderDto.getId());
-        cardHolderQueryWrapper.eq(CardHolder::getChannelId, cardHolderDto.getChannelId());
+        cardHolderQueryWrapper.eq(CardHolder::getBusinessId, cardHolderDto.getBusinessId());
         cardHolderQueryWrapper.eq(CardHolder::getCardCode, cardHolderDto.getCardCode());
         cardHolderQueryWrapper.eq(CardHolder::getMerchantCardHolderId, cardHolderDto.getMerchantCardHolderId());
         cardHolderQueryWrapper.eq(CardHolder::getTpyshCardHolderId, cardHolderDto.getTpyshCardHolderId());

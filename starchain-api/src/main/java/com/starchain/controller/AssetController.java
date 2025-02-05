@@ -39,7 +39,7 @@ public class AssetController {
     @ApiOperation(value = "查询指定币种的钱包地址", notes = "查询指定币种的钱包地址")
     public ClientResponse address(@RequestBody UserWalletDto userWalletDto) {
         log.info("查询指定网络类型的USDT 钱包地址,coinName为:{}", userWalletDto.getUsdtNetwork());
-        if (userWalletDto.getUsdtNetwork() == null || userWalletDto.getUserId() == null || userWalletDto.getChannelId() == null) {
+        if (userWalletDto.getUsdtNetwork() == null || userWalletDto.getUserId() == null || userWalletDto.getBusinessId() == null) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
         // 获取充币地址

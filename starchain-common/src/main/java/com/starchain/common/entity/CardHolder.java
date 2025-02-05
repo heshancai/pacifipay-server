@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -16,7 +17,9 @@ import java.time.LocalDateTime;
 @Data
 @TableName("card_holder")
 @ApiModel(value = "CardHolder对象", description = "持卡人信息表")
-public class CardHolder {
+public class CardHolder implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
     @ApiModelProperty(value = "主键ID", example = "1")
@@ -28,8 +31,8 @@ public class CardHolder {
     @ApiModelProperty(value = "用户Id 第三方传递过来")
     private Long userId;
 
-    @ApiModelProperty(value = "渠道号", example = "100001")
-    private Long channelId;
+    @ApiModelProperty(value = "商家Id", example = "100001")
+    private Long businessId;
 
     @ApiModelProperty(value = "商户持卡人ID", example = "商户端生成")
     private String merchantCardHolderId;

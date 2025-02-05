@@ -181,7 +181,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             lambdaQueryWrapper.eq(CardHolder::getUserId, cardDto.getUserId());
             lambdaQueryWrapper.eq(CardHolder::getCardCode, cardDto.getCardCode());
             lambdaQueryWrapper.eq(CardHolder::getTpyshCardHolderId, cardDto.getTpyshCardHolderId());
-            lambdaQueryWrapper.eq(CardHolder::getChannelId, cardDto.getChannelId());
+            lambdaQueryWrapper.eq(CardHolder::getBusinessId, cardDto.getBusinessId());
             CardHolder cardHolder = cardHolderService.getOne(lambdaQueryWrapper);
             Assert.notNull(cardHolder, "持卡人不存在");
 
@@ -196,7 +196,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
 
             // 余额必须大于 0 且必须大于输入的金额
             BigDecimal orderAmount = cardDto.getOrderAmount().setScale(2, BigDecimal.ROUND_HALF_UP);
-            userWalletBalanceService.checkUserBalance(cardDto.getUserId(), cardDto.getChannelId(), orderAmount);
+            userWalletBalanceService.checkUserBalance(cardDto.getUserId(), cardDto.getBusinessId(), orderAmount);
             cardDto.setOrderAmount(orderAmount);
             // 封装传递参数
             cardDto.setOrderId(String.valueOf(idWorker.nextId()));
@@ -209,7 +209,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             cardRechargeRecord.setStatus(0);
             cardRechargeRecord.setUserId(cardDto.getUserId());
             cardRechargeRecord.setTpyshCardHolderId(cardDto.getTpyshCardHolderId());
-            cardRechargeRecord.setChannelId(cardDto.getChannelId());
+            cardRechargeRecord.setBusinessId(cardDto.getBusinessId());
             cardRechargeRecord.setCreateTime(LocalDateTime.now());
             cardRechargeRecord.setUpdateTime(LocalDateTime.now());
             // 处理成功 等待回调结果
@@ -297,7 +297,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         LambdaQueryWrapper<CardRechargeRecord> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(CardRechargeRecord::getCardId, cardDto.getCardId());
         lambdaQueryWrapper.eq(CardRechargeRecord::getUserId, cardDto.getUserId());
-        lambdaQueryWrapper.eq(CardRechargeRecord::getChannelId, cardDto.getChannelId());
+        lambdaQueryWrapper.eq(CardRechargeRecord::getBusinessId, cardDto.getBusinessId());
         lambdaQueryWrapper.orderByDesc(CardRechargeRecord::getId).last("LIMIT 1");
         CardRechargeRecord cardRechargeRecord = cardRechargeRecordService.getOne(lambdaQueryWrapper);
         return cardRechargeRecord != null && cardRechargeRecord.getStatus() == 0;

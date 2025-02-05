@@ -74,7 +74,7 @@ public class CardController {
     @PostMapping("/addCard")
     public ClientResponse addCard(@RequestBody CardDto cardDto) {
         // 检查当前用户卡数量是否超过 4张
-        Integer holderCardNum = cardService.checkCardNum(cardDto.getChannelId(), cardDto.getCardCode(), cardDto.getTpyshCardHolderId());
+        Integer holderCardNum = cardService.checkCardNum(cardDto.getBusinessId(), cardDto.getCardCode(), cardDto.getTpyshCardHolderId());
         if (holderCardNum >= 4) {
             return ResultGenerator.genFailResult("当前持卡人数量超过4张，无法创建新卡");
         }
@@ -101,7 +101,7 @@ public class CardController {
         if (cardDto.getTpyshCardHolderId() == null) {
             return ResultGenerator.genFailResult("dto 不能为null");
         }
-        if (cardDto.getChannelId() == null) {
+        if (cardDto.getBusinessId() == null) {
             return ResultGenerator.genFailResult("dto 不能为null");
         }
         if (cardDto.getOrderAmount() == null) {
@@ -115,7 +115,7 @@ public class CardController {
             return ResultGenerator.genFailResult("最新的卡充值未结束 无法进行新一轮充值");
         }
         //最新的汇款未结束 无法进行新一轮充值
-        if (remitApplicationRecordService.isRemitInProgress(cardDto.getUserId(), cardDto.getChannelId())) {
+        if (remitApplicationRecordService.isRemitInProgress(cardDto.getUserId(), cardDto.getBusinessId())) {
             return ResultGenerator.genFailResult("最新的汇款未结束 无法进行新一轮充值");
         }
         try {

@@ -54,7 +54,7 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
 
             // 2. 申请汇款记录是否存在 没有则抛出异常
             RemitApplicationRecord remitApplicationRecord = validateAndGetRecord(miPayRemitNotifyResponse);
-            UserWalletBalance userWalletBalance = userWalletBalanceService.getUserWalletBalance(remitApplicationRecord.getUserId(), remitApplicationRecord.getChannelId());
+            UserWalletBalance userWalletBalance = userWalletBalanceService.getUserWalletBalance(remitApplicationRecord.getUserId(), remitApplicationRecord.getBusinessId());
             Assert.notNull(userWalletBalance, "用户钱包余额信息不存在");
             // 3. 检查是否已经处理成功（幂等性）
             if (remitApplicationRecord.getStatus() == CreateStatusEnum.SUCCESS.getCode()) {

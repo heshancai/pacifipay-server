@@ -40,7 +40,7 @@ public class UserWalletServiceImpl extends ServiceImpl<UserWalletMapper, UserWal
         // 钱包地址判断
         LambdaQueryWrapper<UserWallet> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserWallet::getUserId, userWalletDto.getUserId());
-        queryWrapper.eq(UserWallet::getChannelId, userWalletDto.getChannelId());
+        queryWrapper.eq(UserWallet::getBusinessId, userWalletDto.getBusinessId());
         queryWrapper.eq(UserWallet::getUsdtNetwork, userWalletDto.getUsdtNetwork());
         queryWrapper.eq(UserWallet::getLockStatus, 1);
         UserWallet userWallet = this.getOne(queryWrapper);
@@ -52,7 +52,7 @@ public class UserWalletServiceImpl extends ServiceImpl<UserWalletMapper, UserWal
             userWallet = UserWallet.builder()
                     .userId(userWalletDto.getUserId())
                     .coinId(userWalletDto.getCoinId())
-                    .channelId(userWalletDto.getChannelId())
+                    .businessId(userWalletDto.getBusinessId())
                     .usdtNetwork(userWalletDto.getUsdtNetwork())
                     .address(newAddress)
                     .usdtNetwork(userWalletDto.getUsdtNetwork())
@@ -63,7 +63,7 @@ public class UserWalletServiceImpl extends ServiceImpl<UserWalletMapper, UserWal
             // 初始化钱包总余额
             UserWalletBalance userWalletBalance = UserWalletBalance.builder()
                     .userId(userWalletDto.getUserId())
-                    .channelId(userWalletDto.getChannelId())
+                    .businessId(userWalletDto.getBusinessId())
                     .balance(BigDecimal.ZERO)
                     .createTime(LocalDateTime.now())
                     .updateTime(LocalDateTime.now())

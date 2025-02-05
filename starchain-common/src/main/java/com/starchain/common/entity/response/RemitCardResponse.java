@@ -11,8 +11,8 @@ import lombok.Data;
  */
 @Data
 public class RemitCardResponse {
-    @ApiModelProperty(value = "用户Id 第三方传递过来")
-    private Long channelId;
+    @ApiModelProperty(value = "商家Id 第三方传递过来")
+    private Long businessId;
     @ApiModelProperty(value = "汇款类型编码", example = "UQR")
     private String remitCode;
     @ApiModelProperty(value = "汇款卡标识", example = "CARD12345")

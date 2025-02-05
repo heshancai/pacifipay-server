@@ -55,7 +55,7 @@ public class RemitCardController {
         if (remitCardDto.getUserId() == null) {
             return ResultGenerator.genFailResult("userId不能为空");
         }
-        if (remitCardDto.getChannelId() == null) {
+        if (remitCardDto.getBusinessId() == null) {
             return ResultGenerator.genFailResult("channelId不能为空");
         }
         if (remitCardDto.getRemitBankNo() == null) {
@@ -143,7 +143,7 @@ public class RemitCardController {
         if (remitCardDto.getUserId() == null) {
             return ResultGenerator.genFailResult("userId不能为空");
         }
-        if (remitCardDto.getChannelId() == null) {
+        if (remitCardDto.getBusinessId() == null) {
             return ResultGenerator.genFailResult("channelId不能为空");
         }
         try {
@@ -186,7 +186,7 @@ public class RemitCardController {
         if (ObjectUtils.isEmpty(remitApplicationRecordDto.getUserId())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
-        if (ObjectUtils.isEmpty(remitApplicationRecordDto.getChannelId())) {
+        if (ObjectUtils.isEmpty(remitApplicationRecordDto.getBusinessId())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
         if (ObjectUtils.isEmpty(remitApplicationRecordDto.getRemitCode())) {
@@ -213,7 +213,7 @@ public class RemitCardController {
         // 交易上一笔交易是否完成
         LambdaQueryWrapper<RemitApplicationRecord> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(RemitApplicationRecord::getUserId, remitApplicationRecordDto.getUserId());
-        queryWrapper.eq(RemitApplicationRecord::getChannelId, remitApplicationRecordDto.getChannelId());
+        queryWrapper.eq(RemitApplicationRecord::getBusinessId, remitApplicationRecordDto.getBusinessId());
         queryWrapper.eq(RemitApplicationRecord::getRemitCode, remitApplicationRecordDto.getRemitCode());
         queryWrapper.eq(RemitApplicationRecord::getToMoneyKind, remitApplicationRecordDto.getToMoneyKind());
         queryWrapper.orderByDesc(RemitApplicationRecord::getId).last("LIMIT 1");
@@ -223,7 +223,7 @@ public class RemitCardController {
         }
         try {
             // 校验用户钱包余额是否足够
-            userWalletBalanceService.checkUserBalance(remitApplicationRecordDto.getUserId(), remitApplicationRecordDto.getChannelId(), remitApplicationRecordDto.getToAmount());
+            userWalletBalanceService.checkUserBalance(remitApplicationRecordDto.getUserId(), remitApplicationRecordDto.getBusinessId(), remitApplicationRecordDto.getToAmount());
             Boolean result = remitApplicationRecordService.applyRemit(remitApplicationRecordDto);
             return ResultGenerator.genSuccessResult(result);
         } catch (Exception e) {

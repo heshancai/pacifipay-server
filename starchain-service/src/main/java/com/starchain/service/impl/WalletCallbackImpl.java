@@ -56,7 +56,7 @@ public class WalletCallbackImpl implements IWalletCallbackService {
             // 2. 获取用户钱包信息
             UserWallet userWallet = getUserWallet(walletRechargeCallbackResponse.getDepositAddress());
             Assert.notNull(userWallet, "用户钱包信息不存在");
-            UserWalletBalance userWalletBalance=userWalletBalanceService.getUserWalletBalance(userWallet.getUserId(), userWallet.getChannelId());
+            UserWalletBalance userWalletBalance=userWalletBalanceService.getUserWalletBalance(userWallet.getUserId(), userWallet.getBusinessId());
             Assert.notNull(userWalletBalance, "用户钱包余额信息不存在");
 
             // 3. 手续费
@@ -131,10 +131,10 @@ public class WalletCallbackImpl implements IWalletCallbackService {
      * 更新钱包余额
      */
     private void updateWalletBalance(UserWallet userWallet, BigDecimal actAmount) {
-        log.debug("更新钱包余额, 用户ID: {}, 渠道ID: {}, 增加余额: {}", userWallet.getUserId(), userWallet.getChannelId(), actAmount);
+        log.debug("更新钱包余额, 用户ID: {}, 渠道ID: {}, 增加余额: {}", userWallet.getUserId(), userWallet.getBusinessId(), actAmount);
         LambdaUpdateWrapper<UserWalletBalance> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(UserWalletBalance::getUserId, userWallet.getUserId())
-                .eq(UserWalletBalance::getChannelId, userWallet.getChannelId())
+                .eq(UserWalletBalance::getBusinessId, userWallet.getBusinessId())
                 .setSql("balance = balance + " + actAmount)
                 .set(UserWalletBalance::getUpdateTime, LocalDateTime.now());
         userWalletBalanceService.update(updateWrapper);

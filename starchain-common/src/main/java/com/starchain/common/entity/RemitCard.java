@@ -30,8 +30,8 @@ public class RemitCard {
     @ApiModelProperty(name = "用户ID", example = "123456")
     private Long userId;
 
-    @ApiModelProperty(name = "渠道ID", example = "987654")
-    private Long channelId;
+    @ApiModelProperty(name = "商家Id", example = "987654")
+    private Long businessId;
 
     @ApiModelProperty(name = "汇款类型编码", example = "LNR_IND")
     private String remitCode;

@@ -15,10 +15,10 @@ public interface ICardService extends IService<Card> {
      * 根据用户id和渠道id查询卡数量
      *
      * @param
-     * @param channelId
+     * @param businessId
      * @return
      */
-    Integer checkCardNum(Long channelId, String cardCode, String tpyshCardHolderId);
+    Integer checkCardNum(Long businessId, String cardCode, String tpyshCardHolderId);
 
     /**
      * 创建卡

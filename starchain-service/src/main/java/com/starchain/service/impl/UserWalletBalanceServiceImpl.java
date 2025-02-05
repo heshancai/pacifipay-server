@@ -44,7 +44,7 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
     public UserWalletBalance getUserWalletBalance(Long userId, Long channelId) {
         LambdaQueryWrapper<UserWalletBalance> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(UserWalletBalance::getUserId, userId);
-        queryWrapper.eq(UserWalletBalance::getChannelId, channelId);
+        queryWrapper.eq(UserWalletBalance::getBusinessId, channelId);
         return this.getOne(queryWrapper);
     }
 }

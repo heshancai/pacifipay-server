@@ -22,8 +22,8 @@ public class RemitApplicationRecordDto extends RemitApplicationRecord implements
 
     private Long userId;
 
-    @ApiModelProperty(name = "渠道ID", example = "987654")
-    private Long channelId;
+    @ApiModelProperty(name = "商家Id", example = "987654")
+    private Long businessId;
 
     @ApiModelProperty(value = "汇款类型编码", example = "ELR")
     private String remitCode;

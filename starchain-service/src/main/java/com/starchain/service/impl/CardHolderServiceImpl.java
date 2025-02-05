@@ -54,7 +54,7 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
 
             cardHolder.setMerchantCardHolderId(merchantCardHolderId);
             cardHolder.setUserId(cardHolderDto.getUserId());
-            cardHolder.setChannelId(cardHolderDto.getChannelId());
+            cardHolder.setBusinessId(cardHolderDto.getBusinessId());
 
             cardHolder.setFirstName(cardHolderDto.getFirstName());
             cardHolder.setLastName(cardHolderDto.getLastName());
@@ -96,7 +96,7 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
         cardHolderLambdaUpdateWrapper.eq(CardHolder::getId, cardHolderDto.getId());
         cardHolderLambdaUpdateWrapper.eq(CardHolder::getMerchantCardHolderId, cardHolderDto.getMerchantCardHolderId());
         cardHolderLambdaUpdateWrapper.eq(CardHolder::getTpyshCardHolderId, cardHolderDto.getTpyshCardHolderId());
-        cardHolderLambdaUpdateWrapper.eq(CardHolder::getChannelId, cardHolderDto.getChannelId());
+        cardHolderLambdaUpdateWrapper.eq(CardHolder::getBusinessId, cardHolderDto.getBusinessId());
 
         // 设置 firstName
         Optional.ofNullable(cardHolderDto.getFirstName()).ifPresent(firstName -> cardHolderLambdaUpdateWrapper.set(CardHolder::getFirstName, firstName));
@@ -140,10 +140,10 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
     }
 
     @Override
-    public boolean isExitHolder(Long userId, Integer channelId) {
+    public boolean isExitHolder(Long userId, Integer businessId) {
         LambdaQueryWrapper<CardHolder> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(CardHolder::getUserId, userId);
-        lambdaQueryWrapper.eq(CardHolder::getChannelId, channelId);
+        lambdaQueryWrapper.eq(CardHolder::getBusinessId, businessId);
         // 持卡人已存在
         if (this.getOne(lambdaQueryWrapper) != null) {
             return true;

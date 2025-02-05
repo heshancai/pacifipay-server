@@ -33,8 +33,8 @@ public class UserWalletBalance {
     @ApiModelProperty(value = "用户ID", example = "12345")
     private Long userId;
 
-    @ApiModelProperty(value = "渠道ID", example = "12345")
-    private Long channelId;
+    @ApiModelProperty(value = "商家Id", example = "12345")
+    private Long businessId;
 
     @ApiModelProperty(value = "地址余额", example = "总余额")
     private BigDecimal balance;

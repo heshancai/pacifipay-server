@@ -72,7 +72,7 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             RemitCard remitCard = new RemitCard();
             BeanUtils.copyProperties(remitCardResponse, remitCard);
             remitCard.setUserId(remitCardDto.getUserId());
-            remitCard.setChannelId(remitCardDto.getChannelId());
+            remitCard.setBusinessId(remitCardDto.getBusinessId());
             remitCard.setCreateTime(LocalDateTime.now());
             remitCard.setUpdateTime(LocalDateTime.now());
             remitCard.setCreateStatus(0);
@@ -124,8 +124,8 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
         if (ObjectUtils.isEmpty(remitCardDto.getUserId())) {
             throw new IllegalArgumentException("userId不能为空");
         }
-        if (ObjectUtils.isEmpty(remitCardDto.getChannelId())) {
-            throw new IllegalArgumentException("channelId不能为空");
+        if (ObjectUtils.isEmpty(remitCardDto.getBusinessId())) {
+            throw new IllegalArgumentException("businessId不能为空");
         }
         if (!StringUtils.hasText(remitCardDto.getRemitFirstName())) {
             throw new IllegalArgumentException("remitFirstName不能为空");

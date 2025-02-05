@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 
 @Slf4j
 @Data
-public class CardDto implements Serializable {
+public class CardDto extends PageDto implements Serializable {
     private static final long serialVersionUID = 1L;
     private String cardCode;
     private String saveOrderId;
@@ -27,6 +27,9 @@ public class CardDto implements Serializable {
     private String tpyshCardHolderId;
     @ApiModelProperty(value = "卡ID-银行卡端返回", example = "CARD123456")
     private String cardId;
+    @ApiModelProperty(value = "卡号-银行卡端返回", example = "1234567890123456")
+    private String cardNo;
+
     @ApiModelProperty(value = "用户Id", example = "CARD123456")
     private Long userId;
     @ApiModelProperty(value = "渠道Id", example = "CARD123456")

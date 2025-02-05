@@ -1,5 +1,6 @@
 package com.starchain.common.dubbo;
 
+import com.starchain.common.entity.dto.CardDto;
 import com.starchain.common.result.ClientResponse;
 
 /**
@@ -8,5 +9,9 @@ import com.starchain.common.result.ClientResponse;
  * @Description
  */
 public interface ICardManagerProvider {
-    ClientResponse queryCardManagePage();
+    /**
+     * 查询卡列表
+     * @return
+     */
+    ClientResponse queryCardManagePage(CardDto cardDto);
 }

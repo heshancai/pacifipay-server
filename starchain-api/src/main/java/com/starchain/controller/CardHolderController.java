@@ -85,7 +85,7 @@ public class CardHolderController {
     /**
      * 查询持卡人
      */
-    @ApiOperation(value = "查询持卡人")
+    @ApiOperation(value = "查询持卡人详情")
     @PostMapping("/getCardHolder")
     public ClientResponse getCardHolder(@RequestBody CardHolderDto cardHolderDto) {
         if (ObjectUtils.isEmpty(cardHolderDto.getCardCode())) {

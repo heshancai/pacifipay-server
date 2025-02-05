@@ -39,7 +39,7 @@ public class HttpUtils {
             // 银行卡端公钥进行加密
             String encrypt = RSA2048Encrypt.encrypt(json, RSA2048Encrypt.getPublicKey(serverPublicKey));
             // 加签
-            String sign = TpyshUtils.sign(encrypt);
+            String sign = TpyshUtils.sign(encrypt,privateKey);
 
             // 构建请求
             HttpPost httpPost = new HttpPost(urlPath);
@@ -128,7 +128,7 @@ public class HttpUtils {
             // 银行卡端公钥进行加密
             String encrypt = RSA2048Encrypt.encrypt(json, RSA2048Encrypt.getPublicKey(serverPublicKey));
             // 加签私钥加签 服务端用我的公钥进行验签
-            String sign = TpyshUtils.sign(encrypt);
+            String sign = TpyshUtils.sign(encrypt,privateKey);
 
             // 构建请求
             HttpPost httpPost = new HttpPost(urlPath);

@@ -30,6 +30,7 @@ wallet:
 dubbo:
   application:
     name: dubbo-starChain-pacificPay-provider # 应用名称
+    serialize-check-status: WARN # dubbo 序列化检查设置为警告
   protocol:
     name: dubbo # 协议名称
     port: 20880 # 服务暴露端口

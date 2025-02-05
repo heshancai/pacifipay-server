@@ -45,10 +45,10 @@ public class CardManagerProvider implements ICardManagerProvider {
             queryWrapper.eq(Card::getCardNo, dto.getCardNo());
         }
 
-        Page<Card> advertiseConfigPage = new Page<>(dto.getPageNum(), dto.getPageSize());
+        Page<Card> cardPage = new Page<>(dto.getPageNum(), dto.getPageSize());
 
         try {
-            Page<Card> page = cardService.page(advertiseConfigPage, queryWrapper);
+            Page<Card> page = cardService.page(cardPage, queryWrapper);
             return ResultGenerator.genSuccessResult(page);
         } catch (Exception e) {
             log.error("服务错误:{}", e);

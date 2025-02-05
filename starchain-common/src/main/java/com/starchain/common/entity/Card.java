@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -21,7 +22,9 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 @TableName("card")
 @ApiModel(value = "Card", description = "虚拟卡实体信息")
-public class Card {
+public class Card implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
     @ApiModelProperty(value = "主键ID", example = "1")

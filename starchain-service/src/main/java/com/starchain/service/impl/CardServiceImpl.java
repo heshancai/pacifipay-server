@@ -8,10 +8,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.common.config.PacificPayConfig;
 import com.starchain.common.constants.CardUrlConstants;
 import com.starchain.common.entity.Card;
-import com.starchain.common.entity.CardHolder;
 import com.starchain.common.entity.CardRechargeRecord;
 import com.starchain.common.entity.dto.CardDto;
 import com.starchain.common.enums.CardStatusEnum;
+import com.starchain.common.exception.StarChainException;
 import com.starchain.common.util.HttpUtils;
 import com.starchain.common.util.OrderIdGenerator;
 import com.starchain.dao.CardMapper;
@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -38,8 +37,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     @Autowired
     private PacificPayConfig pacificPayConfig;
 
-    @Autowired
-    private ICardHolderService cardHolderService;
+
 
     @Autowired
     private IUserWalletBalanceService userWalletBalanceService;
@@ -175,25 +173,6 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     public CardRechargeRecord applyRecharge(CardDto cardDto) {
         String token = null;
         try {
-
-            // 持卡人校验
-            LambdaQueryWrapper<CardHolder> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.eq(CardHolder::getUserId, cardDto.getUserId());
-            lambdaQueryWrapper.eq(CardHolder::getCardCode, cardDto.getCardCode());
-            lambdaQueryWrapper.eq(CardHolder::getTpyshCardHolderId, cardDto.getTpyshCardHolderId());
-            lambdaQueryWrapper.eq(CardHolder::getBusinessId, cardDto.getBusinessId());
-            CardHolder cardHolder = cardHolderService.getOne(lambdaQueryWrapper);
-            Assert.notNull(cardHolder, "持卡人不存在");
-
-            // 卡校验 必须为使用在才能充值
-            LambdaQueryWrapper<Card> cardLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            cardLambdaQueryWrapper.eq(Card::getCardId, cardDto.getCardId());
-            cardLambdaQueryWrapper.eq(Card::getTpyshCardHolderId, cardDto.getTpyshCardHolderId());
-            cardLambdaQueryWrapper.eq(Card::getCreateStatus, 1);
-            cardLambdaQueryWrapper.eq(Card::getCardStatus, CardStatusEnum.NORMAL.getCardStatus());
-            Card card = this.getOne(cardLambdaQueryWrapper);
-            Assert.notNull(card, "卡不存在");
-
             // 余额必须大于 0 且必须大于输入的金额
             BigDecimal orderAmount = cardDto.getOrderAmount().setScale(2, BigDecimal.ROUND_HALF_UP);
             userWalletBalanceService.checkUserBalance(cardDto.getUserId(), cardDto.getBusinessId(), orderAmount);
@@ -217,8 +196,8 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             return cardRechargeRecord;
         } catch (Exception e) {
             log.error("服务异常", e);
+            throw new StarChainException(e.getMessage());
         }
-        return null;
     }
 
     // 锁卡

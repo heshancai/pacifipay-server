@@ -39,7 +39,7 @@ public class RemitCardControllerTest {
          */
         RemitCardDto remitCard = new RemitCardDto();
         remitCard.setUserId(10000L);
-        remitCard.setChannelId(1000001L);
+        remitCard.setBusinessId(1000001L);
         remitCard.setRemitFirstName("Progressive");
         remitCard.setRemitLastName("Solutions");
         remitCard.setRemitBankNo("GB55TCCL12345618629629");
@@ -74,7 +74,7 @@ public class RemitCardControllerTest {
          */
         RemitCardDto remitCard = new RemitCardDto();
         remitCard.setUserId(10000L);
-        remitCard.setChannelId(1000001L);
+        remitCard.setBusinessId(1000001L);
         remitCard.setRemitCode("UQR_CNH");
         remitCard.setCardId("1882057489940217856");
         remitCard.setTpyCardId("2025012114081850c57");
@@ -105,7 +105,7 @@ public class RemitCardControllerTest {
         RemitApplicationRecordDto remitApplicationRecordDto = new RemitApplicationRecordDto();
         remitApplicationRecordDto.setToAmount(BigDecimal.valueOf(10));
         remitApplicationRecordDto.setUserId(10000L);
-        remitApplicationRecordDto.setChannelId(987654L);
+        remitApplicationRecordDto.setBusinessId(987654L);
         remitApplicationRecordDto.setToMoneyKind(MoneyKindEnum.CNY.getMoneyKindCode());
         remitApplicationRecordDto.setRemitCode(RemitCodeEnum.UQR_CNH.getRemitCode());
         remitApplicationRecordDto.setExtraParams(jsonObject);

@@ -1,13 +1,13 @@
 package com.starchain.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.common.entity.Card;
 import com.starchain.common.entity.CardOpenCallbackRecord;
 import com.starchain.common.entity.response.MiPayCardNotifyResponse;
 import com.starchain.common.enums.CardStatusEnum;
 import com.starchain.common.enums.MiPayNotifyType;
+import com.starchain.common.exception.StarChainException;
 import com.starchain.dao.CardOpenCallbackRecordMapper;
 import com.starchain.service.ICardOpenCallbackRecordService;
 import com.starchain.service.ICardService;
@@ -81,6 +81,12 @@ public class CardOpenCallbackRecordServiceImpl extends ServiceImpl<CardOpenCallb
                 cardOpenCallbackRecord.setCardCode(miPayCardNotifyResponse.getCardCode());
                 cardOpenCallbackRecord.setBusinessType(miPayCardNotifyResponse.getBusinessType());
                 cardOpenCallbackRecord.setCardId(miPayCardNotifyResponse.getCardId());
+                cardOpenCallbackRecord.setCardNo(miPayCardNotifyResponse.getCardNo());
+                cardOpenCallbackRecord.setCardCvn(miPayCardNotifyResponse.getCardCvn());
+                cardOpenCallbackRecord.setCardExpDate(miPayCardNotifyResponse.getCardExpDate());
+                cardOpenCallbackRecord.setActual(actual);
+                cardOpenCallbackRecord.setStatus(miPayCardNotifyResponse.getStatus());
+                cardOpenCallbackRecord.setStatusDesc(miPayCardNotifyResponse.getStatusDesc());
                 cardOpenCallbackRecord.setLocalCreateTime(LocalDateTime.now());
                 cardOpenCallbackRecord.setLocalUpdateTime(LocalDateTime.now());
                 this.save(cardOpenCallbackRecord);
@@ -90,39 +96,44 @@ public class CardOpenCallbackRecordServiceImpl extends ServiceImpl<CardOpenCallb
             }
 
             // 5. 处理回调状态
-            if (card.getCardStatus().equals(CardStatusEnum.ACTIVATING.getCardStatus()) && card.getCreateStatus() == 0 && "SUCCESS".equals(miPayCardNotifyResponse.getStatus())) {
-                // 5.1 修改卡状态为开通成功
-                card.setCardStatus(CardStatusEnum.NORMAL.getCardStatus());
-                card.setCreateStatus(1);
-                card.setLocalUpdateTime(LocalDateTime.now());
-                card.setFinishTime(LocalDateTime.now());
-                cardService.updateById(card);
-
-                // 5.2 更新回调记录
-                cardOpenCallbackRecord.setLocalUpdateTime(LocalDateTime.now());
-                cardOpenCallbackRecord.setFinishTime(LocalDateTime.now());
-                this.updateById(cardOpenCallbackRecord);
-
-                log.info("卡状态更新为开通成功, 卡ID: {}", card.getCardId());
-                return true;
-            } else if ("FAILED".equals(miPayCardNotifyResponse.getStatus())) {
-                // 5.3 处理失败状态
-                LambdaUpdateWrapper<CardOpenCallbackRecord> updateWrapper = new LambdaUpdateWrapper<>();
-                updateWrapper.eq(CardOpenCallbackRecord::getNotifyId, cardOpenCallbackRecord.getNotifyId());
-                updateWrapper.setSql("retries = retries + 1");
-                updateWrapper.set(CardOpenCallbackRecord::getLocalUpdateTime, LocalDateTime.now());
-                this.update(updateWrapper);
-
-                log.warn("卡开通失败, 通知ID: {}, 重试次数: {}", cardOpenCallbackRecord.getNotifyId(), cardOpenCallbackRecord.getRetries());
-                return false;
+            switch (miPayCardNotifyResponse.getStatus()) {
+                case "SUCCESS":
+                    if (card.getCardStatus().equals(CardStatusEnum.ACTIVATING.getCardStatus()) && card.getCreateStatus() == 0) {
+                        // 5.1 修改卡状态为开通成功
+                        card.setCardStatus(CardStatusEnum.NORMAL.getCardStatus());
+                        card.setCreateStatus(1);
+                        updateCardAndCallbackRecord(card, cardOpenCallbackRecord);
+                        log.info("卡状态更新为开通成功, 卡ID: {}", card.getCardId());
+                        return true;
+                    }
+                    break;
+                case "FAILED":
+                    // 5.3 处理失败状态
+                    card.setCardStatus(CardStatusEnum.INIT_FAIL.getCardStatus());
+                    card.setCreateStatus(2);
+                    updateCardAndCallbackRecord(card, cardOpenCallbackRecord);
+                    log.warn("卡开通失败, 通知ID: {}, 失败原因: {}", cardOpenCallbackRecord.getNotifyId(), miPayCardNotifyResponse.getStatusDesc());
+                    return true;
+                default:
+                    log.debug("未知状态: {}", miPayCardNotifyResponse.getStatus());
+                    break;
             }
 
             log.info("回调处理完成, 通知ID: {}", miPayCardNotifyResponse.getNotifyId());
             return true;
         } catch (Exception e) {
             log.error("卡开通回调处理失败, 通知ID: {}, 错误信息: {}", miPayCardNotifyResponse.getNotifyId(), e.getMessage(), e);
-            throw new RuntimeException("卡开通回调处理失败", e);
+            throw new StarChainException("卡开通回调处理失败");
         }
     }
 
+    private void updateCardAndCallbackRecord(Card card, CardOpenCallbackRecord cardOpenCallbackRecord) {
+        card.setLocalUpdateTime(LocalDateTime.now());
+        card.setFinishTime(LocalDateTime.now());
+        cardService.updateById(card);
+
+        cardOpenCallbackRecord.setLocalUpdateTime(LocalDateTime.now());
+        cardOpenCallbackRecord.setFinishTime(LocalDateTime.now());
+        this.updateById(cardOpenCallbackRecord);
+    }
 }

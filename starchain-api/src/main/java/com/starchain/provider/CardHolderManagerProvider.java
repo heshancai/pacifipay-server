@@ -50,4 +50,6 @@ public class CardHolderManagerProvider implements ICardHolderManagerProvider {
             return ResultGenerator.genFailResult("服务错误！" + e.getMessage());
         }
     }
+
+
 }

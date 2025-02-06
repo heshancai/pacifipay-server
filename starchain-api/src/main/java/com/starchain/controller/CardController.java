@@ -7,20 +7,19 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.starchain.common.config.PacificPayConfig;
 import com.starchain.common.constants.CardUrlConstants;
 import com.starchain.common.entity.Card;
+import com.starchain.common.entity.CardHolder;
 import com.starchain.common.entity.CardRechargeRecord;
 import com.starchain.common.entity.MerchantWallet;
 import com.starchain.common.entity.dto.CardDto;
 import com.starchain.common.entity.dto.TradeDetailDto;
 import com.starchain.common.entity.response.TradeDetailResponse;
 import com.starchain.common.enums.CardStatusEnum;
+import com.starchain.common.enums.CreateStatusEnum;
 import com.starchain.common.enums.MoneyKindEnum;
 import com.starchain.common.result.ClientResponse;
 import com.starchain.common.result.ResultGenerator;
 import com.starchain.common.util.HttpUtils;
-import com.starchain.service.ICardRechargeRecordService;
-import com.starchain.service.ICardService;
-import com.starchain.service.IMerchantWalletService;
-import com.starchain.service.IRemitApplicationRecordService;
+import com.starchain.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +55,9 @@ public class CardController {
 
     @Autowired
     private ICardRechargeRecordService cardRechargeRecordService;
+
+    @Autowired
+    private ICardHolderService cardHolderService;
 
     @Autowired
     private IRemitApplicationRecordService remitApplicationRecordService;
@@ -110,22 +112,58 @@ public class CardController {
         if (cardDto.getOrderAmount().compareTo(BigDecimal.ZERO) <= 0) {
             return ResultGenerator.genFailResult("输入的金额必须大于0");
         }
-        //最新的卡充值未结束 无法进行新一轮充值
+
+        // 持卡人合法性校验
+        CardHolder cardHolder = validateCardHolder(cardDto);
+        if (cardHolder == null) {
+            return ResultGenerator.genFailResult("持卡人不存在");
+        }
+
+        // 卡合法性校验
+        Card card = validateCard(cardDto);
+        if (card == null) {
+            return ResultGenerator.genFailResult("卡状态异常 无法充值");
+        }
+
+        // 检查充值状态
         if (cardService.isRechargeInProgress(cardDto)) {
             return ResultGenerator.genFailResult("最新的卡充值未结束 无法进行新一轮充值");
         }
-        //最新的汇款未结束 无法进行新一轮充值
+
+        // 检查汇款状态
         if (remitApplicationRecordService.isRemitInProgress(cardDto.getUserId(), cardDto.getBusinessId())) {
             return ResultGenerator.genFailResult("最新的汇款未结束 无法进行新一轮充值");
         }
+
         try {
             // 进行卡充值
             CardRechargeRecord rechargeRecord = cardService.applyRecharge(cardDto);
             return ResultGenerator.genSuccessResult(rechargeRecord);
         } catch (Exception e) {
-            log.error("查询卡失败", e);
+            log.error("查询卡失败, cardDto: {}", cardDto, e);
             return ResultGenerator.genFailResult(e.getMessage());
         }
+    }
+
+    // 持卡人校验逻辑封装
+    private CardHolder validateCardHolder(CardDto cardDto) {
+        LambdaQueryWrapper<CardHolder> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(CardHolder::getUserId, cardDto.getUserId())
+                .eq(CardHolder::getCardCode, cardDto.getCardCode())
+                .eq(CardHolder::getTpyshCardHolderId, cardDto.getTpyshCardHolderId())
+                .eq(CardHolder::getBusinessId, cardDto.getBusinessId())
+                .eq(CardHolder::getStatus, CreateStatusEnum.SUCCESS.getCode());
+        return cardHolderService.getOne(lambdaQueryWrapper);
+    }
+
+    // 卡校验逻辑封装
+    private Card validateCard(CardDto cardDto) {
+        LambdaQueryWrapper<Card> cardLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        cardLambdaQueryWrapper.eq(Card::getCardId, cardDto.getCardId())
+                .eq(Card::getTpyshCardHolderId, cardDto.getTpyshCardHolderId())
+                .eq(Card::getCreateStatus, CreateStatusEnum.SUCCESS.getCode())
+                .eq(Card::getCardStatus, CardStatusEnum.NORMAL.getCardStatus());
+        return cardService.getOne(cardLambdaQueryWrapper);
     }
 
 
@@ -309,7 +347,7 @@ public class CardController {
             Boolean result = cardService.updateLimit(cardDto);
             return ResultGenerator.genSuccessResult(result);
         } catch (Exception e) {
-            log.error("申请销卡失败", e);
+            log.error("修改卡限额失败", e);
             return ResultGenerator.genFailResult("申请销卡失败");
         }
     }

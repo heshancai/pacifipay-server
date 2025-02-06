@@ -10,8 +10,33 @@ import com.starchain.common.result.ClientResponse;
  */
 public interface ICardManagerProvider {
     /**
-     * 查询卡列表
+     * 卡开通记录列表
+     *
      * @return
      */
     ClientResponse queryCardManagePage(CardDto cardDto);
+
+
+    /**
+     * 修改卡限额
+     *
+     * @param cardDto
+     * @return
+     */
+    ClientResponse updateLimit(CardDto cardDto);
+
+
+    /**
+     * 锁定卡
+     * @param cardDto
+     * @return
+     */
+    ClientResponse lockCard(CardDto cardDto);
+
+    /**
+     * 解锁卡
+     * @param cardDto
+     * @return
+     */
+    ClientResponse unlockCard(CardDto cardDto);
 }

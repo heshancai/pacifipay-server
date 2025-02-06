@@ -1,7 +1,6 @@
 package com.starchain.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.common.entity.Card;
 import com.starchain.common.entity.CardCancelCallbackRecord;
@@ -58,6 +57,7 @@ public class CardCancelCallbackRecordServiceImpl extends ServiceImpl<CardCancelC
             cardQueryWrapper.eq(Card::getCardCode, miPayCardNotifyResponse.getCardCode());
             Card card = cardService.getOne(cardQueryWrapper);
             Assert.isTrue(card != null, "卡信息不存在");
+            Assert.isTrue(card.getCardStatus().equals(CardStatusEnum.NORMAL.getCardStatus()), "卡无须注销");
             log.info("卡信息校验通过, 卡ID: {}", miPayCardNotifyResponse.getCardId());
 
             // 4. 查询或创建回调记录
@@ -76,6 +76,8 @@ public class CardCancelCallbackRecordServiceImpl extends ServiceImpl<CardCancelC
                 cardCancelCallbackRecord.setReturnAmount((BigDecimal) miPayCardNotifyResponse.getAmount().get("returnAmount"));
                 cardCancelCallbackRecord.setHandleFeeAmount((BigDecimal) miPayCardNotifyResponse.getAmount().get("handleFeeAmount"));
                 cardCancelCallbackRecord.setCardId(miPayCardNotifyResponse.getCardId());
+                cardCancelCallbackRecord.setStatus(miPayCardNotifyResponse.getStatus());
+                cardCancelCallbackRecord.setStatusDesc(miPayCardNotifyResponse.getStatusDesc());
                 cardCancelCallbackRecord.setCreateTime(LocalDateTime.now());
                 cardCancelCallbackRecord.setUpdateTime(LocalDateTime.now());
                 this.save(cardCancelCallbackRecord);
@@ -85,12 +87,9 @@ public class CardCancelCallbackRecordServiceImpl extends ServiceImpl<CardCancelC
             }
 
             // 5. 处理回调状态
-            if (card.getCardStatus().equals(CardStatusEnum.NORMAL.getCardStatus())
-                    && "SUCCESS".equals(miPayCardNotifyResponse.getStatus())
-                    && "CardCancel success".equals(miPayCardNotifyResponse.getStatusDesc())) {
+            if ("SUCCESS".equals(miPayCardNotifyResponse.getStatus()) && "CardCancel success".equals(miPayCardNotifyResponse.getStatusDesc())) {
                 // 5.1 销卡成功
-                card.setCardStatus(CardStatusEnum.NORMAL.getCardStatus());
-                card.setCreateStatus(3);
+                card.setCardStatus(CardStatusEnum.CANCELLED.getCardStatus());
                 card.setLocalUpdateTime(LocalDateTime.now());
                 card.setFinishTime(LocalDateTime.now());
                 card.setCancelTime(LocalDateTime.now());
@@ -104,18 +103,9 @@ public class CardCancelCallbackRecordServiceImpl extends ServiceImpl<CardCancelC
 
                 log.info("卡状态更新为开通成功, 卡ID: {}", card.getCardId());
                 return true;
-            } else if ("FAILED".equals(miPayCardNotifyResponse.getStatus())) {
-                // 5.3 处理失败状态
-                LambdaUpdateWrapper<CardCancelCallbackRecord> updateWrapper = new LambdaUpdateWrapper<>();
-                updateWrapper.eq(CardCancelCallbackRecord::getNotifyId, cardCancelCallbackRecord.getNotifyId());
-                updateWrapper.setSql("retries = retries + 1");
-                updateWrapper.set(CardCancelCallbackRecord::getUpdateTime, LocalDateTime.now());
-                this.update(updateWrapper);
-
-                log.warn("卡开通失败, 通知ID: {}, 重试次数: {}", cardCancelCallbackRecord.getNotifyId(), cardCancelCallbackRecord.getRetries());
-                return false;
             }
 
+            // 失败状态直接记录 直接进行返回
             log.info("回调处理完成, 通知ID: {}", miPayCardNotifyResponse.getNotifyId());
             return true;
         } catch (Exception e) {

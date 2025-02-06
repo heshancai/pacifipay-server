@@ -1,7 +1,6 @@
 package com.starchain.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.common.entity.UserWalletBalance;
 import com.starchain.common.exception.StarChainException;
@@ -23,11 +22,10 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
     @Override
     public void checkUserBalance(Long userId, Long channelId, BigDecimal saveAmount) {
         log.info("checkUserBalance userId:{}, channelId:{}, saveAmount:{}", userId, channelId, saveAmount);
-
-        UserWalletBalance userWalletBalance = this.getOne(new QueryWrapper<UserWalletBalance>()
-                .eq("user_id", userId)
-                .eq("channel_id", channelId));
-
+        LambdaQueryWrapper<UserWalletBalance> userWalletBalanceLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        userWalletBalanceLambdaQueryWrapper.eq(UserWalletBalance::getUserId, userId);
+        userWalletBalanceLambdaQueryWrapper.eq(UserWalletBalance::getBusinessId, channelId);
+        UserWalletBalance userWalletBalance = this.getOne(userWalletBalanceLambdaQueryWrapper);
         if (userWalletBalance == null) {
             throw new RuntimeException("User wallet balance not found");
         }
@@ -35,7 +33,7 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
         BigDecimal balance = userWalletBalance.getBalance();
 
         // 钱包余额必须大于等于汇款金额+手续费（1 USD）
-        if ( balance.compareTo(saveAmount.add(BigDecimal.ONE)) < 0) {
+        if (balance.compareTo(saveAmount.add(BigDecimal.ONE)) < 0) {
             throw new StarChainException("余额不足");
         }
     }

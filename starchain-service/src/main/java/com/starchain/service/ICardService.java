@@ -79,5 +79,10 @@ public interface ICardService extends IService<Card> {
     Boolean updateLimit(CardDto cardDto);
 
 
+    /**
+     * 判断卡充值是否在处理中
+     * @param cardDto
+     * @return
+     */
     boolean isRechargeInProgress(CardDto cardDto);
 }

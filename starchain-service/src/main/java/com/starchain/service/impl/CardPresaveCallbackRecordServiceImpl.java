@@ -1,7 +1,6 @@
 package com.starchain.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.common.entity.Card;
 import com.starchain.common.entity.CardPresaveCallbackRecord;
@@ -59,10 +58,10 @@ public class CardPresaveCallbackRecordServiceImpl extends ServiceImpl<CardPresav
             CardPresaveCallbackRecord cardPresaveCallbackRecord = createOrUpdateCallbackRecord(miPayCardNotifyResponse);
 
             // 6. 处理开卡预存
-            return handleRechargeStatus(miPayCardNotifyResponse, cardPresaveCallbackRecord);
+            return true;
         } catch (Exception e) {
-            log.error("卡开通回调处理失败, 通知ID: {}, 错误信息: {}", miPayCardNotifyResponse.getNotifyId(), e.getMessage(), e);
-            throw new StarChainException("卡开通回调处理失败");
+            log.error("卡预存回调处理失败, 通知ID: {}, 错误信息: {}", miPayCardNotifyResponse.getNotifyId(), e.getMessage(), e);
+            throw new StarChainException("卡预存回调处理失败");
         }
     }
 
@@ -113,9 +112,9 @@ public class CardPresaveCallbackRecordServiceImpl extends ServiceImpl<CardPresav
             callbackRecord.setCardNo(response.getCardNo());
             callbackRecord.setMchOrderId(response.getMchOrderId());
             callbackRecord.setActual((BigDecimal) response.getAmount().get("actual"));
-            callbackRecord.setCreateTime(LocalDateTime.now());
             callbackRecord.setStatus(response.getStatus());
             callbackRecord.setStatusDesc(response.getStatusDesc());
+            callbackRecord.setCreateTime(LocalDateTime.now());
             callbackRecord.setUpdateTime(LocalDateTime.now());
             this.save(callbackRecord);
             log.info("创建新的回调记录, 通知ID: {}", response.getNotifyId());
@@ -125,32 +124,4 @@ public class CardPresaveCallbackRecordServiceImpl extends ServiceImpl<CardPresav
         return callbackRecord;
     }
 
-    // 处理回调记录状态
-    private boolean handleRechargeStatus(MiPayCardNotifyResponse response, CardPresaveCallbackRecord rechargeRecord) {
-        if (CardStatusDescEnum.SUCCESS.getDescription().equals(response.getStatus())) {
-
-            // 更新回调记录
-            LambdaUpdateWrapper<CardPresaveCallbackRecord> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(CardPresaveCallbackRecord::getNotifyId, response.getNotifyId())
-                    .set(CardPresaveCallbackRecord::getStatusDesc, response.getStatusDesc())
-                    .set(CardPresaveCallbackRecord::getStatus, response.getStatus())
-                    .set(CardPresaveCallbackRecord::getUpdateTime, LocalDateTime.now());
-            return this.update(updateWrapper);
-        } else if (CardStatusDescEnum.FAILED.getDescription().equals(response.getStatus())) {
-            // 处理失败状态
-            handleFailedStatus(rechargeRecord);
-            return false;
-        }
-        log.info("回调处理完成, 无须重复处理,通知ID: {}", response.getNotifyId());
-        return true;
-    }
-
-    // 处理失败状态
-    private void handleFailedStatus(CardPresaveCallbackRecord callbackRecord) {
-        LambdaUpdateWrapper<CardPresaveCallbackRecord> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(CardPresaveCallbackRecord::getNotifyId, callbackRecord.getNotifyId())
-                .setSql("retries = retries + 1")
-                .set(CardPresaveCallbackRecord::getUpdateTime, LocalDateTime.now());
-        this.update(updateWrapper);
-    }
 }

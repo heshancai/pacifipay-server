@@ -103,6 +103,7 @@ public class CardTradeCallbackRecordServiceImpl extends ServiceImpl<CardTradeCal
             callbackRecord.setCreateTime(LocalDateTime.now());
             callbackRecord.setUpdateTime(LocalDateTime.now());
             this.save(callbackRecord);
+            // 手续费详情 记录在另外的表
             JSONObject feeDetailMap = (JSONObject) response.getAmount().get("feeDetail");
             BigDecimal gatewayFee = (BigDecimal) feeDetailMap.get("gatewayFee");
             BigDecimal verifyFee = (BigDecimal) feeDetailMap.get("verifyFee");
@@ -162,8 +163,8 @@ public class CardTradeCallbackRecordServiceImpl extends ServiceImpl<CardTradeCal
     private void handleFailedStatus(CardTradeCallbackRecord callbackRecord) {
         LambdaUpdateWrapper<CardTradeCallbackRecord> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(CardTradeCallbackRecord::getNotifyId, callbackRecord.getNotifyId())
-                .setSql("retries = retries + 1")
-                .set(CardTradeCallbackRecord::getUpdateTime, LocalDateTime.now());
+                .set(CardTradeCallbackRecord::getUpdateTime, LocalDateTime.now())
+                .set(CardTradeCallbackRecord::getFinishTime, LocalDateTime.now());
         this.update(updateWrapper);
     }
 }

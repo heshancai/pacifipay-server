@@ -11,6 +11,7 @@ import com.starchain.common.entity.response.MiPayRemitNotifyResponse;
 import com.starchain.common.enums.CardStatusDescEnum;
 import com.starchain.common.enums.CreateStatusEnum;
 import com.starchain.common.enums.MiPayNotifyType;
+import com.starchain.common.enums.TransactionTypeEnum;
 import com.starchain.common.exception.StarChainException;
 import com.starchain.common.util.DateUtil;
 import com.starchain.dao.RemitCallbackRecordMapper;
@@ -43,6 +44,7 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
 
     @Autowired
     private IUserWalletTransactionService userWalletTransactionService;
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean callBack(String callBackJson) {
@@ -65,7 +67,7 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
             RemitCallbackRecord callbackRecord = createOrUpdateCallbackRecord(miPayRemitNotifyResponse);
 
             // 5.记录汇款交易流水
-            createUserWalletTransaction(userWalletBalance,remitApplicationRecord, callbackRecord);
+            createUserWalletTransaction(userWalletBalance, remitApplicationRecord, callbackRecord);
 
             // 6.如果对用户钱包余额进行扣款
             return handleRechargeStatus(miPayRemitNotifyResponse, remitApplicationRecord, callbackRecord);
@@ -93,8 +95,8 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
                 .fee(handlingFeeAmount)
                 .actAmount(actAmount)
                 .finaBalance(finalBalance)
-                .type(3)
-                .businessId(callbackRecord.getNotifyId())
+                .type(TransactionTypeEnum.GLOBAL_REMITTANCE.getCode())
+                .businessNumber(callbackRecord.getNotifyId())
                 .partitionKey(DateUtil.getMonth())
                 .remark("汇款")
                 .createTime(LocalDateTime.now())

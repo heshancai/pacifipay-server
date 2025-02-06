@@ -36,7 +36,7 @@ class StarchainPacificpayServerApplicationTests {
     @Test
     void contextLoads() {
         CardHolderDto cardHolder = new CardHolderDto();
-        cardHolder.setChannelId(100000L);
+        cardHolder.setBusinessId(100000L);
         cardHolder.setUserId(100001L);
         cardHolder.setFirstName("张");
         cardHolder.setLastName("三");
@@ -68,7 +68,7 @@ class StarchainPacificpayServerApplicationTests {
         cardHolder.setCardCode("TpyMDN6");
         cardHolder.setTpyshCardHolderId("2025010811465785377");
         cardHolder.setUserId(10000L);
-        cardHolder.setChannelId(100000L);
+        cardHolder.setBusinessId(100000L);
         ClientResponse cardHolder1 = cardController.addCard(cardHolder);
         System.out.println(cardHolder1);
     }
@@ -81,7 +81,7 @@ class StarchainPacificpayServerApplicationTests {
         cardHolder.setCardCode("TpyMDN8");
         cardHolder.setTpyshCardHolderId("2025010811491487397");
         cardHolder.setUserId(10000L);
-        cardHolder.setChannelId(100000L);
+        cardHolder.setBusinessId(100000L);
         cardHolder.setFirstName("hsc");
         cardHolder.setLastName("starChain");
         cardHolder.setId(13L);
@@ -121,7 +121,7 @@ class StarchainPacificpayServerApplicationTests {
         cardDto.setCardCode("TpyMDN6");
         cardDto.setUserId(10000L);
         cardDto.setTpyshCardHolderId("2025010811491487397");
-        cardDto.setChannelId(100000L);
+        cardDto.setBusinessId(100000L);
         cardDto.setOrderAmount(BigDecimal.TEN);
         System.out.println(cardController.applyRecharge(cardDto));
     }
@@ -164,9 +164,6 @@ class StarchainPacificpayServerApplicationTests {
         cardDto.setSingleLimit(new BigDecimal(11.133));
         System.out.println(cardController.updateLimit(cardDto));
     }
-
-
-
 
 
 }

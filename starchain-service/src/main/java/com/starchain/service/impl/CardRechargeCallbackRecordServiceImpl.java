@@ -181,9 +181,9 @@ public class CardRechargeCallbackRecordServiceImpl extends ServiceImpl<CardRecha
                 .userId(userId)
                 .balance(balance)
                 .coinName(MoneyKindEnum.USD.getMoneyKindCode())
-                .amount(recharge)
-                .fee(handleFee)
-                .actAmount(recharge)
+                .amount(recharge.negate())
+                .fee(handleFee.negate())
+                .actAmount(recharge.negate()) // 扣款金额
                 .finaBalance(finalBalance)
                 .type(TransactionTypeEnum.BALANCE_RECHARGE_TO_CARD.getCode())
                 .createTime(LocalDateTime.now())

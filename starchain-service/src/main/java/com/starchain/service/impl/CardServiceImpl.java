@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.common.config.PacificPayConfig;
 import com.starchain.common.constants.CardUrlConstants;
 import com.starchain.common.entity.Card;
+import com.starchain.common.entity.CardCancelRecord;
 import com.starchain.common.entity.CardRechargeRecord;
 import com.starchain.common.entity.dto.CardDto;
 import com.starchain.common.enums.CardStatusEnum;
@@ -38,13 +39,14 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     private PacificPayConfig pacificPayConfig;
 
 
-
     @Autowired
     private IUserWalletBalanceService userWalletBalanceService;
     @Autowired
     private IdWorker idWorker;
     @Autowired
     private ICardRechargeRecordService cardRechargeRecordService;
+    @Autowired
+    private ICardCancelRecordService cardCancelRecordService;
 
     /**
      * 查询商户余额
@@ -129,17 +131,47 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
      */
     @Override
     public Boolean deleteCard(CardDto cardDto) {
-        String token = null;
         try {
-            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
-            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.DELETE_CARD, token, JSONObject.toJSONString(cardDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
-            log.info("返回的数据：{}", str);
-            CardDto returnCard = JSON.parseObject(str, CardDto.class);
-            if (returnCard != null) return true;
+            // 获取第三方支付平台 token
+            String token = HttpUtils.getTokenByMiPay(
+                    pacificPayConfig.getBaseUrl(),
+                    pacificPayConfig.getId(),
+                    pacificPayConfig.getSecret(),
+                    pacificPayConfig.getPrivateKey()
+            );
+
+            // 发送销卡请求
+            String responseStr = HttpUtils.doPostMiPay(
+                    pacificPayConfig.getBaseUrl() + CardUrlConstants.DELETE_CARD,
+                    token,
+                    JSON.toJSONString(cardDto),
+                    pacificPayConfig.getId(),
+                    pacificPayConfig.getServerPublicKey(),
+                    pacificPayConfig.getPrivateKey()
+            );
+
+            log.info("销卡返回数据：{}", responseStr);
+
+            // 解析返回 JSON
+            JSONObject responseJson = JSON.parseObject(responseStr);
+            String cardId = responseJson.getString("cardId");
+            String cardCode = responseJson.getString("cardCode");
+
+            // 记录销卡申请状态
+            CardCancelRecord record = new CardCancelRecord();
+            record.setCardId(cardId);
+            record.setCardCode(cardCode);
+            record.setUserId(cardDto.getUserId());
+            record.setBusinessId(cardDto.getBusinessId());
+            record.setCreateStatus(0); // 0 代表创建中
+            record.setCreateTime(LocalDateTime.now());
+            record.setUpdateTime(LocalDateTime.now());
+
+            return cardCancelRecordService.save(record);
         } catch (Exception e) {
-            log.error("服务异常", e);
+            log.error("申请销卡失败", e);
+            return false;
         }
-        return false;
     }
 
     /**
@@ -280,5 +312,10 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         lambdaQueryWrapper.orderByDesc(CardRechargeRecord::getId).last("LIMIT 1");
         CardRechargeRecord cardRechargeRecord = cardRechargeRecordService.getOne(lambdaQueryWrapper);
         return cardRechargeRecord != null && cardRechargeRecord.getStatus() == 0;
+    }
+
+    @Override
+    public boolean cardExists(String cardId, String cardCode) {
+        return false;
     }
 }

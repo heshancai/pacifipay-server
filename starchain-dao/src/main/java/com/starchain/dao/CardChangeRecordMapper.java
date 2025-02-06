@@ -11,6 +11,6 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 
-public interface CardChangeRecordDao extends BaseMapper<CardChangeRecord> {
+public interface CardChangeRecordMapper extends BaseMapper<CardChangeRecord> {
     // 继承 BaseMapper，提供基础的 CRUD 操作
 }

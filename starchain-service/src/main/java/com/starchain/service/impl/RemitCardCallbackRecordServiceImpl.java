@@ -53,7 +53,7 @@ public class RemitCardCallbackRecordServiceImpl extends ServiceImpl<RemitCardCal
             // 4. 查询或创建回调记录
             RemitCardCallbackRecord callbackRecord = createOrUpdateCallbackRecord(miPayRemitNotifyResponse);
 
-            // 5. 处理款卡审核状态
+            // 5. 申请汇款卡审核状态
             return handleRechargeStatus(miPayRemitNotifyResponse, callbackRecord);
         } catch (Exception e) {
             log.error("卡开通回调处理失败, 通知ID: {}, 错误信息: {}", miPayRemitNotifyResponse.getNotifyId(), e.getMessage(), e);
@@ -114,7 +114,7 @@ public class RemitCardCallbackRecordServiceImpl extends ServiceImpl<RemitCardCal
     private boolean handleRechargeStatus(MiPayRemitNotifyResponse response, RemitCardCallbackRecord callbackRecord) {
         if (CardStatusDescEnum.SUCCESS.getDescription().equals(response.getStatus())) {
 
-            // 修改卡充值状态为成功
+            // 汇款卡审核状态为成功
             updateRecordStatus(response, callbackRecord);
 
             // 更新回调记录
@@ -122,9 +122,11 @@ public class RemitCardCallbackRecordServiceImpl extends ServiceImpl<RemitCardCal
 
             return true;
         } else if (CardStatusDescEnum.FAILED.getDescription().equals(response.getStatus())) {
-            // 处理失败状态
+            // 汇款卡审核状态为成功
+            updateRecordStatus(response, callbackRecord);
+            // 更新回调记录
             handleFailedStatus(callbackRecord);
-            return false;
+            return true;
         }
         log.info("回调处理完成, 无须重复处理,通知ID: {}", response.getNotifyId());
         return true;
@@ -134,7 +136,8 @@ public class RemitCardCallbackRecordServiceImpl extends ServiceImpl<RemitCardCal
     private void updateRecordStatus(MiPayRemitNotifyResponse response, RemitCardCallbackRecord callbackRecord) {
         LambdaUpdateWrapper<RemitCard> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(RemitCard::getCardId, response.getCardId())
-                .set(RemitCard::getCreateStatus, CreateStatusEnum.SUCCESS.getCode()).set(RemitCard::getFinishTime, LocalDateTime.now())
+                .set(RemitCard::getCreateStatus, CreateStatusEnum.FAILED.getCode())
+                .set(RemitCard::getFinishTime, LocalDateTime.now())
                 .set(RemitCard::getUpdateTime, LocalDateTime.now());
         boolean isUpdated = remitCardService.update(updateWrapper);
         if (!isUpdated) {
@@ -156,7 +159,6 @@ public class RemitCardCallbackRecordServiceImpl extends ServiceImpl<RemitCardCal
     private void handleFailedStatus(RemitCardCallbackRecord callbackRecord) {
         LambdaUpdateWrapper<RemitCardCallbackRecord> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(RemitCardCallbackRecord::getNotifyId, callbackRecord.getNotifyId())
-                .setSql("retries = retries + 1")
                 .set(RemitCardCallbackRecord::getUpdateTime, LocalDateTime.now());
         this.update(updateWrapper);
     }

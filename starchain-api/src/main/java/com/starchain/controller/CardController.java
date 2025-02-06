@@ -267,28 +267,36 @@ public class CardController {
     /*
      * 申请销卡
      */
+
+    /**
+     * 申请销卡
+     */
     @ApiOperation(value = "申请销卡")
     @PostMapping("/deleteCard")
     public ClientResponse deleteCard(@RequestBody CardDto cardDto) {
-        if (cardDto.getCardId() == null) {
-            return ResultGenerator.genFailResult("dto 不能为null");
+        if (cardDto == null) {
+            return ResultGenerator.genFailResult("请求参数不能为空");
         }
-        if (cardDto.getCardCode() == null) {
-            return ResultGenerator.genFailResult("dto 不能为null");
+        if (cardDto.getCardId() == null || cardDto.getCardCode() == null ||
+                cardDto.getUserId() == null || cardDto.getBusinessId() == null) {
+            return ResultGenerator.genFailResult("卡ID、卡类型、用户ID、商家ID不能为空");
         }
-        LambdaQueryWrapper<Card> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Card::getCardId, cardDto.getCardId());
-        queryWrapper.eq(Card::getCardCode, cardDto.getCardCode());
-        Card card = cardService.getOne(queryWrapper);
-        if (card == null) {
+
+        // 查询卡信息
+        if (!cardService.cardExists(cardDto.getCardId(), cardDto.getCardCode())) {
             return ResultGenerator.genFailResult("卡信息不存在");
         }
+
         try {
-            Boolean result = cardService.deleteCard(cardDto);
-            return ResultGenerator.genSuccessResult("申请销卡正在处理中");
+            boolean result = cardService.deleteCard(cardDto);
+            if (result) {
+                return ResultGenerator.genSuccessResult("申请销卡正在处理中");
+            } else {
+                return ResultGenerator.genFailResult("申请销卡失败");
+            }
         } catch (Exception e) {
             log.error("申请销卡失败", e);
-            return ResultGenerator.genFailResult("申请销卡失败");
+            return ResultGenerator.genFailResult("申请销卡失败，系统异常");
         }
     }
 

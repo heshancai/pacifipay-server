@@ -6,15 +6,19 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.common.entity.RemitApplicationRecord;
 import com.starchain.common.entity.RemitCancelCallbackRecord;
 import com.starchain.common.entity.UserWalletBalance;
+import com.starchain.common.entity.UserWalletTransaction;
 import com.starchain.common.entity.response.MiPayRemitNotifyResponse;
 import com.starchain.common.enums.CardStatusDescEnum;
 import com.starchain.common.enums.CreateStatusEnum;
 import com.starchain.common.enums.MiPayNotifyType;
+import com.starchain.common.enums.TransactionTypeEnum;
 import com.starchain.common.exception.StarChainException;
+import com.starchain.common.util.DateUtil;
 import com.starchain.dao.RemitCancelCallbackRecordMapper;
 import com.starchain.service.IRemitApplicationRecordService;
 import com.starchain.service.IRemitCancelCallbackRecordService;
 import com.starchain.service.IUserWalletBalanceService;
+import com.starchain.service.IUserWalletTransactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,7 +40,8 @@ public class RemitCancelCallbackRecordServiceImpl extends ServiceImpl<RemitCance
     private IRemitApplicationRecordService remitApplicationRecordService;
     @Autowired
     private IUserWalletBalanceService userWalletBalanceService;
-
+    @Autowired
+    private IUserWalletTransactionService userWalletTransactionService;
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean callBack(String callBackJson) {
@@ -47,6 +52,8 @@ public class RemitCancelCallbackRecordServiceImpl extends ServiceImpl<RemitCance
 
             // 2. 申请汇款记录是否存在 没有则抛出异常
             RemitApplicationRecord remitApplicationRecord = validateAndGetRecord(miPayRemitNotifyResponse);
+            UserWalletBalance userWalletBalance = userWalletBalanceService.getUserWalletBalance(remitApplicationRecord.getUserId(), remitApplicationRecord.getBusinessId());
+            Assert.notNull(userWalletBalance, "用户钱包不存在");
 
             // 3. 数据已撤销（幂等性）
             if (remitApplicationRecord.getStatus() == CreateStatusEnum.CANCEL.getCode()) {
@@ -62,6 +69,38 @@ public class RemitCancelCallbackRecordServiceImpl extends ServiceImpl<RemitCance
             log.error("申请汇款, 通知ID: {}, 错误信息: {}", miPayRemitNotifyResponse.getNotifyId(), e.getMessage(), e);
             throw new StarChainException("申请汇款处理失败");
         }
+    }
+
+    /**
+     * 记录汇款撤销交易流水
+     * @param userWalletBalance
+     * @param remitApplicationRecord
+     * @param callbackRecord
+     */
+    private void createUserWalletTransaction(UserWalletBalance userWalletBalance, RemitApplicationRecord remitApplicationRecord, RemitCancelCallbackRecord callbackRecord) {
+        // 手续费
+        BigDecimal handlingFeeAmount = remitApplicationRecord.getHandlingFeeAmount();
+
+        // 余额扣除手续费
+        BigDecimal finalBalance = userWalletBalance.getBalance().subtract(handlingFeeAmount);
+
+        UserWalletTransaction userWalletTransaction = UserWalletTransaction.builder()
+                .userId(userWalletBalance.getUserId())
+                .coinName(remitApplicationRecord.getFromMoneyKind())
+                .balance(userWalletBalance.getBalance())
+                .amount(BigDecimal.ZERO)
+                .fee(handlingFeeAmount.negate())
+                .actAmount(BigDecimal.ZERO)
+                .finaBalance(finalBalance)
+                .type(TransactionTypeEnum.REMIT_CANCEL.getCode())
+                .businessNumber(callbackRecord.getNotifyId())
+                .partitionKey(DateUtil.getMonth())
+                .remark(TransactionTypeEnum.REMIT_CANCEL.getDescription())
+                .createTime(LocalDateTime.now())
+                .orderId(remitApplicationRecord.getOrderId())
+                .tradeId(remitApplicationRecord.getTradeId()).build();
+        userWalletTransactionService.save(userWalletTransaction);
+        log.info("记录汇款撤销交易流水,交易信息为:{}", userWalletTransaction);
     }
 
     // 1. 校验业务类型
@@ -114,6 +153,8 @@ public class RemitCancelCallbackRecordServiceImpl extends ServiceImpl<RemitCance
     // 汇款撤销
     private boolean handleRechargeStatus(MiPayRemitNotifyResponse response, RemitApplicationRecord remitApplicationRecord, RemitCancelCallbackRecord callbackRecord) {
         if (CardStatusDescEnum.SUCCESS.getDescription().equals(response.getStatus())) {
+            // 记录汇款撤销交易流水
+            createUserWalletTransaction(userWalletBalance, remitApplicationRecord, callbackRecord);
             // 修改用户钱包余额
             updateUserWalletBalance(remitApplicationRecord, response.getCancelAmount());
             // 修改卡汇款申请记录状态为撤销
@@ -124,7 +165,7 @@ public class RemitCancelCallbackRecordServiceImpl extends ServiceImpl<RemitCance
         } else if (CardStatusDescEnum.FAILED.getDescription().equals(response.getStatus())) {
             // 处理失败状态
             handleFailedStatus(callbackRecord);
-            return false;
+            return true;
         }
         log.info("回调处理完成, 无须重复处理,通知ID: {}", response.getNotifyId());
         return true;
@@ -142,7 +183,6 @@ public class RemitCancelCallbackRecordServiceImpl extends ServiceImpl<RemitCance
     private void handleFailedStatus(RemitCancelCallbackRecord callbackRecord) {
         LambdaUpdateWrapper<RemitCancelCallbackRecord> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(RemitCancelCallbackRecord::getNotifyId, callbackRecord.getNotifyId())
-                .setSql("retries = retries + 1")
                 .set(RemitCancelCallbackRecord::getUpdateTime, LocalDateTime.now());
         this.update(updateWrapper);
     }
@@ -162,11 +202,16 @@ public class RemitCancelCallbackRecordServiceImpl extends ServiceImpl<RemitCance
         }
     }
 
-    // 更新用户钱包余额  返回的金额跟
+    /**
+     * 即使汇款撤销  也需要扣除手续费扣除手续费
+     *
+     * @param rechargeRecord
+     * @param cancelAmount
+     */
     private void updateUserWalletBalance(RemitApplicationRecord rechargeRecord, BigDecimal cancelAmount) {
         LambdaUpdateWrapper<UserWalletBalance> balanceUpdateWrapper = new LambdaUpdateWrapper<>();
         balanceUpdateWrapper.eq(UserWalletBalance::getUserId, rechargeRecord.getUserId()).eq(UserWalletBalance::getBusinessId, rechargeRecord.getBusinessId())
-                .setSql("balance = balance + " + cancelAmount) // 撤销的会的金额 会跟发起汇款的金额不 一直 即使是撤销也会扣除了手续费
+                .setSql("balance = balance - " + rechargeRecord.getHandlingFeeAmount()) //汇款撤销需要扣除手续费
                 .set(UserWalletBalance::getUpdateTime, LocalDateTime.now());
         userWalletBalanceService.update(balanceUpdateWrapper);
     }

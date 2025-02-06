@@ -9,8 +9,11 @@ public enum TransactionTypeEnum {
     DEPOSIT(1, "充币"),
     WITHDRAWAL(2, "提币"),
     GLOBAL_REMITTANCE(3, "全球汇款"),
-    BALANCE_RECHARGE_TO_CARD(4, "余额充值到卡");
-
+    BALANCE_RECHARGE_TO_CARD(4, "充值到卡"),
+    // 汇款撤销
+    REMIT_CANCEL(5, "汇款撤销"),
+    // 注销卡到账
+    CANCEL_CARD(6, "注销卡");
     private final int code;
     private final String description;
 

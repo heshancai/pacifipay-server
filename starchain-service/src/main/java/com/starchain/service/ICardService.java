@@ -85,4 +85,9 @@ public interface ICardService extends IService<Card> {
      * @return
      */
     boolean isRechargeInProgress(CardDto cardDto);
+
+    /**
+     * 检查卡是否存在
+     */
+    boolean cardExists(String cardId, String cardCode);
 }

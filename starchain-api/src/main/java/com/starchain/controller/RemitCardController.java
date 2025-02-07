@@ -231,10 +231,11 @@ public class RemitCardController {
         try {
             // 校验用户钱包余额是否足够
             userWalletBalanceService.checkUserBalance(
+                    remitApplicationRecordDto.getRemitCode(),
                     remitApplicationRecordDto.getUserId(),
                     remitApplicationRecordDto.getBusinessId(),
                     remitApplicationRecordDto.getToAmount(),
-                    MiPayNotifyType.Remit.getType()
+                    MiPayNotifyType.Remit
             );
 
             Boolean result = remitApplicationRecordService.applyRemit(remitApplicationRecordDto);
@@ -250,6 +251,7 @@ public class RemitCardController {
         return Objects.equals(MoneyKindEnum.CNY.getMoneyKindCode(), moneyKind) ||
                 Objects.equals(MoneyKindEnum.USD.getMoneyKindCode(), moneyKind);
     }
+
     public ClientResponse validateRemitApplicationRecord(RemitApplicationRecordDto remitApplicationRecordDto) {
 
         String remitTypeCode = remitApplicationRecordDto.getRemitCode();

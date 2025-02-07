@@ -27,50 +27,77 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
     @Autowired
     private ICardFeeRuleService cardFeeRuleService;
 
-    public boolean checkUserBalance(String cardCode,Long userId, Long channelId, BigDecimal saveAmount, String type) throws StarChainException {
-        log.info("checkUserBalance userId:{}, channelId:{}, saveAmount:{}", userId, channelId, saveAmount);
+    public boolean checkUserBalance(String cardCode, Long userId, Long channelId, BigDecimal saveAmount, MiPayNotifyType type) throws StarChainException {
+        log.info("检查用户余额: userId={}, channelId={}, saveAmount={}", userId, channelId, saveAmount);
 
         // 查询用户钱包余额
-        LambdaQueryWrapper<UserWalletBalance> userWalletBalanceLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        userWalletBalanceLambdaQueryWrapper.eq(UserWalletBalance::getUserId, userId);
-        userWalletBalanceLambdaQueryWrapper.eq(UserWalletBalance::getBusinessId, channelId);
-        UserWalletBalance userWalletBalance = this.getOne(userWalletBalanceLambdaQueryWrapper);
-
+        UserWalletBalance userWalletBalance = getUserWalletBalance(userId, channelId);
         if (userWalletBalance == null) {
             throw new StarChainException("用户钱包不存在");
         }
 
+        // 查询卡费规则配置表
+        CardFeeRule cardFeeRule = getCardFeeRule(cardCode);
+        if (cardFeeRule == null) {
+            log.warn("未找到卡费规则。");
+            throw new StarChainException("卡费规则未找到");
+        }
+
         BigDecimal balance = userWalletBalance.getAvaBalance();
 
-        if (type.equals(MiPayNotifyType.CardOpen.getType())) {
-            // 查询卡费规则配置表
-            LambdaQueryWrapper<CardFeeRule> cardFeeRuleWrapper = new LambdaQueryWrapper<>();
-            cardFeeRuleWrapper.eq(CardFeeRule::getCardCode, cardCode);
-            CardFeeRule cardFeeRule = cardFeeRuleService.getOne(cardFeeRuleWrapper);
+        try {
+            switch (type) {
+                case CardOpen: // 卡创建
+                    checkCardOpenBalance(balance, cardFeeRule);
+                    break;
+                case Remit: // 汇款
 
-            if (cardFeeRule == null) {
-                log.warn("Card fee rules not found.");
-                throw new StarChainException("卡费规则未找到");
+                    checkRemitBalance(balance, saveAmount, cardFeeRule);
+                    break;
+                case CardRecharge: // 卡充值
+                    checkCardRechargeBalance(balance, saveAmount, cardFeeRule);
+                    break;
+                default:
+                    throw new StarChainException("未知的操作类型: " + type);
             }
-
-            // 计算用户需要的最小余额 开发费+预存金额+月服务费
-            BigDecimal requiredBalance = cardFeeRule.getCardFee()
-                    .add(cardFeeRule.getSaveAmount())
-                    .add(cardFeeRule.getMonthlyFee());
-
-            // 检查钱包余额是否足够
-            if (balance.compareTo(requiredBalance) < 0) {
-                throw new StarChainException("余额不足，需要至少" + requiredBalance + "但只有" + balance);
-            }
-
-        } else if (type.equals(MiPayNotifyType.Remit.getType())) {
-            // 钱包余额必须大于等于 汇款金额 + 1 USD（手续费）
-            if (balance.compareTo(saveAmount.add(BigDecimal.ONE)) < 0) {
-                throw new StarChainException("余额不足，需要至少" + saveAmount.add(BigDecimal.ONE) + "但只有" + balance);
-            }
+        } catch (ArithmeticException e) {
+            log.error("计算错误", e);
+            throw new StarChainException("计算过程中出现错误: " + e.getMessage());
         }
 
         return true;
+    }
+
+
+    private CardFeeRule getCardFeeRule(String cardCode) {
+        LambdaQueryWrapper<CardFeeRule> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(CardFeeRule::getCardCode, cardCode);
+        return cardFeeRuleService.getOne(queryWrapper);
+    }
+
+    private void checkCardOpenBalance(BigDecimal balance, CardFeeRule cardFeeRule) throws StarChainException {
+        BigDecimal requiredBalance = cardFeeRule.getCardFee()
+                .add(cardFeeRule.getSaveAmount())
+                .add(cardFeeRule.getMonthlyFee());
+
+        if (balance.compareTo(requiredBalance) < 0) {
+            throw new StarChainException("余额不足，需要至少" + requiredBalance + "但只有" + balance);
+        }
+    }
+
+    private void checkRemitBalance(BigDecimal balance, BigDecimal saveAmount, CardFeeRule cardFeeRule) throws StarChainException {
+        BigDecimal totalAmount = saveAmount.multiply(cardFeeRule.getHandleFeeAmount()).add(saveAmount);
+        if (balance.compareTo(saveAmount.add(totalAmount)) < 0) {
+            throw new StarChainException("余额不足，需要至少" + totalAmount + "但只有" + balance);
+        }
+    }
+
+    private void checkCardRechargeBalance(BigDecimal balance, BigDecimal saveAmount, CardFeeRule cardFeeRule) throws StarChainException {
+        // 计算手续费
+        BigDecimal totalAmount = saveAmount.multiply(cardFeeRule.getRechargeFeeRate()).add(saveAmount);
+        if (balance.compareTo(saveAmount.add(totalAmount)) < 0) {
+            throw new StarChainException("余额不足，需要至少" + totalAmount + "但只有" + balance);
+        }
     }
 
 

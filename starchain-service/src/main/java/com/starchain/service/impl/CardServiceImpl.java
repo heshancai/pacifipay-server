@@ -15,7 +15,6 @@ import com.starchain.common.enums.TransactionTypeEnum;
 import com.starchain.common.exception.StarChainException;
 import com.starchain.common.util.DateUtil;
 import com.starchain.common.util.HttpUtils;
-import com.starchain.common.util.OrderIdGenerator;
 import com.starchain.dao.CardMapper;
 import com.starchain.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -85,7 +84,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         try {
             // 获取最新的卡费规则
             LambdaQueryWrapper<CardFeeRule> cardFeeRuleWrapper = new LambdaQueryWrapper<>();
-            cardFeeRuleWrapper.last("LIMIT 1");
+            cardFeeRuleWrapper.eq(CardFeeRule::getCardCode, cardDto.getCardCode());
             CardFeeRule cardFeeRule = cardFeeRuleService.getOne(cardFeeRuleWrapper);
             if (cardFeeRule == null) {
                 throw new StarChainException("未找到有效的开卡费用规则");
@@ -94,8 +93,9 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             // 获取token
             token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
 
-            // 创建卡
+            // 构建发送参数
             CardDto cardDto1 = prepareCardDto(cardDto, cardFeeRule);
+
             String responseStr = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.ADD_CARD, token, JSONObject.toJSONString(cardDto1), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             log.info("返回的数据：{}", responseStr);
             Card returnCard = JSON.parseObject(responseStr, Card.class);
@@ -127,7 +127,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     private CardDto prepareCardDto(CardDto originalCardDto, CardFeeRule cardFeeRule) {
         CardDto cardDto1 = new CardDto();
         cardDto1.setCardCode(originalCardDto.getCardCode());
-        cardDto1.setSaveOrderId(OrderIdGenerator.generateOrderId("", "", 6));
+        cardDto1.setSaveOrderId(String.valueOf(idWorker.nextId()));
         cardDto1.setTpyshCardHolderId(originalCardDto.getTpyshCardHolderId());
         cardDto1.setSaveAmount(cardFeeRule.getSaveAmount());
         return cardDto1;

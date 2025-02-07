@@ -2,6 +2,7 @@ package com.starchain.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.starchain.common.entity.UserWalletBalance;
+import com.starchain.common.enums.MiPayNotifyType;
 
 import java.math.BigDecimal;
 
@@ -18,7 +19,7 @@ public interface IUserWalletBalanceService extends IService<UserWalletBalance> {
      * @param businessId
      * @param saveAmount
      */
-    boolean checkUserBalance(String cardCode, Long userId, Long businessId, BigDecimal saveAmount, String type);
+    boolean checkUserBalance(String cardCode, Long userId, Long businessId, BigDecimal saveAmount, MiPayNotifyType type);
 
     /**
      * 获取用户钱包余额

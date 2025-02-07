@@ -155,6 +155,9 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             log.warn("开卡手续费不匹配，预期: {}, 实际: {}", cardFeeRule.getCardFee(), cardOpenFee);
         }
         currentBalance = addTransaction(transactions, userId, MoneyKindEnum.USD.getMoneyKindCode(), currentBalance, cardOpenFee, TransactionTypeEnum.CARD_OPEN_FEE, returnCard.getCardId(), returnCard.getSaveOrderId());
+        // 月服务费
+        BigDecimal monthlyFee = cardFeeRule.getMonthlyFee();
+        currentBalance = addTransaction(transactions, userId, MoneyKindEnum.USD.getMoneyKindCode(), currentBalance, monthlyFee, TransactionTypeEnum.CARD_MONTHLY_SERVICE_FEE, returnCard.getCardId(), returnCard.getSaveOrderId());
 
         // 预存费
         BigDecimal preStoreAmount = returnCard.getSaveAmount() != null ? returnCard.getSaveAmount() : cardFeeRule.getSaveAmount();
@@ -162,10 +165,6 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             log.warn("预存费用不匹配，预期: {}, 实际: {}", cardFeeRule.getSaveAmount(), preStoreAmount);
         }
         currentBalance = addTransaction(transactions, userId, MoneyKindEnum.USD.getMoneyKindCode(), currentBalance, preStoreAmount, TransactionTypeEnum.CARD_OPEN_DEPOSIT, returnCard.getCardId(), returnCard.getSaveOrderId());
-
-        // 月服务费
-        BigDecimal monthlyFee = cardFeeRule.getMonthlyFee();
-        currentBalance = addTransaction(transactions, userId, MoneyKindEnum.USD.getMoneyKindCode(), currentBalance, monthlyFee, TransactionTypeEnum.CARD_MONTHLY_SERVICE_FEE, returnCard.getCardId(), returnCard.getSaveOrderId());
 
         userWalletTransactionService.saveBatch(transactions);
     }

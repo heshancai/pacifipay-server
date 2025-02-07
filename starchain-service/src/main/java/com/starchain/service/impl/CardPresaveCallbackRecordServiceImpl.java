@@ -3,21 +3,13 @@ package com.starchain.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.starchain.common.entity.Card;
-import com.starchain.common.entity.CardFeeRule;
-import com.starchain.common.entity.CardPresaveCallbackRecord;
-import com.starchain.common.entity.UserWalletBalance;
+import com.starchain.common.entity.*;
 import com.starchain.common.entity.response.MiPayCardNotifyResponse;
-import com.starchain.common.enums.CardStatusDescEnum;
-import com.starchain.common.enums.CardStatusEnum;
-import com.starchain.common.enums.CreateStatusEnum;
-import com.starchain.common.enums.MiPayNotifyType;
+import com.starchain.common.enums.*;
 import com.starchain.common.exception.StarChainException;
+import com.starchain.common.util.DateUtil;
 import com.starchain.dao.CardPresaveCallbackRecordMapper;
-import com.starchain.service.ICardFeeRuleService;
-import com.starchain.service.ICardPresaveCallbackRecordService;
-import com.starchain.service.ICardService;
-import com.starchain.service.IUserWalletBalanceService;
+import com.starchain.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +17,8 @@ import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author
@@ -40,6 +34,8 @@ public class CardPresaveCallbackRecordServiceImpl extends ServiceImpl<CardPresav
     private ICardFeeRuleService cardFeeRuleService;
     @Autowired
     private IUserWalletBalanceService userWalletBalanceService;
+    @Autowired
+    private IUserWalletTransactionService userWalletTransactionService;
 
     @Override
     public Boolean callBack(String callBackJson) {
@@ -86,6 +82,14 @@ public class CardPresaveCallbackRecordServiceImpl extends ServiceImpl<CardPresav
                     }
                     break;
                 case "FAILED":
+                    LambdaQueryWrapper<UserWalletBalance> userWalletBalanceLambdaQueryWrapper = new LambdaQueryWrapper<>();
+                    userWalletBalanceLambdaQueryWrapper.eq(UserWalletBalance::getUserId, card.getUserId());
+                    UserWalletBalance userWalletBalance = userWalletBalanceService.getOne(userWalletBalanceLambdaQueryWrapper);
+                    List<UserWalletTransaction> transactions = new ArrayList<>();
+                    BigDecimal currentBalance = userWalletBalance.getAvaBalance();
+                    // 开卡费回退流水
+                    currentBalance = addTransaction(transactions, card.getUserId(), MoneyKindEnum.USD.getMoneyKindCode(), currentBalance, cardPresaveCallbackRecord.getActual(), TransactionTypeEnum.CARD_OPEN_FEE, card.getCardId(), card.getSaveOrderId());
+                    userWalletTransactionService.saveBatch(transactions);
                     // 金额回滚
                     LambdaUpdateWrapper<UserWalletBalance> userWalletBalanceUpdateWrapper = new LambdaUpdateWrapper<>();
                     userWalletBalanceUpdateWrapper.setSql("freeze_balance = freeze_balance - " + cardPresaveCallbackRecord.getActual());
@@ -106,6 +110,24 @@ public class CardPresaveCallbackRecordServiceImpl extends ServiceImpl<CardPresav
             log.error("卡预存回调处理失败, 通知ID: {}, 错误信息: {}", miPayCardNotifyResponse.getNotifyId(), e.getMessage(), e);
             throw new StarChainException("卡预存回调处理失败");
         }
+    }
+
+    private BigDecimal addTransaction(List<UserWalletTransaction> transactions, Long userId, String coinName, BigDecimal balance, BigDecimal amount, TransactionTypeEnum type, String businessNumber, String orderId) {
+        UserWalletTransaction transaction = UserWalletTransaction.builder()
+                .userId(userId)
+                .coinName(coinName)
+                .balance(balance)
+                .amount(amount)
+                .finaBalance(balance.add(amount))
+                .type(type.getCode())
+                .businessNumber(businessNumber)
+                .createTime(LocalDateTime.now())
+                .partitionKey(DateUtil.getMonth())
+                .remark(type.getDescription())
+                .orderId(orderId)
+                .build();
+        transactions.add(transaction);
+        return balance.add(amount);
     }
 
     // 1. 校验业务类型

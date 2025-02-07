@@ -17,6 +17,7 @@ import com.starchain.common.enums.CardStatusEnum;
 import com.starchain.common.enums.CreateStatusEnum;
 import com.starchain.common.enums.MiPayNotifyType;
 import com.starchain.common.enums.MoneyKindEnum;
+import com.starchain.common.exception.StarChainException;
 import com.starchain.common.result.ClientResponse;
 import com.starchain.common.result.ResultGenerator;
 import com.starchain.common.util.HttpUtils;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -96,33 +98,25 @@ public class CardController {
         return ResultGenerator.genSuccessResult(card);
     }
 
-    /*
-     * 卡充值
-     */
     @ApiOperation(value = "卡充值")
     @PostMapping("/applyRecharge")
     public ClientResponse applyRecharge(@RequestBody CardDto cardDto) {
-        if (cardDto.getCardId() == null) {
-            return ResultGenerator.genFailResult("dto 不能为null");
-        }
-        if (cardDto.getCardCode() == null) {
-            return ResultGenerator.genFailResult("dto 不能为null");
-        }
-        if (cardDto.getUserId() == null) {
-            return ResultGenerator.genFailResult("dto 不能为null");
-        }
-        if (cardDto.getTpyshCardHolderId() == null) {
-            return ResultGenerator.genFailResult("dto 不能为null");
-        }
-        if (cardDto.getBusinessId() == null) {
-            return ResultGenerator.genFailResult("dto 不能为null");
-        }
-        if (cardDto.getOrderAmount() == null) {
-            return ResultGenerator.genFailResult("dto 不能为null");
+        // 使用自定义的帮助方法来简化对DTO字段的检查，并提供具体错误信息
+        if (!validateCardDto(cardDto)) {
+            return ResultGenerator.genFailResult("某些必要字段为空或无效");
         }
         if (cardDto.getOrderAmount().compareTo(BigDecimal.ZERO) <= 0) {
             return ResultGenerator.genFailResult("输入的金额必须大于0");
         }
+
+        // 检查用户钱包余额是否足够
+        BigDecimal orderAmount = cardDto.getOrderAmount().setScale(2, RoundingMode.HALF_UP);
+        try {
+            userWalletBalanceService.checkUserBalance(cardDto.getUserId(), cardDto.getBusinessId(), orderAmount, MiPayNotifyType.Remit.getType());
+        } catch (StarChainException e) {
+            return ResultGenerator.genFailResult(e.getMessage());
+        }
+        cardDto.setOrderAmount(orderAmount);
 
         // 持卡人合法性校验
         CardHolder cardHolder = validateCardHolder(cardDto);
@@ -133,17 +127,17 @@ public class CardController {
         // 卡合法性校验
         Card card = validateCard(cardDto);
         if (card == null) {
-            return ResultGenerator.genFailResult("卡状态异常 无法充值");
+            return ResultGenerator.genFailResult("卡状态异常，无法充值");
         }
 
         // 检查充值状态
         if (cardService.isRechargeInProgress(cardDto)) {
-            return ResultGenerator.genFailResult("最新的卡充值未结束 无法进行新一轮充值");
+            return ResultGenerator.genFailResult("最新的卡充值未结束，无法进行新一轮充值");
         }
 
         // 检查汇款状态
         if (remitApplicationRecordService.isRemitInProgress(cardDto.getUserId(), cardDto.getBusinessId())) {
-            return ResultGenerator.genFailResult("最新的汇款未结束 无法进行新一轮充值");
+            return ResultGenerator.genFailResult("最新的汇款未结束，无法进行新一轮充值");
         }
 
         try {
@@ -154,6 +148,16 @@ public class CardController {
             log.error("查询卡失败, cardDto: {}", cardDto, e);
             return ResultGenerator.genFailResult(e.getMessage());
         }
+    }
+
+    // DTO字段验证方法
+    private boolean validateCardDto(CardDto cardDto) {
+        return cardDto.getCardId() != null &&
+                cardDto.getCardCode() != null &&
+                cardDto.getUserId() != null &&
+                cardDto.getTpyshCardHolderId() != null &&
+                cardDto.getBusinessId() != null &&
+                cardDto.getOrderAmount() != null;
     }
 
     // 持卡人校验逻辑封装

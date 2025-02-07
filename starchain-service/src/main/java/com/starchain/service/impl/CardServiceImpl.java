@@ -12,7 +12,6 @@ import com.starchain.common.entity.CardCancelRecord;
 import com.starchain.common.entity.CardRechargeRecord;
 import com.starchain.common.entity.dto.CardDto;
 import com.starchain.common.enums.CardStatusEnum;
-import com.starchain.common.enums.MiPayNotifyType;
 import com.starchain.common.exception.StarChainException;
 import com.starchain.common.util.HttpUtils;
 import com.starchain.common.util.OrderIdGenerator;
@@ -196,40 +195,30 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     }
 
 
-    /**
-     * 卡充值
-     *
-     * @param cardDto
-     * @return
-     */
     @Override
-    public CardRechargeRecord applyRecharge(CardDto cardDto) {
-        String token = null;
+    public CardRechargeRecord applyRecharge(CardDto cardDto) throws StarChainException {
         try {
-            // 余额必须大于 0 且必须大于输入的金额
-            BigDecimal orderAmount = cardDto.getOrderAmount().setScale(2, BigDecimal.ROUND_HALF_UP);
-            userWalletBalanceService.checkUserBalance(cardDto.getUserId(), cardDto.getBusinessId(), orderAmount, MiPayNotifyType.Remit.getType());
-            cardDto.setOrderAmount(orderAmount);
             // 封装传递参数
             cardDto.setOrderId(String.valueOf(idWorker.nextId()));
-            // 条件通过 进行充值
-            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
-            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.APPLY_RECHARGE, token, JSONObject.toJSONString(cardDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
-            log.info("返回的数据：{}", str);
 
-            CardRechargeRecord cardRechargeRecord = JSON.parseObject(str, CardRechargeRecord.class);
+            String token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+            String responseStr = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.APPLY_RECHARGE, token, JSONObject.toJSONString(cardDto), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            log.info("返回的数据：{}", responseStr);
+
+            CardRechargeRecord cardRechargeRecord = JSON.parseObject(responseStr, CardRechargeRecord.class);
             cardRechargeRecord.setStatus(0);
             cardRechargeRecord.setUserId(cardDto.getUserId());
             cardRechargeRecord.setTpyshCardHolderId(cardDto.getTpyshCardHolderId());
             cardRechargeRecord.setBusinessId(cardDto.getBusinessId());
             cardRechargeRecord.setCreateTime(LocalDateTime.now());
             cardRechargeRecord.setUpdateTime(LocalDateTime.now());
+
             // 处理成功 等待回调结果
             cardRechargeRecordService.save(cardRechargeRecord);
             return cardRechargeRecord;
         } catch (Exception e) {
             log.error("服务异常", e);
-            throw new StarChainException(e.getMessage());
+            throw new StarChainException("卡充值过程中发生错误: " + e.getMessage());
         }
     }
 

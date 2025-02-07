@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Objects;
+
 /**
  * @author
  * @date 2025-01-02
@@ -178,53 +180,63 @@ public class RemitCardController {
         }
     }
 
-    /**
-     * 申请汇款
-     */
+    // 在您的Controller或相应的服务类中添加以下方法
+    private boolean areAllNotNull(Object... objects) {
+        for (Object obj : objects) {
+            if (obj == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @ApiOperation(value = "申请汇款")
     @PostMapping("/applyRemit")
     public ClientResponse applyRemit(@RequestBody RemitApplicationRecordDto remitApplicationRecordDto) {
-        if (ObjectUtils.isEmpty(remitApplicationRecordDto.getUserId())) {
+        // 使用自定义的帮助方法来简化对DTO字段的检查
+        if (!areAllNotNull(remitApplicationRecordDto.getUserId(),
+                remitApplicationRecordDto.getBusinessId(),
+                remitApplicationRecordDto.getRemitCode(),
+                remitApplicationRecordDto.getToAmount()) ||
+                !StringUtils.hasText(remitApplicationRecordDto.getToMoneyKind())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
-        if (ObjectUtils.isEmpty(remitApplicationRecordDto.getBusinessId())) {
-            return ResultGenerator.genFailResult("dto不能为空");
+
+        // 校验货币种类是否支持
+        if (!isValidMoneyKind(remitApplicationRecordDto.getToMoneyKind())) {
+            return ResultGenerator.genFailResult("不支持的币种");
         }
-        if (ObjectUtils.isEmpty(remitApplicationRecordDto.getRemitCode())) {
-            return ResultGenerator.genFailResult("dto不能为空");
-        }
-        if (!StringUtils.hasText(remitApplicationRecordDto.getToMoneyKind())
-                && (MoneyKindEnum.CNY.getMoneyKindCode().equals(remitApplicationRecordDto.getToMoneyKind())
-                || MoneyKindEnum.USD.getMoneyKindCode().equals(remitApplicationRecordDto.getToMoneyKind()))) {
-            return ResultGenerator.genFailResult("dto不能为空 或者不支持的币种");
-        }
-        if (ObjectUtils.isEmpty(remitApplicationRecordDto.getToAmount())) {
-            return ResultGenerator.genFailResult("dto不能为空");
-        }
-        if (remitApplicationRecordDto.getExtraParams() == null) {
-            return ResultGenerator.genFailResult("dto不能为空");
-        }
+
+        // 检查银行卡号是否为空
         if (!StringUtils.hasText(remitApplicationRecordDto.getExtraParams().getString("remitBankNo"))) {
             return ResultGenerator.genFailResult("银行卡号不能为空");
         }
 
-        if (remitApplicationRecordDto.getExtraParams() != null) {
-            validateRemitApplicationRecord(remitApplicationRecordDto);
-        }
-        // 交易上一笔交易是否完成
+        // 验证汇款申请记录
+        validateRemitApplicationRecord(remitApplicationRecordDto);
+
+        // 查询上一笔交易状态
         LambdaQueryWrapper<RemitApplicationRecord> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(RemitApplicationRecord::getUserId, remitApplicationRecordDto.getUserId());
-        queryWrapper.eq(RemitApplicationRecord::getBusinessId, remitApplicationRecordDto.getBusinessId());
-        queryWrapper.eq(RemitApplicationRecord::getRemitCode, remitApplicationRecordDto.getRemitCode());
-        queryWrapper.eq(RemitApplicationRecord::getToMoneyKind, remitApplicationRecordDto.getToMoneyKind());
-        queryWrapper.orderByDesc(RemitApplicationRecord::getId).last("LIMIT 1");
-        RemitApplicationRecord remitApplicationRecord = remitApplicationRecordService.getOne(queryWrapper);
-        if (remitApplicationRecord != null && remitApplicationRecord.getStatus() == 0) {
+        queryWrapper.eq(RemitApplicationRecord::getUserId, remitApplicationRecordDto.getUserId())
+                .eq(RemitApplicationRecord::getBusinessId, remitApplicationRecordDto.getBusinessId())
+                .eq(RemitApplicationRecord::getRemitCode, remitApplicationRecordDto.getRemitCode())
+                .eq(RemitApplicationRecord::getToMoneyKind, remitApplicationRecordDto.getToMoneyKind())
+                .orderByDesc(RemitApplicationRecord::getId).last("LIMIT 1");
+
+        RemitApplicationRecord lastRecord = remitApplicationRecordService.getOne(queryWrapper);
+        if (lastRecord != null && lastRecord.getStatus() == 0) {
             return ResultGenerator.genFailResult("上一笔汇款正在处理中，无法进行新一轮汇款");
         }
+
         try {
             // 校验用户钱包余额是否足够
-            userWalletBalanceService.checkUserBalance(remitApplicationRecordDto.getUserId(), remitApplicationRecordDto.getBusinessId(), remitApplicationRecordDto.getToAmount(), MiPayNotifyType.Remit.getType());
+            userWalletBalanceService.checkUserBalance(
+                    remitApplicationRecordDto.getUserId(),
+                    remitApplicationRecordDto.getBusinessId(),
+                    remitApplicationRecordDto.getToAmount(),
+                    MiPayNotifyType.Remit.getType()
+            );
+
             Boolean result = remitApplicationRecordService.applyRemit(remitApplicationRecordDto);
             return ResultGenerator.genSuccessResult(result);
         } catch (Exception e) {
@@ -233,6 +245,11 @@ public class RemitCardController {
         }
     }
 
+    // 货币种类有效性验证
+    private boolean isValidMoneyKind(String moneyKind) {
+        return Objects.equals(MoneyKindEnum.CNY.getMoneyKindCode(), moneyKind) ||
+                Objects.equals(MoneyKindEnum.USD.getMoneyKindCode(), moneyKind);
+    }
     public ClientResponse validateRemitApplicationRecord(RemitApplicationRecordDto remitApplicationRecordDto) {
 
         String remitTypeCode = remitApplicationRecordDto.getRemitCode();

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.common.entity.CardFeeRule;
 import com.starchain.common.entity.UserWalletBalance;
 import com.starchain.common.enums.MiPayNotifyType;
+import com.starchain.common.exception.StarChainException;
 import com.starchain.dao.UserWalletBalanceMapper;
 import com.starchain.service.ICardFeeRuleService;
 import com.starchain.service.IUserWalletBalanceService;
@@ -26,8 +27,7 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
     @Autowired
     private ICardFeeRuleService cardFeeRuleService;
 
-    @Override
-    public boolean checkUserBalance(Long userId, Long channelId, BigDecimal saveAmount, String type) {
+    public boolean checkUserBalance(Long userId, Long channelId, BigDecimal saveAmount, String type) throws StarChainException {
         log.info("checkUserBalance userId:{}, channelId:{}, saveAmount:{}", userId, channelId, saveAmount);
 
         // 查询用户钱包余额
@@ -37,7 +37,7 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
         UserWalletBalance userWalletBalance = this.getOne(userWalletBalanceLambdaQueryWrapper);
 
         if (userWalletBalance == null) {
-            return false;
+            throw new StarChainException("用户钱包不存在");
         }
 
         BigDecimal balance = userWalletBalance.getBalance();
@@ -50,7 +50,7 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
 
             if (cardFeeRule == null) {
                 log.warn("Card fee rules not found.");
-                return false;
+                throw new StarChainException("卡费规则未找到");
             }
 
             // 计算用户需要的最小余额
@@ -60,13 +60,13 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
 
             // 检查钱包余额是否足够
             if (balance.compareTo(requiredBalance) < 0) {
-                return false;
+                throw new StarChainException("余额不足，需要至少" + requiredBalance + "但只有" + balance);
             }
 
         } else if (type.equals(MiPayNotifyType.Remit.getType())) {
             // 钱包余额必须大于等于 汇款金额 + 1 USD（手续费）
             if (balance.compareTo(saveAmount.add(BigDecimal.ONE)) < 0) {
-                return false;
+                throw new StarChainException("余额不足，需要至少" + saveAmount.add(BigDecimal.ONE) + "但只有" + balance);
             }
         }
 

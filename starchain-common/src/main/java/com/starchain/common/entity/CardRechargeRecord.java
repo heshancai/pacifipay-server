@@ -30,8 +30,8 @@ public class CardRechargeRecord {
     @ApiModelProperty(value = "持卡人Id", example = "")
     private String tpyshCardHolderId;
 
-    @ApiModelProperty(value = "渠道号", example = "100001")
-    private Long businessId; // 渠道号
+    @ApiModelProperty(value = "商户号", example = "100001")
+    private Long businessId; // 商户号
 
     @ApiModelProperty(value = "卡ID", example = "1234567890")
     private String cardId; // 卡ID

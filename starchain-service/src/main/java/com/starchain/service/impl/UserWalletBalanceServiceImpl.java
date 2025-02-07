@@ -51,7 +51,6 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
                     checkCardOpenBalance(balance, cardFeeRule);
                     break;
                 case Remit: // 汇款
-
                     checkRemitBalance(balance, saveAmount, cardFeeRule);
                     break;
                 case CardRecharge: // 卡充值

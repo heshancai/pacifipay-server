@@ -9,7 +9,7 @@ public enum TransactionTypeEnum {
     DEPOSIT(1, "充币"),
     WITHDRAWAL(2, "提币"),
     GLOBAL_REMITTANCE(3, "全球汇款"),
-    BALANCE_RECHARGE_TO_CARD(4, "充值到卡"),
+    BALANCE_RECHARGE_TO_CARD(4, "卡充值"),
     // 汇款撤销
     REMIT_CANCEL(5, "汇款撤销"),
     // 注销卡到账
@@ -19,7 +19,9 @@ public enum TransactionTypeEnum {
     // 开卡预存费
     CARD_OPEN_DEPOSIT(8, "开卡预存费"),
     // 卡月服务费
-    CARD_MONTHLY_SERVICE_FEE(9, "卡月服务费");
+    CARD_MONTHLY_SERVICE_FEE(9, "卡月服务费"),
+    // 充值卡手续费
+    CARD_RECHARGE_FEE(10, "充值卡手续费");
     private final int code;
     private final String description;
 

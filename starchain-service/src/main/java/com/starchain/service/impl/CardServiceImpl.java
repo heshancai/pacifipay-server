@@ -261,9 +261,18 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     }
 
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public CardRechargeRecord applyRecharge(CardDto cardDto) throws StarChainException {
         try {
+            // 获取最新的卡费规则
+            LambdaQueryWrapper<CardFeeRule> cardFeeRuleWrapper = new LambdaQueryWrapper<>();
+            cardFeeRuleWrapper.eq(CardFeeRule::getCardCode, cardDto.getCardCode());
+            CardFeeRule cardFeeRule = cardFeeRuleService.getOne(cardFeeRuleWrapper);
+            if (cardFeeRule == null) {
+                throw new StarChainException("未找到有效的开卡费用规则");
+            }
+
             // 封装传递参数
             cardDto.setOrderId(String.valueOf(idWorker.nextId()));
 
@@ -281,12 +290,62 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
 
             // 处理成功 等待回调结果
             cardRechargeRecordService.save(cardRechargeRecord);
+            // 手续费
+            BigDecimal cardFee = cardDto.getSaveAmount().multiply(cardFeeRule.getRechargeFeeRate());
+            BigDecimal totalFreezeAmount = cardDto.getSaveAmount().add(cardFee);
+            UserWalletBalance wallet = userWalletBalanceService.getById(cardDto.getUserId());
+
+            // 更新用户钱包，冻结相应金额
+            updateWalletBalance(wallet, totalFreezeAmount);
+
+            // 记录预交易流水
+            createPreApplyRechargeTransaction(cardDto.getUserId(), wallet.getAvaBalance(), cardFee,cardRechargeRecord);
+
             return cardRechargeRecord;
         } catch (Exception e) {
             log.error("服务异常", e);
             throw new StarChainException("卡充值过程中发生错误: " + e.getMessage());
         }
     }
+
+    private void createPreApplyRechargeTransaction(Long userId, BigDecimal avaBalance, BigDecimal cardFee, CardRechargeRecord cardRechargeRecord) {
+        List<UserWalletTransaction> transactions = new ArrayList<>();
+        BigDecimal currentBalance = avaBalance;
+
+        if (cardRechargeRecord.getOrderFee().compareTo(cardFee) != 0) {
+            log.warn("手续费不匹配，预期: {}, 实际: {}", cardFee, cardRechargeRecord.getOrderFee());
+        }
+
+        // 创建充值金额交易记录
+        UserWalletTransaction rechargeTransaction = createUserWalletTransaction(userId, currentBalance, cardRechargeRecord.getOrderAmount(), TransactionTypeEnum.BALANCE_RECHARGE_TO_CARD, cardRechargeRecord.getCardId(), cardRechargeRecord.getOrderId(),cardRechargeRecord.getTradeId());
+        transactions.add(rechargeTransaction);
+        currentBalance = currentBalance.subtract(cardRechargeRecord.getOrderAmount());
+
+        // 创建手续费交易记录
+        UserWalletTransaction feeTransaction = createUserWalletTransaction(userId, currentBalance, cardRechargeRecord.getOrderFee(), TransactionTypeEnum.CARD_RECHARGE_FEE, cardRechargeRecord.getCardId(), cardRechargeRecord.getOrderId(),cardRechargeRecord.getTradeId());
+        transactions.add(feeTransaction);
+
+        // 保存所有交易记录
+        userWalletTransactionService.saveBatch(transactions);
+    }
+
+    private UserWalletTransaction createUserWalletTransaction(Long userId, BigDecimal balanceBefore, BigDecimal amount, TransactionTypeEnum type, String businessNumber, String orderId,String tradeId) {
+        return UserWalletTransaction.builder()
+                .userId(userId)
+                .coinName(MoneyKindEnum.USD.getMoneyKindCode())
+                .balance(balanceBefore)
+                .amount(amount.negate()) // 由于是扣款，所以使用负数表示
+                .finaBalance(balanceBefore.subtract(amount))
+                .type(type.getCode())
+                .businessNumber(businessNumber) // 确保业务编号为字符串类型
+                .createTime(LocalDateTime.now())
+                .partitionKey(DateUtil.getMonth())
+                .remark(type.getDescription())
+                .tradeId(tradeId)
+                .orderId(orderId)
+                .build();
+    }
+
 
     // 锁卡
     @Override

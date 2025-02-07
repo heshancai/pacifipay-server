@@ -36,8 +36,11 @@ public class UserWalletBalance {
     @ApiModelProperty(value = "商户Id", example = "12345")
     private Long businessId;
 
-    @ApiModelProperty(value = "地址余额", example = "总余额")
-    private BigDecimal balance;
+    @ApiModelProperty(value = "可用余额", example = "可用余额")
+    private BigDecimal avaBalance;
+
+    @ApiModelProperty(value = "冻结金额", example = "冻结金额")
+    private BigDecimal freezeBalance;
 
     @ApiModelProperty(value = "创建时间", example = "2025-01-01T12:00:00")
     private LocalDateTime createTime;

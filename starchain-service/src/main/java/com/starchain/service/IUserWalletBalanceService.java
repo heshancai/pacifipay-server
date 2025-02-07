@@ -13,14 +13,16 @@ import java.math.BigDecimal;
 public interface IUserWalletBalanceService extends IService<UserWalletBalance> {
     /**
      * 检查用户余额是否满足要求
+     *
      * @param userId
      * @param businessId
      * @param saveAmount
      */
-    boolean checkUserBalance(Long userId, Long businessId, BigDecimal saveAmount,String type);
+    boolean checkUserBalance(String cardCode, Long userId, Long businessId, BigDecimal saveAmount, String type);
 
     /**
      * 获取用户钱包余额
+     *
      * @param userId
      * @param businessId
      * @return

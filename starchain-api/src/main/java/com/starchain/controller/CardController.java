@@ -81,21 +81,28 @@ public class CardController {
     @ApiOperation(value = "根据持卡人创建卡")
     @PostMapping("/addCard")
     public ClientResponse addCard(@RequestBody CardDto cardDto) {
-        if (cardDto.getCardCode() == null || cardDto.getTpyshCardHolderId() == null || cardDto.getBusinessId() == null) {
+        if (cardDto.getUserId() == null || cardDto.getCardCode() == null || cardDto.getTpyshCardHolderId() == null || cardDto.getBusinessId() == null) {
             return ResultGenerator.genFailResult("dto 不能为null");
         }
-        // 检查当前用户卡数量是否超过 4张
-        Integer holderCardNum = cardService.checkCardNum(cardDto.getBusinessId(), cardDto.getCardCode(), cardDto.getTpyshCardHolderId());
-        if (holderCardNum >= 4) {
-            return ResultGenerator.genFailResult("当前持卡人数量超过4张，无法创建新卡");
+
+        try {
+            // 检查当前用户卡数量是否超过 4张
+            Integer holderCardNum = cardService.checkCardNum(cardDto.getBusinessId(), cardDto.getCardCode(), cardDto.getTpyshCardHolderId());
+            if (holderCardNum >= 4) {
+                return ResultGenerator.genFailResult("当前持卡人数量超过4张，无法创建新卡");
+            }
+            // 校验当前用户余额是否满足
+            if (!userWalletBalanceService.checkUserBalance(cardDto.getCardCode(), cardDto.getUserId(), cardDto.getBusinessId(), null, MiPayNotifyType.CardOpen.getType())) {
+                return ResultGenerator.genFailResult("用户余额不足，无法创建新卡");
+            }
+            // 创建卡
+            Card card = cardService.addCard(cardDto);
+            return ResultGenerator.genSuccessResult(card);
+        } catch (Exception e) {
+            log.error("查询卡失败, cardDto: {}", cardDto, e);
+            return ResultGenerator.genFailResult(e.getMessage());
         }
-        // 校验当前用户余额是否满足
-        if (!userWalletBalanceService.checkUserBalance(cardDto.getUserId(), cardDto.getBusinessId(), null, MiPayNotifyType.CardOpen.getType())) {
-            return ResultGenerator.genFailResult("用户余额不足，无法创建新卡");
-        }
-        // 创建卡
-        Card card = cardService.addCard(cardDto);
-        return ResultGenerator.genSuccessResult(card);
+
     }
 
     @ApiOperation(value = "卡充值")
@@ -112,7 +119,7 @@ public class CardController {
         // 检查用户钱包余额是否足够
         BigDecimal orderAmount = cardDto.getOrderAmount().setScale(2, RoundingMode.HALF_UP);
         try {
-            userWalletBalanceService.checkUserBalance(cardDto.getUserId(), cardDto.getBusinessId(), orderAmount, MiPayNotifyType.Remit.getType());
+            userWalletBalanceService.checkUserBalance(cardDto.getCardCode(), cardDto.getUserId(), cardDto.getBusinessId(), orderAmount, MiPayNotifyType.Remit.getType());
         } catch (StarChainException e) {
             return ResultGenerator.genFailResult(e.getMessage());
         }

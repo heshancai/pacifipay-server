@@ -27,7 +27,7 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
     @Autowired
     private ICardFeeRuleService cardFeeRuleService;
 
-    public boolean checkUserBalance(Long userId, Long channelId, BigDecimal saveAmount, String type) throws StarChainException {
+    public boolean checkUserBalance(String cardCode,Long userId, Long channelId, BigDecimal saveAmount, String type) throws StarChainException {
         log.info("checkUserBalance userId:{}, channelId:{}, saveAmount:{}", userId, channelId, saveAmount);
 
         // 查询用户钱包余额
@@ -40,12 +40,12 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
             throw new StarChainException("用户钱包不存在");
         }
 
-        BigDecimal balance = userWalletBalance.getBalance();
+        BigDecimal balance = userWalletBalance.getAvaBalance();
 
         if (type.equals(MiPayNotifyType.CardOpen.getType())) {
             // 查询卡费规则配置表
             LambdaQueryWrapper<CardFeeRule> cardFeeRuleWrapper = new LambdaQueryWrapper<>();
-            cardFeeRuleWrapper.last("LIMIT 1"); // 获取最新的一条规则记录
+            cardFeeRuleWrapper.eq(CardFeeRule::getCardCode, cardCode);
             CardFeeRule cardFeeRule = cardFeeRuleService.getOne(cardFeeRuleWrapper);
 
             if (cardFeeRule == null) {
@@ -53,7 +53,7 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
                 throw new StarChainException("卡费规则未找到");
             }
 
-            // 计算用户需要的最小余额
+            // 计算用户需要的最小余额 开发费+预存金额+月服务费
             BigDecimal requiredBalance = cardFeeRule.getCardFee()
                     .add(cardFeeRule.getSaveAmount())
                     .add(cardFeeRule.getMonthlyFee());

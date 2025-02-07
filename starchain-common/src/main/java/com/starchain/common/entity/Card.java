@@ -30,6 +30,9 @@ public class Card implements Serializable {
     @ApiModelProperty(value = "主键ID", example = "1")
     private Long id;
 
+    @ApiModelProperty(value = "用户Id", example = "CARD123456")
+    private Long userId;
+
     @ApiModelProperty(value = "卡类型编码", example = "123456")
     private String cardCode;
 
@@ -87,7 +90,7 @@ public class Card implements Serializable {
     @ApiModelProperty(value = "SO123456", example = "预存款客户订单号同saveOrderId 保持一致")
     private String saveTradeId;
 
-    @ApiModelProperty(value = "卡状态创建状态", example = "卡卡创建状态：0 创建中 1 创建成功 2 创建失败")
+    @ApiModelProperty(value = "卡状态创建状态", example = "卡创建状态：0 创建中 1 创建成功 2 创建失败")
     private Integer createStatus;
 
     @ApiModelProperty(value = "卡状态-银行卡端返回", example = "normal initFail unactivated activating freezing cancelled")

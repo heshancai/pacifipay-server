@@ -1,19 +1,25 @@
 package com.starchain.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.common.entity.Card;
+import com.starchain.common.entity.CardFeeRule;
 import com.starchain.common.entity.CardOpenCallbackRecord;
+import com.starchain.common.entity.UserWalletBalance;
 import com.starchain.common.entity.response.MiPayCardNotifyResponse;
 import com.starchain.common.enums.CardStatusEnum;
 import com.starchain.common.enums.MiPayNotifyType;
 import com.starchain.common.exception.StarChainException;
 import com.starchain.dao.CardOpenCallbackRecordMapper;
+import com.starchain.service.ICardFeeRuleService;
 import com.starchain.service.ICardOpenCallbackRecordService;
 import com.starchain.service.ICardService;
+import com.starchain.service.IUserWalletBalanceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
@@ -32,12 +38,19 @@ public class CardOpenCallbackRecordServiceImpl extends ServiceImpl<CardOpenCallb
     @Autowired
     private ICardService cardService;
 
+    @Autowired
+    private ICardFeeRuleService cardFeeRuleService;
+
+    @Autowired
+    private IUserWalletBalanceService userWalletBalanceService;
+
     /**
      * 卡开通回调
      *
      * @param
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Boolean callBack(String callBackJson) {
         MiPayCardNotifyResponse miPayCardNotifyResponse = this.covertToMiPayCardNotifyResponse(callBackJson);
@@ -95,11 +108,21 @@ public class CardOpenCallbackRecordServiceImpl extends ServiceImpl<CardOpenCallb
                 log.info("回调记录已存在, 通知ID: {}", miPayCardNotifyResponse.getNotifyId());
             }
 
+            LambdaQueryWrapper<CardFeeRule> cardFeeRuleLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            cardFeeRuleLambdaQueryWrapper.eq(CardFeeRule::getCardCode, miPayCardNotifyResponse.getCardCode());
+            CardFeeRule cardFeeRule = cardFeeRuleService.getOne(cardFeeRuleLambdaQueryWrapper);
+
             // 5. 处理回调状态
             switch (miPayCardNotifyResponse.getStatus()) {
                 case "SUCCESS":
                     if (card.getCardStatus().equals(CardStatusEnum.ACTIVATING.getCardStatus()) && card.getCreateStatus() == 0) {
-                        // 5.1 修改卡状态为开通成功
+                        // 扣除冻结的余额-扣除开卡费-扣除首次开卡月服务费
+                        LambdaUpdateWrapper<UserWalletBalance> userWalletBalanceUpdateWrapper = new LambdaUpdateWrapper<>();
+                        userWalletBalanceUpdateWrapper.setSql("freeze_balance = freeze_balance - " + card.getCardFee().toString());
+                        userWalletBalanceUpdateWrapper.setSql("freeze_balance = freeze_balance - " + cardFeeRule.getMonthlyFee().toString());
+                        userWalletBalanceUpdateWrapper.eq(UserWalletBalance::getUserId, card.getUserId());
+                        userWalletBalanceService.update(userWalletBalanceUpdateWrapper);
+                        // 修改卡状态为开通成功
                         card.setCardStatus(CardStatusEnum.NORMAL.getCardStatus());
                         card.setCreateStatus(1);
                         updateCardAndCallbackRecord(card, cardOpenCallbackRecord);
@@ -108,7 +131,16 @@ public class CardOpenCallbackRecordServiceImpl extends ServiceImpl<CardOpenCallb
                     }
                     break;
                 case "FAILED":
-                    // 5.3 处理失败状态
+                    // 金额回滚
+                    LambdaUpdateWrapper<UserWalletBalance> userWalletBalanceUpdateWrapper = new LambdaUpdateWrapper<>();
+                    userWalletBalanceUpdateWrapper.setSql("freeze_balance = freeze_balance - " + card.getCardFee().toString());
+                    userWalletBalanceUpdateWrapper.setSql("freeze_balance = freeze_balance - " + cardFeeRule.getMonthlyFee().toString());
+                    userWalletBalanceUpdateWrapper.setSql("ava_balance = ava_balance +" + card.getCardFee().toString());
+                    userWalletBalanceUpdateWrapper.setSql("ava_balance = ava_balance +" + cardFeeRule.getMonthlyFee().toString());
+                    userWalletBalanceUpdateWrapper.eq(UserWalletBalance::getUserId, card.getUserId());
+                    userWalletBalanceService.update(userWalletBalanceUpdateWrapper);
+
+                     // 创建失败 重新发起
                     card.setCardStatus(CardStatusEnum.INIT_FAIL.getCardStatus());
                     card.setCreateStatus(2);
                     updateCardAndCallbackRecord(card, cardOpenCallbackRecord);

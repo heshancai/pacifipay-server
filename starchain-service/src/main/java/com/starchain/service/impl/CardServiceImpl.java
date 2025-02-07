@@ -7,12 +7,13 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.common.config.PacificPayConfig;
 import com.starchain.common.constants.CardUrlConstants;
-import com.starchain.common.entity.Card;
-import com.starchain.common.entity.CardCancelRecord;
-import com.starchain.common.entity.CardRechargeRecord;
+import com.starchain.common.entity.*;
 import com.starchain.common.entity.dto.CardDto;
 import com.starchain.common.enums.CardStatusEnum;
+import com.starchain.common.enums.MoneyKindEnum;
+import com.starchain.common.enums.TransactionTypeEnum;
 import com.starchain.common.exception.StarChainException;
+import com.starchain.common.util.DateUtil;
 import com.starchain.common.util.HttpUtils;
 import com.starchain.common.util.OrderIdGenerator;
 import com.starchain.dao.CardMapper;
@@ -25,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author
@@ -37,16 +40,18 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
 
     @Autowired
     private PacificPayConfig pacificPayConfig;
-
-
     @Autowired
     private IUserWalletBalanceService userWalletBalanceService;
+    @Autowired
+    private ICardFeeRuleService cardFeeRuleService;
     @Autowired
     private IdWorker idWorker;
     @Autowired
     private ICardRechargeRecordService cardRechargeRecordService;
     @Autowired
     private ICardCancelRecordService cardCancelRecordService;
+    @Autowired
+    private IUserWalletTransactionService userWalletTransactionService;
 
     /**
      * 查询商户余额
@@ -73,52 +78,114 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     }
 
 
-    /**
-     * 创建持卡人 成功 预先存部分虚拟卡数据
-     *
-     * @param
-     * @return
-     */
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Card addCard(CardDto cardDto) {
-        String token = null;
+        String token;
         try {
-            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
-            // 创建卡
-            System.out.println("token=>" + token);
-
-            Card card = new Card();
-            card.setCardCode(cardDto.getCardCode());
-            //  生成一个唯一的订单号
-            card.setSaveOrderId(OrderIdGenerator.generateOrderId("", "", 6));
-            // 太平洋的持卡人唯一值
-            card.setTpyshCardHolderId(cardDto.getTpyshCardHolderId());
-            card.setCardStatus(CardStatusEnum.ACTIVATING.getCardStatus());
-            card.setCreateStatus(0);
-            card.setLocalCreateTime(LocalDateTime.now());
-            card.setLocalUpdateTime(LocalDateTime.now());
-            card.setSaveAmount(BigDecimal.ZERO);
-            this.save(card);
-            // 卡状态为激活中
-            String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.ADD_CARD, token, JSONObject.toJSONString(card), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
-            log.info("返回的数据：{}", str);
-            Card returnCard = JSON.parseObject(str, Card.class);
-            if (CardStatusEnum.NORMAL.getCardStatus().equals(returnCard.getCardStatus())) {
-                returnCard.setCreateStatus(1);
-            } else {
-                returnCard.setCreateStatus(card.getCreateStatus());
+            // 获取最新的卡费规则
+            LambdaQueryWrapper<CardFeeRule> cardFeeRuleWrapper = new LambdaQueryWrapper<>();
+            cardFeeRuleWrapper.last("LIMIT 1");
+            CardFeeRule cardFeeRule = cardFeeRuleService.getOne(cardFeeRuleWrapper);
+            if (cardFeeRule == null) {
+                throw new StarChainException("未找到有效的开卡费用规则");
             }
-            returnCard.setId(card.getId());
-            returnCard.setLocalCreateTime(card.getLocalCreateTime());
+
+            // 获取token
+            token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
+
+            // 创建卡
+            CardDto cardDto1 = prepareCardDto(cardDto, cardFeeRule);
+            String responseStr = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.ADD_CARD, token, JSONObject.toJSONString(cardDto1), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
+            log.info("返回的数据：{}", responseStr);
+            Card returnCard = JSON.parseObject(responseStr, Card.class);
+            if (CardStatusEnum.ACTIVATING.getCardStatus().equals(returnCard.getCardStatus())) {
+                returnCard.setCreateStatus(1);
+            }
+            returnCard.setLocalCreateTime(LocalDateTime.now());
             returnCard.setLocalUpdateTime(LocalDateTime.now());
-            this.updateById(returnCard);
+            returnCard.setUserId(cardDto.getUserId());
+            this.save(returnCard);
+
+            BigDecimal totalFreezeAmount = calculateTotalFreezeAmount(cardFeeRule);
+            UserWalletBalance wallet = userWalletBalanceService.getById(cardDto.getUserId());
+
+            // 更新用户钱包，冻结相应金额
+            updateWalletBalance(wallet, totalFreezeAmount);
+
+            // 记录预交易流水
+            createPreTransactionRecords(cardDto.getUserId(), wallet.getAvaBalance(), returnCard, cardFeeRule);
+
             log.info("发起创建卡成功:{}", returnCard);
-            return card;
+            return returnCard;
         } catch (Exception e) {
             log.error("服务异常", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private CardDto prepareCardDto(CardDto originalCardDto, CardFeeRule cardFeeRule) {
+        CardDto cardDto1 = new CardDto();
+        cardDto1.setCardCode(originalCardDto.getCardCode());
+        cardDto1.setSaveOrderId(OrderIdGenerator.generateOrderId("", "", 6));
+        cardDto1.setTpyshCardHolderId(originalCardDto.getTpyshCardHolderId());
+        cardDto1.setSaveAmount(cardFeeRule.getSaveAmount());
+        return cardDto1;
+    }
+
+    private BigDecimal calculateTotalFreezeAmount(CardFeeRule cardFeeRule) {
+        return cardFeeRule.getCardFee()
+                .add(cardFeeRule.getSaveAmount())
+                .add(cardFeeRule.getMonthlyFee());
+    }
+
+    private void updateWalletBalance(UserWalletBalance wallet, BigDecimal totalFreezeAmount) {
+        wallet.setAvaBalance(wallet.getAvaBalance().subtract(totalFreezeAmount));
+        wallet.setFreezeBalance(wallet.getFreezeBalance().add(totalFreezeAmount));
+        userWalletBalanceService.updateById(wallet);
+    }
+
+    private void createPreTransactionRecords(Long userId, BigDecimal initialBalance, Card returnCard, CardFeeRule cardFeeRule) {
+        List<UserWalletTransaction> transactions = new ArrayList<>();
+        BigDecimal currentBalance = initialBalance;
+
+        // 开卡费
+        BigDecimal cardOpenFee = returnCard.getCardFee() != null ? returnCard.getCardFee() : cardFeeRule.getCardFee();
+        if (cardFeeRule.getCardFee().compareTo(cardOpenFee) != 0) {
+            log.warn("开卡手续费不匹配，预期: {}, 实际: {}", cardFeeRule.getCardFee(), cardOpenFee);
+        }
+        currentBalance = addTransaction(transactions, userId, MoneyKindEnum.USD.getMoneyKindCode(), currentBalance, cardOpenFee, TransactionTypeEnum.CARD_OPEN_FEE, returnCard.getCardId(), returnCard.getSaveOrderId());
+
+        // 预存费
+        BigDecimal preStoreAmount = returnCard.getSaveAmount() != null ? returnCard.getSaveAmount() : cardFeeRule.getSaveAmount();
+        if (cardFeeRule.getSaveAmount().compareTo(preStoreAmount) != 0) {
+            log.warn("预存费用不匹配，预期: {}, 实际: {}", cardFeeRule.getSaveAmount(), preStoreAmount);
+        }
+        currentBalance = addTransaction(transactions, userId, MoneyKindEnum.USD.getMoneyKindCode(), currentBalance, preStoreAmount, TransactionTypeEnum.CARD_OPEN_DEPOSIT, returnCard.getCardId(), returnCard.getSaveOrderId());
+
+        // 月服务费
+        BigDecimal monthlyFee = cardFeeRule.getMonthlyFee();
+        currentBalance = addTransaction(transactions, userId, MoneyKindEnum.USD.getMoneyKindCode(), currentBalance, monthlyFee, TransactionTypeEnum.CARD_MONTHLY_SERVICE_FEE, returnCard.getCardId(), returnCard.getSaveOrderId());
+
+        userWalletTransactionService.saveBatch(transactions);
+    }
+
+    private BigDecimal addTransaction(List<UserWalletTransaction> transactions, Long userId, String coinName, BigDecimal balance, BigDecimal amount, TransactionTypeEnum type, String businessNumber, String orderId) {
+        UserWalletTransaction transaction = UserWalletTransaction.builder()
+                .userId(userId)
+                .coinName(coinName)
+                .balance(balance)
+                .amount(amount.negate())
+                .finaBalance(balance.subtract(amount))
+                .type(type.getCode())
+                .businessNumber(businessNumber)
+                .createTime(LocalDateTime.now())
+                .partitionKey(DateUtil.getMonth())
+                .remark(type.getDescription())
+                .orderId(orderId)
+                .build();
+        transactions.add(transaction);
+        return balance.subtract(amount);
     }
 
 

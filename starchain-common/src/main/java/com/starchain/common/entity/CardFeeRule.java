@@ -36,11 +36,14 @@ public class CardFeeRule {
     @ApiModelProperty(value = "销卡费")
     private BigDecimal cancelFee;
 
-    @ApiModelProperty(value = "充值手续费率（%）")
+    @ApiModelProperty(value = "充值手续费率")
     private BigDecimal rechargeFeeRate;
 
-    @ApiModelProperty(value = "提现手续费率（%）")
+    @ApiModelProperty(value = "提现手续费率")
     private BigDecimal withdrawFeeRate;
+
+    @ApiModelProperty(value = "卡类型编码", example = "TpyMDN6")
+    private String cardCode;
 
     @ApiModelProperty(value = "每日充值次数限制")
     private Integer dailyRechargeLimit;

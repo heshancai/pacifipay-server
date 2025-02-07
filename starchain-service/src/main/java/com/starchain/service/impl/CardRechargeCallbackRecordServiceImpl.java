@@ -147,7 +147,7 @@ public class CardRechargeCallbackRecordServiceImpl extends ServiceImpl<CardRecha
             updateUserWalletBalance(rechargeRecord, callbackRecord);
             // 修改卡余额
             updateCardBalance(response, rechargeRecord, callbackRecord);
-            // 修改卡充值状态为成功
+            // 修改卡充值记录 设置金额
             updateRechargeRecordStatus(response, callbackRecord);
 
             // 更新回调记录

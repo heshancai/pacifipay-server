@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.starchain.common.entity.CardHolder;
 import com.starchain.common.entity.dto.CardHolderDto;
 
+import java.util.List;
+
 /**
  * @author
  * @date 2025-01-03
@@ -41,4 +43,11 @@ public interface ICardHolderService extends IService<CardHolder> {
      * @return
      */
     CardHolder getCardHolder(CardHolderDto cardHolderDto);
+
+    /**
+     * 查询持卡人
+     * @param cardHolderDto
+     * @return
+     */
+    List<CardHolder> selectCardHolder(CardHolderDto cardHolderDto);
 }

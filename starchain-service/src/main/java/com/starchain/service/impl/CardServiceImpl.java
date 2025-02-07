@@ -12,6 +12,7 @@ import com.starchain.common.entity.CardCancelRecord;
 import com.starchain.common.entity.CardRechargeRecord;
 import com.starchain.common.entity.dto.CardDto;
 import com.starchain.common.enums.CardStatusEnum;
+import com.starchain.common.enums.MiPayNotifyType;
 import com.starchain.common.exception.StarChainException;
 import com.starchain.common.util.HttpUtils;
 import com.starchain.common.util.OrderIdGenerator;
@@ -207,7 +208,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         try {
             // 余额必须大于 0 且必须大于输入的金额
             BigDecimal orderAmount = cardDto.getOrderAmount().setScale(2, BigDecimal.ROUND_HALF_UP);
-            userWalletBalanceService.checkUserBalance(cardDto.getUserId(), cardDto.getBusinessId(), orderAmount);
+            userWalletBalanceService.checkUserBalance(cardDto.getUserId(), cardDto.getBusinessId(), orderAmount, MiPayNotifyType.Remit.getType());
             cardDto.setOrderAmount(orderAmount);
             // 封装传递参数
             cardDto.setOrderId(String.valueOf(idWorker.nextId()));

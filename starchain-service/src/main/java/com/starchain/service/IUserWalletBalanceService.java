@@ -14,10 +14,16 @@ public interface IUserWalletBalanceService extends IService<UserWalletBalance> {
     /**
      * 检查用户余额是否满足要求
      * @param userId
-     * @param channelId
+     * @param businessId
      * @param saveAmount
      */
-    void checkUserBalance(Long userId, Long channelId, BigDecimal saveAmount);
+    boolean checkUserBalance(Long userId, Long businessId, BigDecimal saveAmount,String type);
 
-    UserWalletBalance getUserWalletBalance(Long userId, Long channelId);
+    /**
+     * 获取用户钱包余额
+     * @param userId
+     * @param businessId
+     * @return
+     */
+    UserWalletBalance getUserWalletBalance(Long userId, Long businessId);
 }

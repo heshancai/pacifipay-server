@@ -2,11 +2,14 @@ package com.starchain.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.starchain.common.entity.CardFeeRule;
 import com.starchain.common.entity.UserWalletBalance;
-import com.starchain.common.exception.StarChainException;
+import com.starchain.common.enums.MiPayNotifyType;
 import com.starchain.dao.UserWalletBalanceMapper;
+import com.starchain.service.ICardFeeRuleService;
 import com.starchain.service.IUserWalletBalanceService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,24 +22,57 @@ import java.math.BigDecimal;
 @Service
 @Slf4j
 public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceMapper, UserWalletBalance> implements IUserWalletBalanceService {
+
+    @Autowired
+    private ICardFeeRuleService cardFeeRuleService;
+
     @Override
-    public void checkUserBalance(Long userId, Long channelId, BigDecimal saveAmount) {
+    public boolean checkUserBalance(Long userId, Long channelId, BigDecimal saveAmount, String type) {
         log.info("checkUserBalance userId:{}, channelId:{}, saveAmount:{}", userId, channelId, saveAmount);
+
+        // 查询用户钱包余额
         LambdaQueryWrapper<UserWalletBalance> userWalletBalanceLambdaQueryWrapper = new LambdaQueryWrapper<>();
         userWalletBalanceLambdaQueryWrapper.eq(UserWalletBalance::getUserId, userId);
         userWalletBalanceLambdaQueryWrapper.eq(UserWalletBalance::getBusinessId, channelId);
         UserWalletBalance userWalletBalance = this.getOne(userWalletBalanceLambdaQueryWrapper);
+
         if (userWalletBalance == null) {
-            throw new RuntimeException("User wallet balance not found");
+            return false;
         }
 
         BigDecimal balance = userWalletBalance.getBalance();
 
-        // 钱包余额必须大于等于汇款金额+手续费（1 USD）
-        if (balance.compareTo(saveAmount.add(BigDecimal.ONE)) < 0) {
-            throw new StarChainException("余额不足");
+        if (type.equals(MiPayNotifyType.CardOpen.getType())) {
+            // 查询卡费规则配置表
+            LambdaQueryWrapper<CardFeeRule> cardFeeRuleWrapper = new LambdaQueryWrapper<>();
+            cardFeeRuleWrapper.last("LIMIT 1"); // 获取最新的一条规则记录
+            CardFeeRule cardFeeRule = cardFeeRuleService.getOne(cardFeeRuleWrapper);
+
+            if (cardFeeRule == null) {
+                log.warn("Card fee rules not found.");
+                return false;
+            }
+
+            // 计算用户需要的最小余额
+            BigDecimal requiredBalance = cardFeeRule.getCardFee()
+                    .add(cardFeeRule.getSaveAmount())
+                    .add(cardFeeRule.getMonthlyFee());
+
+            // 检查钱包余额是否足够
+            if (balance.compareTo(requiredBalance) < 0) {
+                return false;
+            }
+
+        } else if (type.equals(MiPayNotifyType.Remit.getType())) {
+            // 钱包余额必须大于等于 汇款金额 + 1 USD（手续费）
+            if (balance.compareTo(saveAmount.add(BigDecimal.ONE)) < 0) {
+                return false;
+            }
         }
+
+        return true;
     }
+
 
     @Override
     public UserWalletBalance getUserWalletBalance(Long userId, Long channelId) {

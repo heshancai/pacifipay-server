@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -162,6 +163,13 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public List<CardHolder> selectCardHolder(CardHolderDto cardHolderDto) {
+        LambdaQueryWrapper<CardHolder> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(CardHolder::getUserId, cardHolderDto.getUserId()).eq(CardHolder::getBusinessId, cardHolderDto.getBusinessId());
+        return this.list(lambdaQueryWrapper);
     }
 
 

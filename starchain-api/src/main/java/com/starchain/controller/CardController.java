@@ -15,6 +15,7 @@ import com.starchain.common.entity.dto.TradeDetailDto;
 import com.starchain.common.entity.response.TradeDetailResponse;
 import com.starchain.common.enums.CardStatusEnum;
 import com.starchain.common.enums.CreateStatusEnum;
+import com.starchain.common.enums.MiPayNotifyType;
 import com.starchain.common.enums.MoneyKindEnum;
 import com.starchain.common.result.ClientResponse;
 import com.starchain.common.result.ResultGenerator;
@@ -65,6 +66,9 @@ public class CardController {
     @Autowired
     private IMerchantWalletService merchantWalletService;
 
+    @Autowired
+    private IUserWalletBalanceService userWalletBalanceService;
+
     @Value("${app.id}")
     private String appId;
 
@@ -75,10 +79,17 @@ public class CardController {
     @ApiOperation(value = "根据持卡人创建卡")
     @PostMapping("/addCard")
     public ClientResponse addCard(@RequestBody CardDto cardDto) {
+        if (cardDto.getCardCode() == null || cardDto.getTpyshCardHolderId() == null || cardDto.getBusinessId() == null) {
+            return ResultGenerator.genFailResult("dto 不能为null");
+        }
         // 检查当前用户卡数量是否超过 4张
         Integer holderCardNum = cardService.checkCardNum(cardDto.getBusinessId(), cardDto.getCardCode(), cardDto.getTpyshCardHolderId());
         if (holderCardNum >= 4) {
             return ResultGenerator.genFailResult("当前持卡人数量超过4张，无法创建新卡");
+        }
+        // 校验当前用户余额是否满足
+        if (!userWalletBalanceService.checkUserBalance(cardDto.getUserId(), cardDto.getBusinessId(), null, MiPayNotifyType.CardOpen.getType())) {
+            return ResultGenerator.genFailResult("用户余额不足，无法创建新卡");
         }
         // 创建卡
         Card card = cardService.addCard(cardDto);

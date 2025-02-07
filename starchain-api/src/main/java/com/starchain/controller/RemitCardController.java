@@ -7,6 +7,7 @@ import com.starchain.common.entity.RemitCard;
 import com.starchain.common.entity.dto.RemitApplicationRecordDto;
 import com.starchain.common.entity.dto.RemitCardDto;
 import com.starchain.common.entity.dto.RemitRateDto;
+import com.starchain.common.enums.MiPayNotifyType;
 import com.starchain.common.enums.MoneyKindEnum;
 import com.starchain.common.result.ClientResponse;
 import com.starchain.common.result.ResultGenerator;
@@ -223,7 +224,7 @@ public class RemitCardController {
         }
         try {
             // 校验用户钱包余额是否足够
-            userWalletBalanceService.checkUserBalance(remitApplicationRecordDto.getUserId(), remitApplicationRecordDto.getBusinessId(), remitApplicationRecordDto.getToAmount());
+            userWalletBalanceService.checkUserBalance(remitApplicationRecordDto.getUserId(), remitApplicationRecordDto.getBusinessId(), remitApplicationRecordDto.getToAmount(), MiPayNotifyType.Remit.getType());
             Boolean result = remitApplicationRecordService.applyRemit(remitApplicationRecordDto);
             return ResultGenerator.genSuccessResult(result);
         } catch (Exception e) {

@@ -28,7 +28,7 @@ public class CardHolder implements Serializable {
     @ApiModelProperty(value = "卡类型编码,银行卡端提供", example = "TpyMDN6")
     private String cardCode; // 卡类型编码
 
-    @ApiModelProperty(value = "用户Id 第三方传递过来")
+    @ApiModelProperty(value = "用户Id")
     private Long userId;
 
     @ApiModelProperty(value = "商家Id", example = "100001")

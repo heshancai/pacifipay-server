@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * @author
  * @date 2025-01-07
@@ -43,6 +45,20 @@ public class CardHolderController {
         }
         // 创建持卡人
         CardHolder cardHolder = cardHolderService.addCardHolder(cardHolderDto);
+        return ResultGenerator.genSuccessResult(cardHolder);
+    }
+
+    /**
+     * 查询当前用户持卡人信息
+     */
+    @ApiOperation(value = "查询当前用户持卡人信息")
+    @PostMapping("/selectCardHolder")
+    public ClientResponse selectCardHolder(@RequestBody CardHolderDto cardHolderDto) {
+        if (ObjectUtils.isEmpty(cardHolderDto.getUserId()) || ObjectUtils.isEmpty(cardHolderDto.getBusinessId())) {
+            return ResultGenerator.genFailResult("dto不能为空");
+        }
+        // 查询当前用户持卡人信息
+        List<CardHolder> cardHolder = cardHolderService.selectCardHolder(cardHolderDto);
         return ResultGenerator.genSuccessResult(cardHolder);
     }
 
@@ -83,7 +99,7 @@ public class CardHolderController {
     }
 
     /**
-     * 查询持卡人
+     * 查询持卡人详情
      */
     @ApiOperation(value = "查询持卡人详情")
     @PostMapping("/getCardHolder")
@@ -94,8 +110,8 @@ public class CardHolderController {
         if (ObjectUtils.isEmpty(cardHolderDto.getTpyshCardHolderId())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }
-        LambdaQueryWrapper<CardHolder> cardHolderLambdaQueryWrapper=new LambdaQueryWrapper<>();
-        cardHolderLambdaQueryWrapper.eq(CardHolder::getMerchantCardHolderId,cardHolderDto.getMerchantCardHolderId());
+        LambdaQueryWrapper<CardHolder> cardHolderLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        cardHolderLambdaQueryWrapper.eq(CardHolder::getMerchantCardHolderId, cardHolderDto.getMerchantCardHolderId());
         CardHolder result = cardHolderService.getOne(cardHolderLambdaQueryWrapper);
         if (result == null) {
             return ResultGenerator.genFailResult("持卡人不存在");

@@ -37,7 +37,7 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
         }
 
         // 查询卡费规则配置表
-        CardFeeRule cardFeeRule = getCardFeeRule(cardCode);
+        CardFeeRule cardFeeRule = cardFeeRuleService.getCardFeeRule(cardCode);
         if (cardFeeRule == null) {
             log.warn("未找到卡费规则。");
             throw new StarChainException("卡费规则未找到");
@@ -77,14 +77,8 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
         }
     }
 
-
-    private CardFeeRule getCardFeeRule(String cardCode) {
-        LambdaQueryWrapper<CardFeeRule> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(CardFeeRule::getCardCode, cardCode);
-        return cardFeeRuleService.getOne(queryWrapper);
-    }
-
     private void checkCardOpenBalance(BigDecimal balance, CardFeeRule cardFeeRule) throws StarChainException {
+
         BigDecimal requiredBalance = cardFeeRule.getCardFee()
                 .add(cardFeeRule.getSaveAmount())
                 .add(cardFeeRule.getMonthlyFee());
@@ -95,7 +89,8 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
     }
 
     private void checkRemitBalance(BigDecimal balance, BigDecimal saveAmount, CardFeeRule cardFeeRule) throws StarChainException {
-        BigDecimal totalAmount = saveAmount.multiply(cardFeeRule.getHandleFeeAmount()).add(saveAmount);
+        // 判断钱包金额是否足够 手续费费用公式：金额的1.6%+2U
+        BigDecimal totalAmount = saveAmount.multiply(cardFeeRule.getRemitFeeRate()).add(cardFeeRule.getRemitFeeAmount()).add(saveAmount);
         if (balance.compareTo(saveAmount.add(totalAmount)) < 0) {
             throw new StarChainException("余额不足，需要至少" + totalAmount + "但只有" + balance);
         }
@@ -116,5 +111,12 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
         queryWrapper.eq(UserWalletBalance::getUserId, userId);
         queryWrapper.eq(UserWalletBalance::getBusinessId, channelId);
         return this.getOne(queryWrapper);
+    }
+
+    @Override
+    public boolean updateWalletBalance(UserWalletBalance wallet, BigDecimal totalFreezeAmount) {
+        wallet.setAvaBalance(wallet.getAvaBalance().subtract(totalFreezeAmount));
+        wallet.setFreezeBalance(wallet.getFreezeBalance().add(totalFreezeAmount));
+        return this.updateById(wallet);
     }
 }

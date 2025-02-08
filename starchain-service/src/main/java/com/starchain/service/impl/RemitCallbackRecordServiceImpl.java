@@ -151,7 +151,7 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
         return callbackRecord;
     }
 
-    // 汇款卡审核状态
+    // 汇款撤销
     private boolean handleRechargeStatus(MiPayRemitNotifyResponse response, RemitApplicationRecord remitApplicationRecord, RemitCallbackRecord callbackRecord) {
         if (CardStatusDescEnum.SUCCESS.getDescription().equals(response.getStatus())) {
             // 5.记录汇款交易流水

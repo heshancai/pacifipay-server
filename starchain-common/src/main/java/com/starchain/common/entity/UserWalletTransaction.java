@@ -49,7 +49,7 @@ public class UserWalletTransaction {
     @ApiModelProperty(value = "操作后的钱包余额")
     private BigDecimal finaBalance;
 
-    @ApiModelProperty(value = "流水类型 1:充币 2.提币 3.全球汇款 4、充值到卡 5、汇款撤销 6、注销卡 7、开卡费 8、预存费 9、月服务费 10、充值手续费 11、销卡回退金额 12 销卡手续费 ")
+    @ApiModelProperty(value = "流水类型 1:充币 2.提币 3.全球汇款 4、充值到卡 5、汇款撤销  6、开卡费 7、预存费 8、月服务费 9、充值手续费 10、销卡回退金额 11 销卡手续费 12 汇款手续费 ")
     private Integer type;
 
     @ApiModelProperty(value = "业务编号")

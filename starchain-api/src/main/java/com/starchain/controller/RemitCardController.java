@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
 
 /**
@@ -227,16 +229,49 @@ public class RemitCardController {
         if (lastRecord != null && lastRecord.getStatus() == 0) {
             return ResultGenerator.genFailResult("上一笔汇款正在处理中，无法进行新一轮汇款");
         }
+        RemitRateDto remitRateDto = new RemitRateDto();
+        remitRateDto.setRemitCode(remitApplicationRecordDto.getRemitCode());
+        remitRateDto.setToMoneyKind(remitApplicationRecordDto.getToMoneyKind());
+
 
         try {
-            // 校验用户钱包余额是否足够
-            userWalletBalanceService.checkUserBalance(
-                    remitApplicationRecordDto.getRemitCode(),
-                    remitApplicationRecordDto.getUserId(),
-                    remitApplicationRecordDto.getBusinessId(),
-                    remitApplicationRecordDto.getToAmount(),
-                    MiPayNotifyType.Remit
-            );
+            // 获取实时汇率
+            RemitRateDto remitRate = remitCardService.getRemitRate(null, remitRateDto);
+
+            // 判断是人民币 进行转换 计算为美元
+            if (remitApplicationRecordDto.getToMoneyKind().equals(MoneyKindEnum.CNY.getMoneyKindCode())) {
+                // 确保汇率存在
+                if (remitRate.getTradeRate() != null) {
+                    // 根据汇率将人民币金额转换为美元
+                    BigDecimal cnyAmount = remitApplicationRecordDto.getToAmount();
+                    BigDecimal usdAmount = cnyAmount.multiply(remitRate.getTradeRate()).setScale(2, RoundingMode.HALF_UP);
+
+                    // 打印或记录转换后的美元金额，这里仅作示例
+                    log.info("转换后的美元金额: {}", usdAmount);
+
+                    // 校验用户钱包余额是否足够 美元为标准
+                    userWalletBalanceService.checkUserBalance(
+                            remitApplicationRecordDto.getRemitCode(),
+                            remitApplicationRecordDto.getUserId(),
+                            remitApplicationRecordDto.getBusinessId(),
+                            usdAmount,
+                            MiPayNotifyType.Remit
+                    );
+                } else {
+                    // 如果没有找到有效的汇率，记录错误或抛出异常
+                    log.error("未找到有效的汇率进行货币转换");
+                    throw new RuntimeException("未找到有效的汇率进行货币转换");
+                }
+            } else {
+                // 美元直接计算
+                userWalletBalanceService.checkUserBalance(
+                        remitApplicationRecordDto.getRemitCode(),
+                        remitApplicationRecordDto.getUserId(),
+                        remitApplicationRecordDto.getBusinessId(),
+                        remitApplicationRecordDto.getToAmount(),
+                        MiPayNotifyType.Remit
+                );
+            }
 
             Boolean result = remitApplicationRecordService.applyRemit(remitApplicationRecordDto);
             return ResultGenerator.genSuccessResult(result);

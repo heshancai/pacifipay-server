@@ -42,6 +42,13 @@ public class CardFeeRule {
     @ApiModelProperty(value = "提现手续费率")
     private BigDecimal withdrawFeeRate;
 
+    @ApiModelProperty(value = "汇款手续费率")
+    private BigDecimal remitFeeRate;
+
+    @ApiModelProperty(value = "汇款手续费")
+    private BigDecimal remitFeeAmount;
+
+
     @ApiModelProperty(value = "卡类型编码", example = "TpyMDN6")
     private String cardCode;
 
@@ -62,6 +69,9 @@ public class CardFeeRule {
 
     @ApiModelProperty(value = "销卡手续费")
     private BigDecimal handleFeeAmount;
+
+    @ApiModelProperty(value = "汇款手续费率")
+    private BigDecimal handleFeeRate;
 
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;

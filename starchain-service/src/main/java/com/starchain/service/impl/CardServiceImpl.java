@@ -111,7 +111,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             UserWalletBalance wallet = userWalletBalanceService.getById(cardDto.getUserId());
 
             // 更新用户钱包，冻结相应金额
-            updateWalletBalance(wallet, totalFreezeAmount);
+            userWalletBalanceService.updateWalletBalance(wallet, totalFreezeAmount);
 
             // 记录预交易流水
             createPreTransactionRecords(cardDto.getUserId(), wallet.getAvaBalance(), returnCard, cardFeeRule);
@@ -139,11 +139,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
                 .add(cardFeeRule.getMonthlyFee());
     }
 
-    private void updateWalletBalance(UserWalletBalance wallet, BigDecimal totalFreezeAmount) {
-        wallet.setAvaBalance(wallet.getAvaBalance().subtract(totalFreezeAmount));
-        wallet.setFreezeBalance(wallet.getFreezeBalance().add(totalFreezeAmount));
-        userWalletBalanceService.updateById(wallet);
-    }
+
 
     private void createPreTransactionRecords(Long userId, BigDecimal initialBalance, Card returnCard, CardFeeRule cardFeeRule) {
         List<UserWalletTransaction> transactions = new ArrayList<>();
@@ -241,7 +237,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             CardFeeRule cardFeeRule = cardFeeRuleService.getOne(queryWrapper);
 
             // 更新用户钱包，冻结相应金额
-            updateWalletBalance(wallet, cardFeeRule.getCancelFee());
+            userWalletBalanceService.updateWalletBalance(wallet, cardFeeRule.getCancelFee());
 
             List<UserWalletTransaction> transactions = new ArrayList<>();
 
@@ -314,7 +310,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             createPreApplyRechargeTransaction(cardDto.getUserId(), wallet.getAvaBalance(), cardFee, cardRechargeRecord);
 
             // 更新用户钱包，冻结相应金额
-            updateWalletBalance(wallet, totalFreezeAmount);
+            userWalletBalanceService.updateWalletBalance(wallet, totalFreezeAmount);
 
 
             return cardRechargeRecord;

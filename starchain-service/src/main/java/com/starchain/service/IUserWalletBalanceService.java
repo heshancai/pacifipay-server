@@ -29,4 +29,11 @@ public interface IUserWalletBalanceService extends IService<UserWalletBalance> {
      * @return
      */
     UserWalletBalance getUserWalletBalance(Long userId, Long businessId);
+
+    /**
+     *
+     * @param wallet
+     * @param totalFreezeAmount
+     */
+    boolean updateWalletBalance(UserWalletBalance wallet, BigDecimal totalFreezeAmount);
 }

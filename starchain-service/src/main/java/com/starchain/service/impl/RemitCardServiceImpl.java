@@ -214,9 +214,9 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
     @Override
     public RemitRateDto getRemitRate(String token, RemitRateDto remitRateDto) {
 
-        Assert.notNull(remitRateDto.getRemitCode(), "汇款类型编码不能为空");
-        Assert.notNull(remitRateDto.getToMoneyKind(), "汇款目标币种编码不能为空");
         try {
+            Assert.notNull(remitRateDto.getRemitCode(), "汇款类型编码不能为空");
+            Assert.notNull(remitRateDto.getToMoneyKind(), "汇款目标币种编码不能为空");
             String requestUrl = pacificPayConfig.getBaseUrl() + CardRemittanceUrlConstants.GET_REMIT_RATE;
             String requestBody = JSONObject.toJSONString(remitRateDto);
             log.info("发送请求，URL：{}，请求体：{}", requestUrl, requestBody);
@@ -225,7 +225,7 @@ public class RemitCardServiceImpl extends ServiceImpl<RemitCardMapper, RemitCard
             return JSONObject.parseObject(responseStr, RemitRateDto.class);
         } catch (Exception e) {
             log.error("添加汇款卡时发生异常", e);
-            throw new StarChainException("添加汇款卡失败");
+            throw new StarChainException(e.getMessage());
         }
     }
 

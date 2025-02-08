@@ -122,7 +122,7 @@ public class CardOpenCallbackRecordServiceImpl extends ServiceImpl<CardOpenCallb
                         userWalletBalanceUpdateWrapper.setSql("freeze_balance = freeze_balance - " + cardFeeRule.getMonthlyFee().toString());
                         userWalletBalanceUpdateWrapper.eq(UserWalletBalance::getUserId, card.getUserId());
                         userWalletBalanceService.update(userWalletBalanceUpdateWrapper);
-                        // 修改卡状态为开通成功
+                        // 修改卡状态、增加卡余额
                         card.setCardStatus(CardStatusEnum.NORMAL.getCardStatus());
                         card.setCreateStatus(1);
                         updateCardAndCallbackRecord(card, cardOpenCallbackRecord);

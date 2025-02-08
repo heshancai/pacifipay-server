@@ -121,6 +121,7 @@ public class CardController {
         try {
             userWalletBalanceService.checkUserBalance(cardDto.getCardCode(), cardDto.getUserId(), cardDto.getBusinessId(), orderAmount, MiPayNotifyType.CardRecharge);
         } catch (StarChainException e) {
+            log.error("用户钱包余额不足，无法进行充值");
             return ResultGenerator.genFailResult(e.getMessage());
         }
         cardDto.setOrderAmount(orderAmount);

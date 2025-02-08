@@ -40,8 +40,8 @@ public class UserWalletTransaction {
     @ApiModelProperty(value = "充值金额/汇款金额/提现金额/充值到卡金额/注销卡到账金额/开卡费/月服务费")
     private BigDecimal amount;
 
-    @ApiModelProperty(value = "手续费")
-    private BigDecimal fee;
+//    @ApiModelProperty(value = "手续费")
+//    private BigDecimal fee;
 
     @ApiModelProperty(value = "实际到账金额")
     private BigDecimal actAmount;

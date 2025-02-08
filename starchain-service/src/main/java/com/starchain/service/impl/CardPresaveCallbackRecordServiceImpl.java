@@ -61,14 +61,14 @@ public class CardPresaveCallbackRecordServiceImpl extends ServiceImpl<CardPresav
             validateRechargeAmount(miPayCardNotifyResponse, card);
 
 
-            // 5. 查询或创建回调记录 如果成功则扣除钱包的冻结余额
+            // 5. 查询或创建回调记录
             CardPresaveCallbackRecord cardPresaveCallbackRecord = createOrUpdateCallbackRecord(miPayCardNotifyResponse);
 
             LambdaQueryWrapper<CardFeeRule> cardFeeRuleLambdaQueryWrapper = new LambdaQueryWrapper<>();
             cardFeeRuleLambdaQueryWrapper.eq(CardFeeRule::getCardCode, miPayCardNotifyResponse.getCardCode());
             CardFeeRule cardFeeRule = cardFeeRuleService.getOne(cardFeeRuleLambdaQueryWrapper);
 
-            // 6. 处理开卡预存
+            // 6. 处理开卡预存 如果成功则扣除钱包的冻结余额
             switch (miPayCardNotifyResponse.getStatus()) {
                 case "SUCCESS":
                     if (card.getCardStatus().equals(CardStatusEnum.ACTIVATING.getCardStatus()) && card.getCreateStatus() == 0) {
@@ -77,6 +77,11 @@ public class CardPresaveCallbackRecordServiceImpl extends ServiceImpl<CardPresav
                         userWalletBalanceUpdateWrapper.setSql("freeze_balance = freeze_balance - " + cardPresaveCallbackRecord.getActual());
                         userWalletBalanceUpdateWrapper.eq(UserWalletBalance::getUserId, card.getUserId());
                         userWalletBalanceService.update(userWalletBalanceUpdateWrapper);
+                        // 修改卡余额
+                        BigDecimal amount = card.getCardAmount().add(cardPresaveCallbackRecord.getActual());
+                        card.setCardAmount(amount);
+                        card.setLocalUpdateTime(LocalDateTime.now());
+                        cardService.updateById(card);
                         log.info("卡状态更新为开通成功, 卡ID: {}", card.getCardId());
                         return true;
                     }

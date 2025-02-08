@@ -291,15 +291,16 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             // 处理成功 等待回调结果
             cardRechargeRecordService.save(cardRechargeRecord);
             // 手续费
-            BigDecimal cardFee = cardDto.getSaveAmount().multiply(cardFeeRule.getRechargeFeeRate());
-            BigDecimal totalFreezeAmount = cardDto.getSaveAmount().add(cardFee);
+            BigDecimal cardFee = cardRechargeRecord.getOrderAmount().multiply(cardFeeRule.getRechargeFeeRate());
+            BigDecimal totalFreezeAmount = cardRechargeRecord.getOrderAmount().add(cardFee);
             UserWalletBalance wallet = userWalletBalanceService.getById(cardDto.getUserId());
+
+            // 记录预交易流水
+            createPreApplyRechargeTransaction(cardDto.getUserId(), wallet.getAvaBalance(), cardFee,cardRechargeRecord);
 
             // 更新用户钱包，冻结相应金额
             updateWalletBalance(wallet, totalFreezeAmount);
 
-            // 记录预交易流水
-            createPreApplyRechargeTransaction(cardDto.getUserId(), wallet.getAvaBalance(), cardFee,cardRechargeRecord);
 
             return cardRechargeRecord;
         } catch (Exception e) {
@@ -316,12 +317,12 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             log.warn("手续费不匹配，预期: {}, 实际: {}", cardFee, cardRechargeRecord.getOrderFee());
         }
 
-        // 创建充值金额交易记录
+        // 充值金额交易流水落库
         UserWalletTransaction rechargeTransaction = createUserWalletTransaction(userId, currentBalance, cardRechargeRecord.getOrderAmount(), TransactionTypeEnum.BALANCE_RECHARGE_TO_CARD, cardRechargeRecord.getCardId(), cardRechargeRecord.getOrderId(),cardRechargeRecord.getTradeId());
         transactions.add(rechargeTransaction);
         currentBalance = currentBalance.subtract(cardRechargeRecord.getOrderAmount());
 
-        // 创建手续费交易记录
+        // 手续费交易流水落库
         UserWalletTransaction feeTransaction = createUserWalletTransaction(userId, currentBalance, cardRechargeRecord.getOrderFee(), TransactionTypeEnum.CARD_RECHARGE_FEE, cardRechargeRecord.getCardId(), cardRechargeRecord.getOrderId(),cardRechargeRecord.getTradeId());
         transactions.add(feeTransaction);
 

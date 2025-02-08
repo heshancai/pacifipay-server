@@ -45,7 +45,7 @@ public class CardRechargeRecord {
     @ApiModelProperty(value = "充值金额", example = "100.00")
     private BigDecimal orderAmount; // 充值金额
 
-    @ApiModelProperty(value = "充值到账金额", example = "100.00")
+    @ApiModelProperty(value = "实际支付金额", example = "100.00")
     private BigDecimal actAmount; // 充值金额
 
     @ApiModelProperty(value = "流水号", example = "TRADE123456789")

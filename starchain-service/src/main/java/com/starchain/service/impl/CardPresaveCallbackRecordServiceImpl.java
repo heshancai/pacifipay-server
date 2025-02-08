@@ -87,8 +87,8 @@ public class CardPresaveCallbackRecordServiceImpl extends ServiceImpl<CardPresav
                     UserWalletBalance userWalletBalance = userWalletBalanceService.getOne(userWalletBalanceLambdaQueryWrapper);
                     List<UserWalletTransaction> transactions = new ArrayList<>();
                     BigDecimal currentBalance = userWalletBalance.getAvaBalance();
-                    // 开卡费回退流水
-                    currentBalance = addTransaction(transactions, card.getUserId(), MoneyKindEnum.USD.getMoneyKindCode(), currentBalance, cardPresaveCallbackRecord.getActual(), TransactionTypeEnum.CARD_OPEN_FEE, card.getCardId(), card.getSaveOrderId());
+                    // 预存款回退流水记录
+                    currentBalance = addTransaction(transactions, card.getUserId(), MoneyKindEnum.USD.getMoneyKindCode(), currentBalance, cardPresaveCallbackRecord.getActual(), TransactionTypeEnum.CARD_OPEN_DEPOSIT, card.getCardId(), card.getSaveOrderId());
                     userWalletTransactionService.saveBatch(transactions);
                     // 金额回滚
                     LambdaUpdateWrapper<UserWalletBalance> userWalletBalanceUpdateWrapper = new LambdaUpdateWrapper<>();

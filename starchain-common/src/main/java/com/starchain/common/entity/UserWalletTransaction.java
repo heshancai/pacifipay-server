@@ -37,19 +37,19 @@ public class UserWalletTransaction {
     @ApiModelProperty(value = "钱包原始余额")
     private BigDecimal balance;
 
-    @ApiModelProperty(value = "充值金额/汇款金额/提现金额/充值到卡金额/注销卡到账金额/开卡费/月服务费")
+    @ApiModelProperty(value = "充值金额/汇款金额/提现金额/充值到卡金额/注销回退金额/开卡费/月服务费")
     private BigDecimal amount;
 
 //    @ApiModelProperty(value = "手续费")
 //    private BigDecimal fee;
 
-    @ApiModelProperty(value = "实际到账金额")
-    private BigDecimal actAmount;
+//    @ApiModelProperty(value = "实际到账金额")
+//    private BigDecimal actAmount;
 
     @ApiModelProperty(value = "操作后的钱包余额")
     private BigDecimal finaBalance;
 
-    @ApiModelProperty(value = "流水类型 1:充币 2.提币 3.全球汇款 4、充值到卡 5、汇款撤销 6、注销卡 7、开卡费 8、预存费 9、月服务费 ")
+    @ApiModelProperty(value = "流水类型 1:充币 2.提币 3.全球汇款 4、充值到卡 5、汇款撤销 6、注销卡 7、开卡费 8、预存费 9、月服务费 10、充值手续费 11、销卡回退金额 12 销卡手续费 ")
     private Integer type;
 
     @ApiModelProperty(value = "业务编号")

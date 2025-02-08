@@ -142,8 +142,7 @@ public class CardOpenCallbackRecordServiceImpl extends ServiceImpl<CardOpenCallb
                     // 月服务费回退流水
                     currentBalance = addTransaction(transactions, card.getUserId(), MoneyKindEnum.USD.getMoneyKindCode(), currentBalance, cardFeeRule.getMonthlyFee(), TransactionTypeEnum.CARD_OPEN_FEE, card.getCardId(), card.getSaveOrderId());
                     userWalletTransactionService.saveBatch(transactions);
-                    // 金额回滚
-
+                    // 开卡费+月服务费回滚
                     LambdaUpdateWrapper<UserWalletBalance> userWalletBalanceUpdateWrapper = new LambdaUpdateWrapper<>();
                     userWalletBalanceUpdateWrapper.eq(UserWalletBalance::getUserId, card.getUserId());
                     userWalletBalanceUpdateWrapper.setSql("freeze_balance = freeze_balance - " + card.getCardFee().toString());

@@ -21,7 +21,11 @@ public enum TransactionTypeEnum {
     // 卡月服务费
     CARD_MONTHLY_SERVICE_FEE(9, "卡月服务费"),
     // 充值卡手续费
-    CARD_RECHARGE_FEE(10, "充值卡手续费");
+    CARD_RECHARGE_FEE(10, "充值卡手续费"),
+    // 销卡回退金额
+    CARD_CANCEL_RETURN(11, "销卡回退金额"),
+    // 销卡手续费
+    CARD_CANCEL_FEE(12, "销卡手续费");
     private final int code;
     private final String description;
 

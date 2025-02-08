@@ -171,7 +171,7 @@ public class CardCancelCallbackRecordServiceImpl extends ServiceImpl<CardCancelC
 
     // 处理销卡成功逻辑
     private void handleCardCancelSuccess(CardCancelRecord cancelRecord, Card card, CardCancelCallbackRecord callbackRecord) {
-        // 1. 生成用户钱包流水
+        // 1. 回退金额钱包流水
         UserWalletBalance userWalletBalance = userWalletBalanceService.getUserWalletBalance(cancelRecord.getUserId(), cancelRecord.getBusinessId());
         createUserWalletTransaction(userWalletBalance, cancelRecord, callbackRecord);
 
@@ -198,21 +198,18 @@ public class CardCancelCallbackRecordServiceImpl extends ServiceImpl<CardCancelC
     // 生成用户钱包流水
     private void createUserWalletTransaction(UserWalletBalance userWalletBalance, CardCancelRecord cancelRecord, CardCancelCallbackRecord callbackRecord) {
         BigDecimal returnAmount = callbackRecord.getReturnAmount();
-        BigDecimal handleFeeAmount = callbackRecord.getHandleFeeAmount();
-        BigDecimal finalBalance = userWalletBalance.getBalance().add(returnAmount);
+        BigDecimal finalBalance = userWalletBalance.getAvaBalance().add(returnAmount);
 
         UserWalletTransaction walletTransaction = UserWalletTransaction.builder()
                 .userId(userWalletBalance.getUserId())
                 .coinName(MoneyKindEnum.USD.getMoneyKindCode())
-                .balance(userWalletBalance.getBalance())
+                .balance(userWalletBalance.getAvaBalance())
                 .amount(returnAmount)
-                .fee(handleFeeAmount)
-                .actAmount(returnAmount)
                 .finaBalance(finalBalance)
-                .type(TransactionTypeEnum.CANCEL_CARD.getCode())
-                .businessNumber(callbackRecord.getNotifyId())
+                .type(TransactionTypeEnum.CARD_CANCEL_RETURN.getCode())
+                .businessNumber(callbackRecord.getCardId())
                 .partitionKey(DateUtil.getMonth())
-                .remark(TransactionTypeEnum.CANCEL_CARD.getDescription())
+                .remark(TransactionTypeEnum.CARD_CANCEL_RETURN.getDescription())
                 .createTime(LocalDateTime.now())
                 .build();
 

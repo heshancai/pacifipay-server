@@ -72,7 +72,7 @@ public class CardPresaveCallbackRecordServiceImpl extends ServiceImpl<CardPresav
             switch (miPayCardNotifyResponse.getStatus()) {
                 case "SUCCESS":
                     if (card.getCardStatus().equals(CardStatusEnum.ACTIVATING.getCardStatus()) && card.getCreateStatus() == 0) {
-                        // 扣除冻结的余额-扣除开卡费-扣除首次开卡月服务费
+                        // 冻结的金额扣除预付款
                         LambdaUpdateWrapper<UserWalletBalance> userWalletBalanceUpdateWrapper = new LambdaUpdateWrapper<>();
                         userWalletBalanceUpdateWrapper.setSql("freeze_balance = freeze_balance - " + cardPresaveCallbackRecord.getActual());
                         userWalletBalanceUpdateWrapper.eq(UserWalletBalance::getUserId, card.getUserId());
@@ -95,7 +95,7 @@ public class CardPresaveCallbackRecordServiceImpl extends ServiceImpl<CardPresav
                     // 预存款回退流水记录
                     currentBalance = addTransaction(transactions, card.getUserId(), MoneyKindEnum.USD.getMoneyKindCode(), currentBalance, cardPresaveCallbackRecord.getActual(), TransactionTypeEnum.CARD_OPEN_DEPOSIT, card.getCardId(), card.getSaveOrderId());
                     userWalletTransactionService.saveBatch(transactions);
-                    // 金额回滚
+                    // 预存款 回滚
                     LambdaUpdateWrapper<UserWalletBalance> userWalletBalanceUpdateWrapper = new LambdaUpdateWrapper<>();
                     userWalletBalanceUpdateWrapper.setSql("freeze_balance = freeze_balance - " + cardPresaveCallbackRecord.getActual());
                     userWalletBalanceUpdateWrapper.setSql("ava_balance = ava_balance +" + cardPresaveCallbackRecord.getActual());

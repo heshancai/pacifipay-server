@@ -232,6 +232,21 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             record.setCreateStatus(0); // 0 代表创建中
             record.setCreateTime(LocalDateTime.now());
             record.setUpdateTime(LocalDateTime.now());
+            cardCancelRecordService.save(record);
+
+            UserWalletBalance wallet = userWalletBalanceService.getById(cardDto.getUserId());
+
+            LambdaQueryWrapper<CardFeeRule> queryWrapper =new LambdaQueryWrapper<>();
+            queryWrapper.eq(CardFeeRule::getCardCode, cardDto.getCardCode());
+            CardFeeRule cardFeeRule = cardFeeRuleService.getOne(queryWrapper);
+
+            // 更新用户钱包，冻结相应金额
+            updateWalletBalance(wallet, cardFeeRule.getCancelFee());
+
+            List<UserWalletTransaction> transactions = new ArrayList<>();
+
+            // 记录预交易流水
+            addTransaction(transactions, record.getUserId(), MoneyKindEnum.USD.getMoneyKindCode(), wallet.getAvaBalance(), cardFeeRule.getCancelFee(), TransactionTypeEnum.CARD_CANCEL_FEE, record.getCardId(), null);
 
             return cardCancelRecordService.save(record);
         } catch (Exception e) {
@@ -296,7 +311,7 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
             UserWalletBalance wallet = userWalletBalanceService.getById(cardDto.getUserId());
 
             // 记录预交易流水
-            createPreApplyRechargeTransaction(cardDto.getUserId(), wallet.getAvaBalance(), cardFee,cardRechargeRecord);
+            createPreApplyRechargeTransaction(cardDto.getUserId(), wallet.getAvaBalance(), cardFee, cardRechargeRecord);
 
             // 更新用户钱包，冻结相应金额
             updateWalletBalance(wallet, totalFreezeAmount);
@@ -318,19 +333,19 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
         }
 
         // 充值金额交易流水落库
-        UserWalletTransaction rechargeTransaction = createUserWalletTransaction(userId, currentBalance, cardRechargeRecord.getOrderAmount(), TransactionTypeEnum.BALANCE_RECHARGE_TO_CARD, cardRechargeRecord.getCardId(), cardRechargeRecord.getOrderId(),cardRechargeRecord.getTradeId());
+        UserWalletTransaction rechargeTransaction = createUserWalletTransaction(userId, currentBalance, cardRechargeRecord.getOrderAmount(), TransactionTypeEnum.BALANCE_RECHARGE_TO_CARD, cardRechargeRecord.getCardId(), cardRechargeRecord.getOrderId(), cardRechargeRecord.getTradeId());
         transactions.add(rechargeTransaction);
         currentBalance = currentBalance.subtract(cardRechargeRecord.getOrderAmount());
 
         // 手续费交易流水落库
-        UserWalletTransaction feeTransaction = createUserWalletTransaction(userId, currentBalance, cardRechargeRecord.getOrderFee(), TransactionTypeEnum.CARD_RECHARGE_FEE, cardRechargeRecord.getCardId(), cardRechargeRecord.getOrderId(),cardRechargeRecord.getTradeId());
+        UserWalletTransaction feeTransaction = createUserWalletTransaction(userId, currentBalance, cardRechargeRecord.getOrderFee(), TransactionTypeEnum.CARD_RECHARGE_FEE, cardRechargeRecord.getCardId(), cardRechargeRecord.getOrderId(), cardRechargeRecord.getTradeId());
         transactions.add(feeTransaction);
 
         // 保存所有交易记录
         userWalletTransactionService.saveBatch(transactions);
     }
 
-    private UserWalletTransaction createUserWalletTransaction(Long userId, BigDecimal balanceBefore, BigDecimal amount, TransactionTypeEnum type, String businessNumber, String orderId,String tradeId) {
+    private UserWalletTransaction createUserWalletTransaction(Long userId, BigDecimal balanceBefore, BigDecimal amount, TransactionTypeEnum type, String businessNumber, String orderId, String tradeId) {
         return UserWalletTransaction.builder()
                 .userId(userId)
                 .coinName(MoneyKindEnum.USD.getMoneyKindCode())
@@ -431,7 +446,11 @@ public class CardServiceImpl extends ServiceImpl<CardMapper, Card> implements IC
     }
 
     @Override
-    public boolean cardExists(String cardId, String cardCode) {
-        return false;
+    public Card cardExists(String cardId, String cardCode) {
+        LambdaQueryWrapper<Card> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Card::getCardId, cardId);
+        lambdaQueryWrapper.eq(Card::getCardCode, cardCode);
+
+        return this.getOne(lambdaQueryWrapper);
     }
 }

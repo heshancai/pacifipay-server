@@ -305,9 +305,22 @@ public class CardController {
             return ResultGenerator.genFailResult("卡ID、卡类型、用户ID、商家ID不能为空");
         }
 
+        // 申请销卡 扣除手续费
+        try {
+            userWalletBalanceService.checkUserBalance(cardDto.getCardCode(), cardDto.getUserId(), cardDto.getBusinessId(), null, MiPayNotifyType.CardCancel);
+        } catch (StarChainException e) {
+            log.error("用户钱包余额不足，无法进行充值");
+            return ResultGenerator.genFailResult(e.getMessage());
+        }
+
+        Card card = cardService.cardExists(cardDto.getCardId(), cardDto.getCardCode());
+
+        if (card == null) {
+            return ResultGenerator.genFailResult("卡不存在");
+        }
         // 查询卡信息
-        if (!cardService.cardExists(cardDto.getCardId(), cardDto.getCardCode())) {
-            return ResultGenerator.genFailResult("卡信息不存在");
+        if (card.getCardStatus().equals(CardStatusEnum.CANCELLED.getCardStatus())) {
+            return ResultGenerator.genFailResult("卡已注销");
         }
 
         try {
@@ -403,8 +416,8 @@ public class CardController {
             Boolean result = cardService.lockCard(card);
             return ResultGenerator.genSuccessResult(result);
         } catch (Exception e) {
-            log.error("申请销卡失败", e);
-            return ResultGenerator.genFailResult("服务异常，申请销卡失败");
+            log.error("申请锁定卡失败", e);
+            return ResultGenerator.genFailResult("服务异常，申请锁定卡失败");
         }
     }
 
@@ -428,7 +441,7 @@ public class CardController {
             Boolean result = cardService.unlockCard(card);
             return ResultGenerator.genSuccessResult(result);
         } catch (Exception e) {
-            log.error("申请销卡失败", e);
+            log.error("申请解锁卡失败", e);
             return ResultGenerator.genFailResult("服务异常，解锁卡失败");
         }
     }

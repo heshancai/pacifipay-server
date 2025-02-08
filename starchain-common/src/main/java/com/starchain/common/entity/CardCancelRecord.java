@@ -43,4 +43,7 @@ public class CardCancelRecord {
 
     @ApiModelProperty(value = "更新时间")
     private LocalDateTime updateTime;
+
+    @ApiModelProperty(value = "完成时间", example = "2023-10-15 12:30:45")
+    private LocalDateTime finishTime;
 }

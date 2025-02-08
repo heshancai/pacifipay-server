@@ -56,6 +56,9 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
                 case CardRecharge: // 卡充值
                     checkCardRechargeBalance(balance, saveAmount, cardFeeRule);
                     break;
+                case CardCancel: // 卡注销
+                    checkCardCancelBalance(balance, cardFeeRule);
+                    break;
                 default:
                     throw new StarChainException("未知的操作类型: " + type);
             }
@@ -65,6 +68,13 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
         }
 
         return true;
+    }
+
+    private void checkCardCancelBalance(BigDecimal balance, CardFeeRule cardFeeRule) {
+        BigDecimal requiredBalance = cardFeeRule.getCancelFee();
+        if (balance.compareTo(requiredBalance) < 0) {
+            throw new StarChainException("余额不足，需要至少" + requiredBalance + "但只有" + balance);
+        }
     }
 
 

@@ -89,5 +89,5 @@ public interface ICardService extends IService<Card> {
     /**
      * 检查卡是否存在
      */
-    boolean cardExists(String cardId, String cardCode);
+    Card cardExists(String cardId, String cardCode);
 }

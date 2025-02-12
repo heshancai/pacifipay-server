@@ -63,7 +63,7 @@ public class RemitCancelCallbackRecordServiceImpl extends ServiceImpl<RemitCance
             // 4. 查询或创建回调记录
             RemitCancelCallbackRecord callbackRecord = createOrUpdateCallbackRecord(miPayRemitNotifyResponse);
 
-            // 5.修改申请状态为撤销 并且返还用户余额
+            // 5.汇款撤销 返回金额 手续费不退回
             return handleRechargeStatus(miPayRemitNotifyResponse, remitApplicationRecord, callbackRecord);
         } catch (Exception e) {
             log.error("申请汇款, 通知ID: {}, 错误信息: {}", miPayRemitNotifyResponse.getNotifyId(), e.getMessage(), e);
@@ -79,23 +79,21 @@ public class RemitCancelCallbackRecordServiceImpl extends ServiceImpl<RemitCance
      */
     private void createUserWalletTransaction(UserWalletBalance userWalletBalance, RemitApplicationRecord remitApplicationRecord, RemitCancelCallbackRecord callbackRecord) {
         // 手续费
-        BigDecimal handlingFeeAmount = remitApplicationRecord.getHandlingFeeAmount();
+        BigDecimal cancelAmount = callbackRecord.getCancelAmount();
 
         // 余额扣除手续费
-        BigDecimal finalBalance = userWalletBalance.getBalance().subtract(handlingFeeAmount);
+        BigDecimal finalBalance = userWalletBalance.getAvaBalance().add(cancelAmount);
 
         UserWalletTransaction userWalletTransaction = UserWalletTransaction.builder()
                 .userId(userWalletBalance.getUserId())
                 .coinName(remitApplicationRecord.getFromMoneyKind())
-                .balance(userWalletBalance.getBalance())
-                .amount(BigDecimal.ZERO)
-                .fee(handlingFeeAmount.negate())
-                .actAmount(BigDecimal.ZERO)
+                .balance(userWalletBalance.getAvaBalance())
+                .amount(cancelAmount)
                 .finaBalance(finalBalance)
-                .type(TransactionTypeEnum.REMIT_CANCEL.getCode())
-                .businessNumber(callbackRecord.getNotifyId())
+                .type(TransactionTypeEnum.REMIT_CANCEL_FEE.getCode())
+                .businessNumber(remitApplicationRecord.getRemitBankNo())
                 .partitionKey(DateUtil.getMonth())
-                .remark(TransactionTypeEnum.REMIT_CANCEL.getDescription())
+                .remark(TransactionTypeEnum.REMIT_CANCEL_FEE.getDescription())
                 .createTime(LocalDateTime.now())
                 .orderId(remitApplicationRecord.getOrderId())
                 .tradeId(remitApplicationRecord.getTradeId()).build();
@@ -153,7 +151,12 @@ public class RemitCancelCallbackRecordServiceImpl extends ServiceImpl<RemitCance
     // 汇款撤销
     private boolean handleRechargeStatus(MiPayRemitNotifyResponse response, RemitApplicationRecord remitApplicationRecord, RemitCancelCallbackRecord callbackRecord) {
         if (CardStatusDescEnum.SUCCESS.getDescription().equals(response.getStatus())) {
-            // 记录汇款撤销交易流水
+
+            LambdaQueryWrapper<UserWalletBalance> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(UserWalletBalance::getUserId, remitApplicationRecord.getUserId())
+                    .eq(UserWalletBalance::getBusinessId, remitApplicationRecord.getBusinessId());
+            UserWalletBalance userWalletBalance = userWalletBalanceService.getOne(queryWrapper);
+            // 汇款撤销 退回汇款金额 不退手续费
             createUserWalletTransaction(userWalletBalance, remitApplicationRecord, callbackRecord);
             // 修改用户钱包余额
             updateUserWalletBalance(remitApplicationRecord, response.getCancelAmount());
@@ -211,7 +214,7 @@ public class RemitCancelCallbackRecordServiceImpl extends ServiceImpl<RemitCance
     private void updateUserWalletBalance(RemitApplicationRecord rechargeRecord, BigDecimal cancelAmount) {
         LambdaUpdateWrapper<UserWalletBalance> balanceUpdateWrapper = new LambdaUpdateWrapper<>();
         balanceUpdateWrapper.eq(UserWalletBalance::getUserId, rechargeRecord.getUserId()).eq(UserWalletBalance::getBusinessId, rechargeRecord.getBusinessId())
-                .setSql("balance = balance - " + rechargeRecord.getHandlingFeeAmount()) //汇款撤销需要扣除手续费
+                .setSql("ava_balance = ava_balance +" + cancelAmount)
                 .set(UserWalletBalance::getUpdateTime, LocalDateTime.now());
         userWalletBalanceService.update(balanceUpdateWrapper);
     }

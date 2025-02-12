@@ -8,10 +8,10 @@ package com.starchain.common.enums;
 public enum TransactionTypeEnum {
     DEPOSIT(1, "充币"),
     WITHDRAWAL(2, "提币"),
-    GLOBAL_REMITTANCE(3, "全球汇款"),
+    GLOBAL_REMITTANCE_FEE(3, "汇款金额"),
     BALANCE_RECHARGE_TO_CARD(4, "卡充值"),
     // 汇款撤销
-    REMIT_CANCEL(5, "汇款撤销"),
+    REMIT_CANCEL_FEE(5, "汇款撤销退回金额"),
     // 开卡费
     CARD_OPEN_FEE(6, "开卡费"),
     // 开卡预存费

@@ -65,7 +65,7 @@ public class WalletCallbackImpl implements IWalletCallbackService {
             BigDecimal actAmount = walletCallbackRecord.getAmount().subtract(localFee);
             log.debug("手续费: {}, 实际到账金额: {}", localFee, actAmount);
             // 钱包原始余额
-            BigDecimal balance = userWalletBalance.getBalance();
+            BigDecimal balance = userWalletBalance.getAvaBalance();
             // 充值后的钱包余额
             BigDecimal finalBalance = balance.add(actAmount);
             log.debug("钱包原始余额: {}, 充值后的余额: {}", balance, finalBalance);

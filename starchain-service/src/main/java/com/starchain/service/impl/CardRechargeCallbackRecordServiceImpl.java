@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.common.entity.Card;
 import com.starchain.common.entity.CardRechargeCallbackRecord;
 import com.starchain.common.entity.CardRechargeRecord;
-import com.starchain.common.entity.UserWalletBalance;
 import com.starchain.common.entity.response.MiPayCardNotifyResponse;
 import com.starchain.common.enums.CardStatusDescEnum;
 import com.starchain.common.enums.MiPayNotifyType;
@@ -69,7 +68,7 @@ public class CardRechargeCallbackRecordServiceImpl extends ServiceImpl<CardRecha
             // 5. 查询或创建回调记录
             CardRechargeCallbackRecord callbackRecord = createOrUpdateCallbackRecord(miPayCardNotifyResponse);
 
-            // 6. 处理充值或者失败
+            // 6. 处理充值成功或者失败
             return handleRechargeStatus(miPayCardNotifyResponse, rechargeRecord, callbackRecord);
         } catch (Exception e) {
             log.error("卡开通回调处理失败, 通知ID: {}, 错误信息: {}", miPayCardNotifyResponse.getNotifyId(), e.getMessage(), e);
@@ -145,7 +144,7 @@ public class CardRechargeCallbackRecordServiceImpl extends ServiceImpl<CardRecha
     private boolean handleRechargeStatus(MiPayCardNotifyResponse response, CardRechargeRecord rechargeRecord, CardRechargeCallbackRecord callbackRecord) {
         if (rechargeRecord.getStatus() == 0 && CardStatusDescEnum.SUCCESS.getDescription().equals(response.getStatus())) {
             // 扣除冻结金额
-            updateUserWalletBalance(rechargeRecord, callbackRecord);
+            userWalletBalanceService.deductionFreezeBalance(rechargeRecord.getUserId(), rechargeRecord.getBusinessId(), callbackRecord.getRecharge(), callbackRecord.getHandleFee());
             // 修改卡余额
             updateCardBalance(response, rechargeRecord, callbackRecord);
             // 修改卡充值记录 设置金额
@@ -187,15 +186,7 @@ public class CardRechargeCallbackRecordServiceImpl extends ServiceImpl<CardRecha
         }
     }
 
-    // 更新用户钱包余额
-    private void updateUserWalletBalance(CardRechargeRecord rechargeRecord, CardRechargeCallbackRecord callbackRecord) {
-        LambdaUpdateWrapper<UserWalletBalance> userWalletBalanceUpdateWrapper = new LambdaUpdateWrapper<>();
-        userWalletBalanceUpdateWrapper.eq(UserWalletBalance::getUserId, rechargeRecord.getUserId()).eq(UserWalletBalance::getBusinessId, rechargeRecord.getBusinessId());
-        userWalletBalanceUpdateWrapper.setSql("freeze_balance = freeze_balance - " + callbackRecord.getRecharge());
-        userWalletBalanceUpdateWrapper.setSql("freeze_balance = freeze_balance - " + callbackRecord.getHandleFee());
-        userWalletBalanceUpdateWrapper.set(UserWalletBalance::getUpdateTime, LocalDateTime.now());
-        userWalletBalanceService.update(userWalletBalanceUpdateWrapper);
-    }
+
 
     // 更新回调记录
     private void updateCallbackRecord(CardRechargeCallbackRecord callbackRecord) {

@@ -119,19 +119,19 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
             remitApplicationRecord.setPinNumber(remitApplicationRecordDtoResponse.getPinNumber());
             this.save(remitApplicationRecord);
 
-            // 汇款金额流水 钱包支持usd流水
+            // 汇款金额流水
             UserWalletBalance userWalletBalance = userWalletBalanceService.getUserWalletBalance(remitApplicationRecord.getUserId(), remitApplicationRecord.getBusinessId());
 
             // 查询卡费规则配置表
             CardFeeRule cardFeeRule = cardFeeRuleService.getCardFeeRule(remitApplicationRecord.getRemitCode());
             if (remitApplicationRecordDto.getToMoneyKind().equals(MoneyKindEnum.CNY.getMoneyKindCode())) {
-                // 根据汇率将人民币金额转换为美元
                 BigDecimal cnyAmount = remitApplicationRecordDto.getToAmount();
+                // 换算成美元
                 BigDecimal usdAmount = cnyAmount.multiply(remitRate.getTradeRate()).setScale(2, RoundingMode.HALF_UP);
                 // 计算手续费
                 BigDecimal remitFeeAmount = usdAmount.multiply(cardFeeRule.getRemitFeeRate()).add(cardFeeRule.getRemitFeeAmount());
                 // 生成流水
-                createApplyRemitTransaction(remitApplicationRecord.getUserId(), userWalletBalance.getAvaBalance(), remitFeeAmount, remitApplicationRecord);
+                createApplyRemitTransaction(remitApplicationRecord.getUserId(), userWalletBalance.getAvaBalance(), usdAmount, remitFeeAmount, remitApplicationRecord);
             }
 
             // 金额冻结
@@ -162,7 +162,7 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
      * @param cardFee
      * @param
      */
-    private void createApplyRemitTransaction(Long userId, BigDecimal avaBalance, BigDecimal cardFee, RemitApplicationRecord remitApplicationRecord) {
+    private void createApplyRemitTransaction(Long userId, BigDecimal avaBalance, BigDecimal remitFeeAmount, BigDecimal cardFee, RemitApplicationRecord remitApplicationRecord) {
         List<UserWalletTransaction> transactions = new ArrayList<>();
         BigDecimal currentBalance = avaBalance;
 
@@ -170,8 +170,12 @@ public class RemitApplicationRecordServiceImpl extends ServiceImpl<RemitApplicat
             log.warn("手续费不匹配，预期: {}, 实际: {}", cardFee, remitApplicationRecord.getHandlingFeeAmount());
         }
 
+        if (remitApplicationRecord.getFromAmount().compareTo(remitFeeAmount) != 0) {
+            log.warn("汇款金额不一致，预期: {}, 实际: {}", cardFee, remitApplicationRecord.getHandlingFeeAmount());
+        }
+
         // 充值金额交易流水落库
-        UserWalletTransaction rechargeTransaction = createUserWalletTransaction(userId, currentBalance, remitApplicationRecord.getFromAmount(), TransactionTypeEnum.GLOBAL_REMITTANCE, remitApplicationRecord.getBankCode(), remitApplicationRecord.getOrderId(), remitApplicationRecord.getTradeId());
+        UserWalletTransaction rechargeTransaction = createUserWalletTransaction(userId, currentBalance, remitApplicationRecord.getFromAmount(), TransactionTypeEnum.GLOBAL_REMITTANCE_FEE, remitApplicationRecord.getBankCode(), remitApplicationRecord.getOrderId(), remitApplicationRecord.getTradeId());
         transactions.add(rechargeTransaction);
         currentBalance = currentBalance.subtract(remitApplicationRecord.getFromAmount());
 

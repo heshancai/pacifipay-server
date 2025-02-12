@@ -1,6 +1,7 @@
 package com.starchain.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.starchain.common.entity.CardFeeRule;
 import com.starchain.common.entity.UserWalletBalance;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  * @author
@@ -118,5 +120,25 @@ public class UserWalletBalanceServiceImpl extends ServiceImpl<UserWalletBalanceM
         wallet.setAvaBalance(wallet.getAvaBalance().subtract(totalFreezeAmount));
         wallet.setFreezeBalance(wallet.getFreezeBalance().add(totalFreezeAmount));
         return this.updateById(wallet);
+    }
+
+    @Override
+    public void deductionFreezeBalance(Long userId, Long businessId, BigDecimal fromAmount, BigDecimal handlingFeeAmount) {
+        LambdaUpdateWrapper<UserWalletBalance> userWalletBalanceUpdateWrapper = new LambdaUpdateWrapper<>();
+        userWalletBalanceUpdateWrapper.eq(UserWalletBalance::getUserId, userId).eq(UserWalletBalance::getBusinessId, businessId);
+        userWalletBalanceUpdateWrapper.setSql("freeze_balance = freeze_balance - " + fromAmount);
+        userWalletBalanceUpdateWrapper.setSql("freeze_balance = freeze_balance - " +handlingFeeAmount);
+        userWalletBalanceUpdateWrapper.set(UserWalletBalance::getUpdateTime, LocalDateTime.now());
+        this.update(userWalletBalanceUpdateWrapper);
+    }
+
+    @Override
+    public void rollbackFreezeBalance(Long userId, Long businessId, BigDecimal totalFreezeAmount) {
+        LambdaUpdateWrapper<UserWalletBalance> userWalletBalanceUpdateWrapper = new LambdaUpdateWrapper<>();
+        userWalletBalanceUpdateWrapper.eq(UserWalletBalance::getUserId, userId).eq(UserWalletBalance::getBusinessId, businessId);
+        userWalletBalanceUpdateWrapper.setSql("freeze_balance = freeze_balance - " + totalFreezeAmount);
+        userWalletBalanceUpdateWrapper.setSql("ava_balance = ava_balance + " + totalFreezeAmount);
+        userWalletBalanceUpdateWrapper.set(UserWalletBalance::getUpdateTime, LocalDateTime.now());
+        this.update(userWalletBalanceUpdateWrapper);
     }
 }

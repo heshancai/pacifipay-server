@@ -31,9 +31,26 @@ public interface IUserWalletBalanceService extends IService<UserWalletBalance> {
     UserWalletBalance getUserWalletBalance(Long userId, Long businessId);
 
     /**
-     *
+     * 更新钱包余额
      * @param wallet
      * @param totalFreezeAmount
      */
     boolean updateWalletBalance(UserWalletBalance wallet, BigDecimal totalFreezeAmount);
+
+    /**
+     * 扣减冻结金额
+     * @param userId
+     * @param businessId
+     * @param fromAmount  充值金额 / 全球汇款金额 usd 单位
+     * @param handlingFeeAmount 充值手续费 / 全球汇款手续费
+     */
+    void deductionFreezeBalance(Long userId, Long businessId, BigDecimal fromAmount, BigDecimal handlingFeeAmount);
+
+    /**
+     * 冻结金额回滚可用余额
+     * @param userId
+     * @param businessId
+     * @param totalFreezeAmount
+     */
+    void rollbackFreezeBalance(Long userId, Long businessId, BigDecimal totalFreezeAmount);
 }

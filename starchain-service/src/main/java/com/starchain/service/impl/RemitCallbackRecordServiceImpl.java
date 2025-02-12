@@ -8,10 +8,7 @@ import com.starchain.common.entity.RemitCallbackRecord;
 import com.starchain.common.entity.UserWalletBalance;
 import com.starchain.common.entity.UserWalletTransaction;
 import com.starchain.common.entity.response.MiPayRemitNotifyResponse;
-import com.starchain.common.enums.CardStatusDescEnum;
-import com.starchain.common.enums.CreateStatusEnum;
-import com.starchain.common.enums.MiPayNotifyType;
-import com.starchain.common.enums.TransactionTypeEnum;
+import com.starchain.common.enums.*;
 import com.starchain.common.exception.StarChainException;
 import com.starchain.common.util.DateUtil;
 import com.starchain.dao.RemitCallbackRecordMapper;
@@ -27,6 +24,8 @@ import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author
@@ -67,41 +66,13 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
             RemitCallbackRecord callbackRecord = createOrUpdateCallbackRecord(miPayRemitNotifyResponse);
 
             // 6.对用户钱包余额进行扣款
-            return handleRechargeStatus(miPayRemitNotifyResponse, remitApplicationRecord, callbackRecord);
+            return handleRechargeStatus(userWalletBalance, miPayRemitNotifyResponse, remitApplicationRecord, callbackRecord);
         } catch (Exception e) {
             log.error("申请汇款, 通知ID: {}, 错误信息: {}", miPayRemitNotifyResponse.getNotifyId(), e.getMessage(), e);
             throw new StarChainException("申请汇款处理失败");
         }
     }
 
-    private void createUserWalletTransaction(UserWalletBalance userWalletBalance, RemitApplicationRecord remitApplicationRecord, RemitCallbackRecord callbackRecord) {
-        // 总扣款金额 包含手续费
-        BigDecimal fromAmount = remitApplicationRecord.getFromAmount();
-        // 手续费
-        BigDecimal handlingFeeAmount = remitApplicationRecord.getHandlingFeeAmount();
-        // 实际到账金额
-        BigDecimal actAmount = fromAmount.subtract(handlingFeeAmount);
-        // 钱包扣减后余额
-        BigDecimal finalBalance = userWalletBalance.getBalance().subtract(remitApplicationRecord.getFromAmount());
-
-        UserWalletTransaction userWalletTransaction = UserWalletTransaction.builder()
-                .userId(userWalletBalance.getUserId())
-                .coinName(remitApplicationRecord.getFromMoneyKind())
-                .balance(userWalletBalance.getBalance())
-                .amount(actAmount.negate())
-                .fee(handlingFeeAmount.negate())
-                .actAmount(actAmount.negate())
-                .finaBalance(finalBalance)
-                .type(TransactionTypeEnum.GLOBAL_REMITTANCE.getCode())
-                .businessNumber(callbackRecord.getNotifyId())
-                .partitionKey(DateUtil.getMonth())
-                .remark(TransactionTypeEnum.GLOBAL_REMITTANCE.getDescription())
-                .createTime(LocalDateTime.now())
-                .orderId(remitApplicationRecord.getOrderId())
-                .tradeId(remitApplicationRecord.getTradeId()).build();
-        userWalletTransactionService.save(userWalletTransaction);
-        log.info("记录交易流水,交易信息为:{}", userWalletTransaction);
-    }
 
     // 1. 校验业务类型
     private void validateBusinessType(MiPayRemitNotifyResponse response) {
@@ -151,25 +122,57 @@ public class RemitCallbackRecordServiceImpl extends ServiceImpl<RemitCallbackRec
         return callbackRecord;
     }
 
-    // 汇款撤销
-    private boolean handleRechargeStatus(MiPayRemitNotifyResponse response, RemitApplicationRecord remitApplicationRecord, RemitCallbackRecord callbackRecord) {
+    // 处理汇款成功或者失败场景
+    private boolean handleRechargeStatus(UserWalletBalance userWalletBalance, MiPayRemitNotifyResponse response, RemitApplicationRecord remitApplicationRecord, RemitCallbackRecord callbackRecord) {
         if (CardStatusDescEnum.SUCCESS.getDescription().equals(response.getStatus())) {
-            // 5.记录汇款交易流水
-            createUserWalletTransaction(userWalletBalance, remitApplicationRecord, callbackRecord);
-            // 修改用户钱包余额
-            updateUserWalletBalance(remitApplicationRecord);
+            // 扣除冻结金额
+            userWalletBalanceService.deductionFreezeBalance(remitApplicationRecord.getUserId(), remitApplicationRecord.getBusinessId(), remitApplicationRecord.getFromAmount(), remitApplicationRecord.getHandlingFeeAmount());
             // 修改卡汇款申请记录状态为成功
             updateRecordStatus(response);
             // 更新卡汇款回调记录
             updateCallbackRecord(callbackRecord, response);
             return true;
         } else if (CardStatusDescEnum.FAILED.getDescription().equals(response.getStatus())) {
-            // 处理失败状态 重新发起汇款
+            List<UserWalletTransaction> transactions = new ArrayList<>();
+            // 回退金额生产流水
+            // 回退冻结金额 + 手续费
+            BigDecimal avaBalance = userWalletBalance.getAvaBalance();
+            // 充值金额交易流水落库
+            UserWalletTransaction rechargeTransaction = createUserWalletTransaction(remitApplicationRecord.getUserId(), avaBalance, remitApplicationRecord.getFromAmount(), TransactionTypeEnum.GLOBAL_REMITTANCE_FEE, remitApplicationRecord.getBankCode(), remitApplicationRecord.getOrderId(), remitApplicationRecord.getTradeId());
+            transactions.add(rechargeTransaction);
+            avaBalance = avaBalance.add(remitApplicationRecord.getFromAmount());
+
+            // 手续费交易流水落库
+            UserWalletTransaction feeTransaction = createUserWalletTransaction(remitApplicationRecord.getUserId(), avaBalance, remitApplicationRecord.getHandlingFeeAmount(), TransactionTypeEnum.REMIT_FEE, remitApplicationRecord.getBankCode(), remitApplicationRecord.getOrderId(), remitApplicationRecord.getTradeId());
+            transactions.add(feeTransaction);
+
+            // 保存所有交易记录
+            userWalletTransactionService.saveBatch(transactions);
+
+            // 冻结金额 返回可用余额
+            userWalletBalanceService.rollbackFreezeBalance(remitApplicationRecord.getUserId(), remitApplicationRecord.getBusinessId(), remitApplicationRecord.getFromAmount().add(remitApplicationRecord.getHandlingFeeAmount()));
             handleFailedStatus(callbackRecord, response);
             return true;
         }
         log.info("回调处理完成, 无须重复处理,通知ID: {}", response.getNotifyId());
         return true;
+    }
+
+    private UserWalletTransaction createUserWalletTransaction(Long userId, BigDecimal avaBalance, BigDecimal fromAmount, TransactionTypeEnum transactionTypeEnum, String businessNumber, String orderId, String tradeId) {
+        return UserWalletTransaction.builder()
+                .userId(userId)
+                .coinName(MoneyKindEnum.USD.getMoneyKindCode())
+                .balance(avaBalance)
+                .amount(fromAmount)
+                .finaBalance(avaBalance.subtract(fromAmount))
+                .type(transactionTypeEnum.getCode())
+                .businessNumber(businessNumber)
+                .createTime(LocalDateTime.now())
+                .partitionKey(DateUtil.getMonth())
+                .remark(transactionTypeEnum.getDescription())
+                .tradeId(tradeId)
+                .orderId(orderId)
+                .build();
     }
 
     // 修改卡充值状态为成功

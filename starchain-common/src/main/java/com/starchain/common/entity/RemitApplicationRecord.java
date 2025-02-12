@@ -30,6 +30,7 @@ public class RemitApplicationRecord {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    @ApiModelProperty(value = "用户Id", example = "1")
     private Long userId;
 
     @ApiModelProperty(name = "渠道ID", example = "987654")
@@ -47,7 +48,7 @@ public class RemitApplicationRecord {
     @ApiModelProperty(value = "汇款目标金额", example = "可以是 人民币和美元")
     private BigDecimal toAmount;
 
-    @ApiModelProperty(value = "扣款金额", example = "扣除的是美元 包含手续费")
+    @ApiModelProperty(value = "扣款金额", example = "扣除的是美元")
     private BigDecimal fromAmount;
 
     @ApiModelProperty(value = "汇款交易单号", example = "ORDER123456789")

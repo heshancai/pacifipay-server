@@ -2,12 +2,12 @@ package com.starchain.callback;
 
 import com.alibaba.fastjson2.JSON;
 import com.starchain.common.config.PacificPayConfig;
-import com.starchain.context.MiPayNotifyStrategyFactory;
-import com.starchain.common.enums.MiPayNotifyType;
 import com.starchain.common.entity.response.MiPayCardNotifyResponse;
-import com.starchain.service.IMiPayNotifyServiceStrategy;
+import com.starchain.common.enums.MiPayNotifyType;
 import com.starchain.common.util.RSA2048Encrypt;
-import io.swagger.annotations.Operation;
+import com.starchain.context.MiPayNotifyStrategyFactory;
+import com.starchain.service.IMiPayNotifyServiceStrategy;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -34,7 +34,7 @@ public class MiPayNotifyController {
     @Autowired
     private MiPayNotifyStrategyFactory miPayNotifyStrategyFactory;
 
-    @Operation(value = "密付异步通知api")
+    @Operation(summary = "密付异步通知api")
     @PostMapping(value = "/miPayNotify")
     public String miPayNotify(@RequestBody String jsonObject) {
         String decrypt = null;

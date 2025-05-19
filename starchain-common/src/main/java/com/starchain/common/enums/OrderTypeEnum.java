@@ -1,13 +1,13 @@
 package com.starchain.common.enums;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * @author
  * @date 2024-12-31
  * @Description
  */
-@ApiModel(value="订单类型", description="订单类型")
+@Schema( description="订单类型")
 public enum OrderTypeEnum {
     CARD_FEE("CardFee", "开卡费"),
     ADD_CARD_SAVE("AddCardSave", "开卡预存"),

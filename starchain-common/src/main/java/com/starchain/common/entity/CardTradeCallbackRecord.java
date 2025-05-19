@@ -24,48 +24,67 @@ import java.time.LocalDateTime;
 @Schema(description = "卡交易通知记录实体")
 public class CardTradeCallbackRecord {
 
-    @Schema(description = "主键ID", example = "1")
+    @Schema(description = "主键ID")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @Schema(description = "通知ID", example = "NOTIFY123456789")
+    @Schema(description = "通知ID")
     private String notifyId;
 
-    @Schema(description = "卡类型", example = "CARD_TYPE_001")
+    @Schema(description = "卡类型")
     private String cardCode;
 
-    @Schema(description = "业务类型", example = "TRADE")
+    @Schema(description = "业务类型")
     private String businessType;
 
-    @Schema(description = "卡ID", example = "1234567890")
+    @Schema(description = "卡ID")
     private String cardId;
 
-    @Schema(description = "卡号", example = "1234567890123456")
-    private String cardNo;
+    @Schema(description = "交易时间")
+    private LocalDateTime tradeTime;
 
-    @Schema(description = "状态", example = "SUCCESS")
+    @Schema(description = "交易类型")
+    private String tradeType;
+
+    @Schema(description = "交易流水号")
+    private String tradeId;
+
+    @Schema(description = "原交易流水号")
+    private String originalTradeId;
+
+    @Schema(description = "余额")
+    private BigDecimal balance;
+
+    @Schema(description = "商户名")
+    private String merchantName;
+
+    @Schema(description = "状态")
     private String status;
 
-    @Schema(description = "状态描述", example = "交易成功")
+    @Schema(description = "状态描述")
     private String statusDesc;
 
-    @Schema(description = "商户订单ID", example = "MCH_ORDER_123456789")
-    private String mchOrderId;
-
-    @Schema(description = "交易金额", example = "100.00")
-    private BigDecimal tradeAmount;
-
-    @Schema(description = "手续费", example = "5.00")
+    @Schema(description = "手续费")
     private BigDecimal fee;
 
-    @Schema(description = "实际支付金额", example = "95.00")
-    private BigDecimal actual;
+    @Schema(description = "交易金额")
+    private BigDecimal trade;
 
-    @Schema(description = "创建时间", example = "2023-10-15 12:30:45")
+    @Schema(description = "交易币种")
+    private String tradeCurrency;
+
+    @Schema(description = "重试次数")
+    private Integer retries;
+
+    @Schema(description = "创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
 
-    @Schema(description = "更新时间", example = "2023-10-15 12:30:45")
+    @Schema(description = "更新时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime updateTime;
+
+    @Schema(description = "完成时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime finishTime;
 }

@@ -4,8 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -21,43 +20,43 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("remit_card_callback_record")
-@ApiModel(value = "RemitCardCallbackRecord", description = "申请汇款卡审核通知记录实体")
+@Schema(description = "申请汇款卡审核通知记录实体")
 public class RemitCardCallbackRecord {
 
-    @ApiModelProperty(value = "主键ID")
+    @Schema(description = "主键ID", example = "1")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @ApiModelProperty(value = "通知ID")
+    @Schema(description = "通知ID", example = "NOTIFY123456789")
     private String notifyId;
 
-    @ApiModelProperty(value = "汇款类型编码")
+    @Schema(description = "汇款类型编码", example = "ELR")
     private String remitCode;
 
-    @ApiModelProperty(value = "业务类型")
+    @Schema(description = "业务类型", example = "REMIT_CARD")
     private String businessType;
 
-    @ApiModelProperty(value = "汇款卡ID")
+    @Schema(description = "汇款卡ID", example = "TPY123456789")
     private String tpyCardId;
 
-    @ApiModelProperty(value = "汇款卡标识")
+    @Schema(description = "汇款卡标识", example = "CARD123456789")
     private String cardId;
 
-    @ApiModelProperty(value = "状态")
+    @Schema(description = "状态", example = "SUCCESS")
     private String status;
 
-    @ApiModelProperty(value = "状态描述")
+    @Schema(description = "状态描述", example = "审核成功")
     private String statusDesc;
 
-    @ApiModelProperty(value = "创建时间")
+    @Schema(description = "创建时间", example = "2023-10-15 12:30:45")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
 
-    @ApiModelProperty(value = "更新时间")
+    @Schema(description = "更新时间", example = "2023-10-15 12:30:45")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime updateTime;
 
-    @ApiModelProperty(value = "完成时间")
+    @Schema(description = "完成时间", example = "2023-10-15 12:30:45")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime finishTime;
 }

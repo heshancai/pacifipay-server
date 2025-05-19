@@ -8,6 +8,6 @@ import com.starchain.common.entity.CardTradeCallbackRecord;
  * @date 2025-01-06
  * @Description
  */
-public interface ICardTradeCallbackRecordService extends IService<CardTradeCallbackRecord>, IMiPayNotifyService {
+public interface ICardTradeCallbackRecordService extends IService<CardTradeCallbackRecord>, IMiPayNotifyServiceStrategy {
     // 自定义方法可以在这里定义
 }

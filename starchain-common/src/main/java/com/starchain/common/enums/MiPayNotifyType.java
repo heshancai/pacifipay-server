@@ -3,7 +3,7 @@ package com.starchain.common.enums;
 /**
  * @author
  * @date 2025-01-06
- * @Description 回调服务对应类
+ * @Description 回调服务对应类 保存具体的策略类 根据类型对应
  */
 public enum MiPayNotifyType {
     /**

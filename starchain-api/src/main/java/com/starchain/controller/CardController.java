@@ -22,8 +22,8 @@ import com.starchain.common.result.ClientResponse;
 import com.starchain.common.result.ResultGenerator;
 import com.starchain.common.util.HttpUtils;
 import com.starchain.service.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @Slf4j
-@Api(value = "pacificPay银行卡相关api", tags = {"pacificPay银行卡相关api"})
+@Tag(name = "pacificPay银行卡相关api")
 @RequestMapping("/card")
 public class CardController {
 
@@ -78,7 +78,7 @@ public class CardController {
     /**
      * 创建卡 每种类型限制4张
      */
-    @ApiOperation(value = "根据持卡人创建卡")
+    @Operation(summary = "根据持卡人创建卡", description = "根据持卡人创建卡")
     @PostMapping("/addCard")
     public ClientResponse addCard(@RequestBody CardDto cardDto) {
         if (cardDto.getUserId() == null || cardDto.getCardCode() == null || cardDto.getTpyshCardHolderId() == null || cardDto.getBusinessId() == null) {
@@ -105,7 +105,7 @@ public class CardController {
 
     }
 
-    @ApiOperation(value = "卡充值")
+    @Operation(summary = "卡充值")
     @PostMapping("/applyRecharge")
     public ClientResponse applyRecharge(@RequestBody CardDto cardDto) {
         // 使用自定义的帮助方法来简化对DTO字段的检查，并提供具体错误信息
@@ -193,7 +193,7 @@ public class CardController {
     /**
      * 查询商户余额
      */
-    @ApiOperation(value = "查询商户余额")
+    @Operation(summary = "查询商户余额")
     @PostMapping("/mchInfo")
     public ClientResponse mchInfo() {
         String token = null;
@@ -229,7 +229,7 @@ public class CardController {
     /*
      * 查询商户交易明细 支持查询多种类型数据
      */
-    @ApiOperation(value = "查询商户交易明细")
+    @Operation(summary = "查询商户交易明细")
     @PostMapping("/tradeDetail")
     public ClientResponse tradeDetail(@RequestBody TradeDetailDto tradeDetailDto) {
         String token = null;
@@ -251,7 +251,7 @@ public class CardController {
     /*
      * 查询卡
      */
-    @ApiOperation(value = "查询卡")
+    @Operation(summary = "查询卡")
     @PostMapping("/getCardDetail")
     public ClientResponse getCardDetail(@RequestBody CardDto cardDto) {
         if (cardDto.getCardId() == null) {
@@ -294,7 +294,7 @@ public class CardController {
     /**
      * 申请销卡
      */
-    @ApiOperation(value = "申请销卡")
+    @Operation(summary = "申请销卡")
     @PostMapping("/deleteCard")
     public ClientResponse deleteCard(@RequestBody CardDto cardDto) {
         if (cardDto == null) {
@@ -339,7 +339,7 @@ public class CardController {
     /*
      * 作废 现无法使用-申请换卡
      */
-//    @ApiOperation(value = "申请换卡")
+//    @Operation(value = "申请换卡")
 //    @PostMapping("/changeCard")
 //    public ClientResponse changeCard(@RequestBody CardDto cardDto) {
 //        if (cardDto.getCardId() == null) {
@@ -371,7 +371,7 @@ public class CardController {
 //        }
 //    }
 
-    @ApiOperation(value = "修改卡限额")
+    @Operation(summary = "修改卡限额")
     @PostMapping("/updateLimit")
     public ClientResponse updateLimit(@RequestBody CardDto cardDto) {
         if (cardDto.getCardId() == null) {
@@ -396,7 +396,7 @@ public class CardController {
         }
     }
 
-    @ApiOperation(value = "锁定卡")
+    @Operation(summary = "锁定卡")
     @PostMapping("/lockCard")
     public ClientResponse lockCard(@RequestBody CardDto cardDto) {
         if (cardDto.getCardId() == null) {
@@ -421,7 +421,7 @@ public class CardController {
         }
     }
 
-    @ApiOperation(value = "解锁卡")
+    @Operation(summary = "解锁卡")
     @PostMapping("/unlockCard")
     public ClientResponse unlockCard(@RequestBody CardDto cardDto) {
         if (cardDto.getCardId() == null) {

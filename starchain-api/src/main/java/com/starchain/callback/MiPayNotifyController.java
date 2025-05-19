@@ -2,12 +2,12 @@ package com.starchain.callback;
 
 import com.alibaba.fastjson2.JSON;
 import com.starchain.common.config.PacificPayConfig;
-import com.starchain.context.MiPayNotifyContext;
+import com.starchain.context.MiPayNotifyStrategyFactory;
 import com.starchain.common.enums.MiPayNotifyType;
 import com.starchain.common.entity.response.MiPayCardNotifyResponse;
-import com.starchain.service.IMiPayNotifyService;
+import com.starchain.service.IMiPayNotifyServiceStrategy;
 import com.starchain.common.util.RSA2048Encrypt;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -32,9 +32,9 @@ public class MiPayNotifyController {
     private PacificPayConfig pacificPayConfig;
 
     @Autowired
-    private MiPayNotifyContext miPayNotifyContext;
+    private MiPayNotifyStrategyFactory miPayNotifyStrategyFactory;
 
-    @ApiOperation(value = "密付异步通知api")
+    @Operation(value = "密付异步通知api")
     @PostMapping(value = "/miPayNotify")
     public String miPayNotify(@RequestBody String jsonObject) {
         String decrypt = null;
@@ -46,8 +46,9 @@ public class MiPayNotifyController {
             checkRecharge(miPayNotifyResponse);
             log.info("pacificPayNotify:{}", miPayNotifyResponse);
             // 根据 businessType 获取对应的策略实现类
-            IMiPayNotifyService miPayNotifyService = miPayNotifyContext.getMiPayNotifyService(miPayNotifyResponse.getBusinessType());
-            Boolean callBack = miPayNotifyService.callBack(decrypt);
+            IMiPayNotifyServiceStrategy miPayNotifyServiceStrategy = miPayNotifyStrategyFactory.getMiPayNotifyService(miPayNotifyResponse.getBusinessType());
+            // 调用不同的策略实现类的callBack方法
+            Boolean callBack = miPayNotifyServiceStrategy.callBack(decrypt);
             if (callBack) {
                 return "SUCCESS";
             }

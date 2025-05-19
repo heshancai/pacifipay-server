@@ -21,12 +21,12 @@ import java.time.LocalDateTime;
 /**
  * @author
  * @date 2025-01-06
- * @Description 销卡通知
+ * @Description 销卡通知 具体实现的策略类
  */
 @Service
 @Slf4j
 public class CardCancelCallbackRecordServiceImpl extends ServiceImpl<CardCancelCallbackRecordMapper, CardCancelCallbackRecord>
-        implements IMiPayNotifyService, ICardCancelCallbackRecordService {
+        implements IMiPayNotifyServiceStrategy, ICardCancelCallbackRecordService {
 
     @Autowired
     private ICardService cardService;

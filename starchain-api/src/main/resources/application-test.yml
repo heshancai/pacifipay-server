@@ -39,3 +39,7 @@ dubbo:
     parameters.registry-consumer: true # 是否将消费者注册到注册中心
   scan:
     base-packages: com.starchain.common.dubbo # 扫描 Dubbo 服务的包路径
+springdoc:
+  api-docs:
+    enabled: true # 启用OpenAPI文档
+    path: /swagger-ui.html # 自定义Swagger UI路径（可选）

@@ -64,7 +64,7 @@ public class UserWalletServiceImpl extends ServiceImpl<UserWalletMapper, UserWal
             UserWalletBalance userWalletBalance = UserWalletBalance.builder()
                     .userId(userWalletDto.getUserId())
                     .businessId(userWalletDto.getBusinessId())
-                    .balance(BigDecimal.ZERO)
+                    .avaBalance(BigDecimal.ZERO)
                     .createTime(LocalDateTime.now())
                     .updateTime(LocalDateTime.now())
                     .build();

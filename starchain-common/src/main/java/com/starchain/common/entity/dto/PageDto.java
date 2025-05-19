@@ -1,7 +1,6 @@
 package com.starchain.common.entity.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -12,20 +11,21 @@ import java.io.Serializable;
  * @Description
  */
 @Data
-@ApiModel(value = "分页对象-PageDto", description = "分页对象")
+@Schema(title = "分页对象-PageDto", description = "分页对象")
 public class PageDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @ApiModelProperty(name = "current", value = "当前页", example = "1", required = false)
+
+    @Schema(description = "当前页", example = "1")
     private Integer pageNum = 1;
 
-    @ApiModelProperty(name = "size", value = "每页数量", example = "1", required = false)
+    @Schema(description = "每页数量", example = "10")
     private Integer pageSize = 10;
 
-    @ApiModelProperty(name = "beginTime", value = "开始时间", example = "yyyy-MM-dd HH:mm:ss", required = false)
+    @Schema(description = "开始时间", example = "yyyy-MM-dd HH:mm:ss")
     private String beginTime;
 
-    @ApiModelProperty(name = "endTime", value = "结束时间", example = "yyyy-MM-dd HH:mm:ss", required = false)
+    @Schema(description = "结束时间", example = "yyyy-MM-dd HH:mm:ss")
     private String endTime;
 
 }

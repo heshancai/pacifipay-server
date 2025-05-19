@@ -3,8 +3,7 @@ package com.starchain.common.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -14,36 +13,36 @@ import java.time.LocalDateTime;
  * @date 2025-02-06
  * @Description
  */
-@ApiModel(value = "CardCancelRecord", description = "销卡申请记录表")
 @Data
-@TableName("card_cancel_record")  // 表名修改为 card_cancel_record
+@TableName("card_cancel_record")
+@Schema(title = "CardCancelRecord", description = "销卡申请记录表")
 public class CardCancelRecord {
 
-    @ApiModelProperty(value = "主键ID", example = "1")
+    @Schema(description = "主键ID", example = "1")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @ApiModelProperty(value = "卡ID，收款人证件号码")
+    @Schema(description = "卡ID，收款人证件号码", example = "CARD123456")
     private String cardId;
 
-    @ApiModelProperty(value = "卡类型编码")
+    @Schema(description = "卡类型编码", example = "TpyMDN6")
     private String cardCode;
 
-    @ApiModelProperty(value = "用户Id，第三方传递过来")
+    @Schema(description = "用户Id，第三方传递过来", example = "123456")
     private Long userId;
 
-    @ApiModelProperty(value = "商家Id")
+    @Schema(description = "商家Id", example = "987654")
     private Long businessId;
 
-    @ApiModelProperty(value = "记录创建状态 0 创建中 1 创建成功 2 创建失败")
+    @Schema(description = "记录创建状态 0 创建中 1 创建成功 2 创建失败", example = "1")
     private Integer createStatus;
 
-    @ApiModelProperty(value = "创建时间")
+    @Schema(description = "创建时间", example = "2025-02-06 10:00:00")
     private LocalDateTime createTime;
 
-    @ApiModelProperty(value = "更新时间")
+    @Schema(description = "更新时间", example = "2025-02-06 10:30:00")
     private LocalDateTime updateTime;
 
-    @ApiModelProperty(value = "完成时间", example = "2023-10-15 12:30:45")
+    @Schema(description = "完成时间", example = "2023-10-15 12:30:45")
     private LocalDateTime finishTime;
 }

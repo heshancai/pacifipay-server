@@ -4,8 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -22,70 +21,51 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("card_trade_callback_record")
-@ApiModel(value = "CardTradeCallbackRecord", description = "卡流水通知记录实体")
+@Schema(description = "卡交易通知记录实体")
 public class CardTradeCallbackRecord {
 
-    @ApiModelProperty(value = "主键ID")
+    @Schema(description = "主键ID", example = "1")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @ApiModelProperty(value = "通知ID")
+    @Schema(description = "通知ID", example = "NOTIFY123456789")
     private String notifyId;
 
-    @ApiModelProperty(value = "卡类型")
+    @Schema(description = "卡类型", example = "CARD_TYPE_001")
     private String cardCode;
 
-    @ApiModelProperty(value = "业务类型")
+    @Schema(description = "业务类型", example = "TRADE")
     private String businessType;
 
-    @ApiModelProperty(value = "卡ID")
+    @Schema(description = "卡ID", example = "1234567890")
     private String cardId;
 
-    @ApiModelProperty(value = "交易时间")
-    private LocalDateTime tradeTime;
+    @Schema(description = "卡号", example = "1234567890123456")
+    private String cardNo;
 
-    @ApiModelProperty(value = "交易类型")
-    private String tradeType;
-
-    @ApiModelProperty(value = "交易流水号")
-    private String tradeId;
-
-    @ApiModelProperty(value = "原交易流水号")
-    private String originalTradeId;
-
-    @ApiModelProperty(value = "余额")
-    private BigDecimal balance;
-
-    @ApiModelProperty(value = "商户名")
-    private String merchantName;
-
-    @ApiModelProperty(value = "状态")
+    @Schema(description = "状态", example = "SUCCESS")
     private String status;
 
-    @ApiModelProperty(value = "状态描述")
+    @Schema(description = "状态描述", example = "交易成功")
     private String statusDesc;
 
-    @ApiModelProperty(value = "手续费")
+    @Schema(description = "商户订单ID", example = "MCH_ORDER_123456789")
+    private String mchOrderId;
+
+    @Schema(description = "交易金额", example = "100.00")
+    private BigDecimal tradeAmount;
+
+    @Schema(description = "手续费", example = "5.00")
     private BigDecimal fee;
 
-    @ApiModelProperty(value = "交易金额")
-    private BigDecimal trade;
+    @Schema(description = "实际支付金额", example = "95.00")
+    private BigDecimal actual;
 
-    @ApiModelProperty(value = "交易币种")
-    private String tradeCurrency;
-
-    @ApiModelProperty(value = "重试次数")
-    private Integer retries;
-
-    @ApiModelProperty(value = "创建时间")
+    @Schema(description = "创建时间", example = "2023-10-15 12:30:45")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
 
-    @ApiModelProperty(value = "更新时间")
+    @Schema(description = "更新时间", example = "2023-10-15 12:30:45")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime updateTime;
-
-    @ApiModelProperty(value = "更新时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime finishTime;
 }

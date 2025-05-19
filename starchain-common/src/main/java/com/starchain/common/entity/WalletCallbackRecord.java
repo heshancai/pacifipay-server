@@ -1,8 +1,7 @@
 package com.starchain.common.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -19,40 +18,56 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("wallet_callback_record")
-@ApiModel(value = "WalletCallbackRecord", description = "钱包回调记录表")
+@Schema(description = "钱包回调记录表") // 修改: 将 @ApiModel 替换为 @Schema
 public class WalletCallbackRecord {
-    @ApiModelProperty(value = "主键")
+    @Schema(description = "主键", example = "1") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private Long id;
-    @ApiModelProperty(value = "通知类型，充值通知：deposit，提现通知：withdraw")
+
+    @Schema(description = "通知类型，充值通知：deposit，提现通知：withdraw") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private String side;
-    @ApiModelProperty(value = "地址")
+
+    @Schema(description = "地址") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private String address;
-    @ApiModelProperty(value = "充值金额")
+
+    @Schema(description = "充值金额") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private BigDecimal amount;
-    @ApiModelProperty(value = "币种符号")
+
+    @Schema(description = "币种符号") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private String symbol;
-    @ApiModelProperty(value = "区块链上的交易id")
+
+    @Schema(description = "区块链上的交易id") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private String txid;
-    @ApiModelProperty(value = "当前确认次数")
+
+    @Schema(description = "当前确认次数") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private Integer confirmTimes;
-    @ApiModelProperty(value = "通知id")
+
+    @Schema(description = "通知id") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private String notifyId;
-    @ApiModelProperty(value = "充值id")
+
+    @Schema(description = "充值id") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private String depositId;
-    @ApiModelProperty(value = "0:等待确认 1成功，2:失败，3取消")
+
+    @Schema(description = "0:等待确认 1成功，2:失败，3取消") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private Integer status;
-    @ApiModelProperty(value = "交易传送入的唯一工单号，确保每一笔是唯一的")
+
+    @Schema(description = "交易传送入的唯一工单号，确保每一笔是唯一的") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private String orderNo;
-    @ApiModelProperty(value = "创建时间")
+
+    @Schema(description = "创建时间") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private LocalDateTime createTime;
-    @ApiModelProperty(value = "创建时间")
+
+    @Schema(description = "创建时间") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private LocalDateTime updateTime;
-    @ApiModelProperty(value = "完成时间")
+
+    @Schema(description = "完成时间") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private LocalDateTime finishTime;
-    @ApiModelProperty(value = "是否成功确认")
+
+    @Schema(description = "是否成功确认") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private Integer successConfirm;
-    @ApiModelProperty(value = "分区键(格式：yyyyMM)")
+
+    @Schema(description = "分区键(格式：yyyyMM)") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private Integer partitionKey;
-    @ApiModelProperty(value = "客户汇款交易唯一标识")
+
+    @Schema(description = "客户汇款交易唯一标识") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private String orderId;
 }

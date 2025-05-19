@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
  * @Description
  */
 @Service
-public interface IRemitCardCallbackRecordService  extends IService<RemitCardCallbackRecord>,IMiPayNotifyService {
+public interface IRemitCardCallbackRecordService  extends IService<RemitCardCallbackRecord>, IMiPayNotifyServiceStrategy {
 
     // 自定义方法实现可以在这里定义
 }

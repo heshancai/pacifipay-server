@@ -11,7 +11,8 @@ import com.starchain.common.util.SignUtils;
 import com.starchain.service.IWalletCallbackRecordService;
 import com.starchain.service.IWalletCallbackService;
 import com.starchain.service.IWalletCoinConfigService;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,9 +54,10 @@ public class WalletCallbackController {
     /**
      * 钱包充值回调
      */
-    @ApiOperation(value = "钱包充值回调")
+    @Operation(summary  = "钱包充值回调",description = "返回钱包充值回调信息")
+    @ApiResponse(responseCode = "200", description = "成功响应")
     @PostMapping("/recharge")
-    public ClientResponse rechargeCallback(HttpServletRequest request) {
+    public ClientResponse rechargeCallback( HttpServletRequest request) {
         try {
             log.info("开始处理钱包回调信息");
             // 验签 解密数据

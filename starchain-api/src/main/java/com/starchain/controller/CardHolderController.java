@@ -6,8 +6,8 @@ import com.starchain.common.entity.dto.CardHolderDto;
 import com.starchain.common.result.ClientResponse;
 import com.starchain.common.result.ResultGenerator;
 import com.starchain.service.ICardHolderService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
@@ -25,7 +25,7 @@ import java.util.List;
  */
 @RestController
 @Slf4j
-@Api(value = "miPay 持卡人相关api", tags = {"miPay 持卡人相关api相关api"})
+@Tag(name = "miPay 持卡人相关api", description = "miPay 持卡人相关api相关api")
 @RequestMapping("/cardHolder")
 public class CardHolderController {
     @Autowired
@@ -34,7 +34,7 @@ public class CardHolderController {
     /**
      * 创建持卡人 免费创建
      */
-    @ApiOperation(value = "创建持卡人")
+    @Operation(summary = "创建持卡人")
     @PostMapping("/add")
     public ClientResponse addCardHolder(@RequestBody CardHolderDto cardHolderDto) {
         if (ObjectUtils.isEmpty(cardHolderDto.getUserId())) {
@@ -51,7 +51,7 @@ public class CardHolderController {
     /**
      * 查询当前用户持卡人信息
      */
-    @ApiOperation(value = "查询当前用户持卡人信息")
+    @Operation(summary = "查询当前用户持卡人信息")
     @PostMapping("/selectCardHolder")
     public ClientResponse selectCardHolder(@RequestBody CardHolderDto cardHolderDto) {
         if (ObjectUtils.isEmpty(cardHolderDto.getUserId()) || ObjectUtils.isEmpty(cardHolderDto.getBusinessId())) {
@@ -65,7 +65,7 @@ public class CardHolderController {
     /**
      * 修改持卡人
      */
-    @ApiOperation(value = "修改持卡人")
+    @Operation(summary = "修改持卡人")
     @PostMapping("/update")
     public ClientResponse updateCardHolder(@RequestBody CardHolderDto cardHolderDto) {
         if (ObjectUtils.isEmpty(cardHolderDto.getUserId())) {
@@ -101,7 +101,7 @@ public class CardHolderController {
     /**
      * 查询持卡人详情
      */
-    @ApiOperation(value = "查询持卡人详情")
+    @Operation(summary = "查询持卡人详情")
     @PostMapping("/getCardHolder")
     public ClientResponse getCardHolder(@RequestBody CardHolderDto cardHolderDto) {
         if (ObjectUtils.isEmpty(cardHolderDto.getCardCode())) {

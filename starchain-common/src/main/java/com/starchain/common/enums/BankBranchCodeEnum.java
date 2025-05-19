@@ -1,13 +1,13 @@
 package com.starchain.common.enums;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * @author
  * @date 2024-12-31
  * @Description
  */
-@ApiModel(value="汇款银行支行编码", description="汇款银行支行编码")
+@Schema( description="汇款银行支行编码")
 public enum BankBranchCodeEnum {
     KKBK000123("KKBK000123", "INDBAN", "IFT Branch"),
     BKID0007114("BKID0007114", "INDBAN", "NOIDA"),

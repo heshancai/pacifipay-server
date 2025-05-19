@@ -14,8 +14,8 @@ import com.starchain.common.result.ResultGenerator;
 import com.starchain.service.IRemitApplicationRecordService;
 import com.starchain.service.IRemitCardService;
 import com.starchain.service.IUserWalletBalanceService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -35,7 +35,7 @@ import java.util.Objects;
  * @date 2025-01-02
  * @Description 汇款Controller
  */
-@Api(value = "PacificPay汇款相关api", tags = {"PacificPay汇款相关api"})
+@Tag(name = "PacificPay汇款相关api", description = "PacificPay汇款相关api")
 @RestController
 @RequestMapping("/remit")
 @Slf4j
@@ -54,7 +54,7 @@ public class RemitCardController {
     /**
      * 添加收款卡
      */
-    @ApiOperation(value = "添加收款卡信息")
+    @Operation(summary = "添加收款卡信息")
     @PostMapping("/addRemitCard")
     public ClientResponse addRemitCard(@RequestBody RemitCardDto remitCardDto) {
         if (remitCardDto.getUserId() == null) {
@@ -78,7 +78,7 @@ public class RemitCardController {
     /**
      * 获取收款卡信息
      */
-    @ApiOperation(value = "获取收款卡信息")
+    @Operation(summary = "获取收款卡信息")
     @PostMapping("/getRemitCard")
     public ClientResponse getRemitCard(@RequestBody RemitCardDto remitCardDto) {
         if (remitCardDto.getTpyCardId() == null) {
@@ -108,7 +108,7 @@ public class RemitCardController {
     /**
      * 修改收款卡信息
      */
-    @ApiOperation(value = "修改收款卡信息")
+    @Operation(summary = "修改收款卡信息")
     @PostMapping("/updateRemitCard")
     public ClientResponse updateRemitCard(@RequestBody RemitCardDto remitCardDto) {
         if (remitCardDto.getTpyCardId() == null) {
@@ -132,7 +132,7 @@ public class RemitCardController {
     /**
      * 添加收款卡
      */
-    @ApiOperation(value = "删除收款卡信息")
+    @Operation(summary = "删除收款卡信息")
     @PostMapping("/delRemitCard")
     public ClientResponse delRemitCard(@RequestBody RemitCardDto remitCardDto) {
 
@@ -163,7 +163,7 @@ public class RemitCardController {
     /**
      * 查询汇款单详情
      */
-    @ApiOperation(value = "查询汇款单详情")
+    @Operation(summary = "查询汇款单详情")
     @PostMapping("/remitDetail")
     public ClientResponse remitDetail(@RequestBody RemitCardDto remitCardDto) {
 
@@ -192,7 +192,7 @@ public class RemitCardController {
         return true;
     }
 
-    @ApiOperation(value = "申请汇款")
+    @Operation(summary = "申请汇款")
     @PostMapping("/applyRemit")
     public ClientResponse applyRemit(@RequestBody RemitApplicationRecordDto remitApplicationRecordDto) {
         // 使用自定义的帮助方法来简化对DTO字段的检查
@@ -348,7 +348,7 @@ public class RemitCardController {
     /**
      * 获取汇款汇率
      */
-    @ApiOperation(value = "获取汇款汇率")
+    @Operation(summary = "获取汇款汇率")
     @PostMapping("/getRemitRate")
     public ClientResponse getRemitRate(@RequestBody RemitRateDto remitRateDto) {
         if (ObjectUtils.isEmpty(remitRateDto.getRemitCode())) {

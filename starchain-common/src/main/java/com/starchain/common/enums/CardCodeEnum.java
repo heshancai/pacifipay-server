@@ -1,13 +1,13 @@
 package com.starchain.common.enums;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * @author
  * @date 2024-12-31
  * @Description
  */
-@ApiModel(value="卡类型编码", description="卡类型编码")
+@Schema(description = "卡类型编码")
 public enum CardCodeEnum {
     TPY_UDK1("TpyUDK1", "实名银联数字卡1", "需要实名认证；有卡密码；"),
     TPY_MDN5("TpyMDN5", "匿名万事达数字卡5", ""),

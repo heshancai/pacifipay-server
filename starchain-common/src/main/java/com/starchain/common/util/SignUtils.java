@@ -11,19 +11,7 @@ public class SignUtils {
 
 
 
-    /**
-     * q签名
-     * @param data 签名原始数据
-     * @param key 签名key
-     * @return
-     * @throws Exception
-     */
-    public static String hmacEncode(String data, String key) throws Exception {
-        Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secret_key = new SecretKeySpec(key.getBytes("UTF-8"), "HmacSHA256");
-        sha256_HMAC.init(secret_key);
-        return bytesToHex(sha256_HMAC.doFinal(data.getBytes("UTF-8")));
-    }
+
 
     /**
      * 验证签名
@@ -44,6 +32,20 @@ public class SignUtils {
             log.error("validSign error",e);
             return false;
         }
+    }
+
+    /**
+     * q签名
+     * @param data 签名原始数据
+     * @param key 签名key
+     * @return
+     * @throws Exception
+     */
+    public static String hmacEncode(String data, String key) throws Exception {
+        Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
+        SecretKeySpec secret_key = new SecretKeySpec(key.getBytes("UTF-8"), "HmacSHA256");
+        sha256_HMAC.init(secret_key);
+        return bytesToHex(sha256_HMAC.doFinal(data.getBytes("UTF-8")));
     }
 
     private final static char[] hexArray = "0123456789ABCDEF".toCharArray();

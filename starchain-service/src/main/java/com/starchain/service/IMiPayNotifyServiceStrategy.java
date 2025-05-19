@@ -7,9 +7,9 @@ import com.starchain.common.entity.response.MiPayRemitNotifyResponse;
 /**
  * @author
  * @date 2025-01-04
- * @Description
+ * @Description 策略设计模式 抽象策略类
  */
-public interface IMiPayNotifyService {
+public interface IMiPayNotifyServiceStrategy {
     /**
      * 结果回调
      */

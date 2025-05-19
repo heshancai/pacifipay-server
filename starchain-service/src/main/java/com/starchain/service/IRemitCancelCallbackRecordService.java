@@ -8,5 +8,5 @@ import com.starchain.common.entity.RemitCancelCallbackRecord;
  * @date 2025-01-06
  * @Description
  */
-public interface IRemitCancelCallbackRecordService  extends IService<RemitCancelCallbackRecord>,IMiPayNotifyService {
+public interface IRemitCancelCallbackRecordService  extends IService<RemitCancelCallbackRecord>, IMiPayNotifyServiceStrategy {
 }

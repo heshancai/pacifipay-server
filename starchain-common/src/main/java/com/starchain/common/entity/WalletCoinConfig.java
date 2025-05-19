@@ -2,8 +2,7 @@ package com.starchain.common.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -17,13 +16,13 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("wallet_coin_config")
-@ApiModel(value = "WalletCoinConfig", description = "Wallet Coin Configuration")
+@Schema(description = "Wallet Coin Configuration") // 修改: 将 @ApiModel 替换为 @Schema
 public class WalletCoinConfig {
 
     @TableId
-    @ApiModelProperty(value = "Coin Name", example = "Bitcoin")
+    @Schema(description = "Coin Name", example = "Bitcoin") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private String coinName;
 
-    @ApiModelProperty(value = "Callback Name", example = "BTC")
+    @Schema(description = "Callback Name", example = "BTC") // 修改: 将 @ApiModelProperty 替换为 @Schema
     private String callbackName;
 }

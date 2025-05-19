@@ -1,13 +1,13 @@
 package com.starchain.common.enums;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * @author
  * @date 2025-01-15
  * @Description
  */
-@ApiModel(value = "卡状态创建状态", description = "卡状态创建状态")
+@Schema( description = "卡状态创建状态")
 public enum CreateStatusEnum {
     CREATING(0, "创建中"),
     SUCCESS(1, "创建成功"),

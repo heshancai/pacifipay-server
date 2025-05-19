@@ -4,8 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -22,50 +21,51 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("card_withdraw_callback_record")
-@ApiModel(value = "CardWithdrawCallbackRecord", description = "卡提现通知记录实体")
+@Schema(description = "卡提现通知记录实体")
 public class CardWithdrawCallbackRecord {
-    @ApiModelProperty(value = "主键ID")
+
+    @Schema(description = "主键ID", example = "1")
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    @ApiModelProperty(value = "通知ID")
+    @Schema(description = "通知ID", example = "NOTIFY123456789")
     private String notifyId;
 
-    @ApiModelProperty(value = "卡类型")
+    @Schema(description = "卡类型", example = "CARD_TYPE_001")
     private String cardCode;
 
-    @ApiModelProperty(value = "业务类型")
+    @Schema(description = "业务类型", example = "WITHDRAW")
     private String businessType;
 
-    @ApiModelProperty(value = "卡ID")
+    @Schema(description = "卡ID", example = "1234567890")
     private String cardId;
 
-    @ApiModelProperty(value = "卡号")
+    @Schema(description = "卡号", example = "1234567890123456")
     private String cardNo;
 
-    @ApiModelProperty(value = "状态")
+    @Schema(description = "状态", example = "SUCCESS")
     private String status;
 
-    @ApiModelProperty(value = "状态描述")
+    @Schema(description = "状态描述", example = "提现成功")
     private String statusDesc;
 
-    @ApiModelProperty(value = "商户订单ID")
+    @Schema(description = "商户订单ID", example = "MCH_ORDER_123456789")
     private String mchOrderId;
 
-    @ApiModelProperty(value = "申请提现金额")
+    @Schema(description = "申请提现金额", example = "100.00")
     private BigDecimal withdraw;
 
-    @ApiModelProperty(value = "提现手续费")
+    @Schema(description = "提现手续费", example = "5.00")
     private BigDecimal handleFee;
 
-    @ApiModelProperty(value = "实际到账金额")
+    @Schema(description = "实际到账金额", example = "95.00")
     private BigDecimal actual;
 
-    @ApiModelProperty(value = "创建时间")
+    @Schema(description = "创建时间", example = "2023-10-15 12:30:45")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
 
-    @ApiModelProperty(value = "更新时间")
+    @Schema(description = "更新时间", example = "2023-10-15 12:30:45")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime updateTime;
 }

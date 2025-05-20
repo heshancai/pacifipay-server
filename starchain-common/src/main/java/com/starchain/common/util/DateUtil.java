@@ -6,6 +6,9 @@ import org.springframework.util.Assert;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -22,6 +25,8 @@ public class DateUtil {
 
     public static final DateFormat YYYYMMDD = new SimpleDateFormat("yyyyMMdd");
     public static final DateFormat YYYYMM = new SimpleDateFormat("yyyyMM");
+    public static final String YYYY_MM_DD_MM_HH_SS_Str = "yyyy-MM-dd HH:mm:ss";
+
 
     public static String dateToString(Date date) {
         return YYYY_MM_DD_MM_HH_SS.format(date);
@@ -292,5 +297,10 @@ public class DateUtil {
                 return null;
             }
         }
+    }
+    public static LocalDateTime convertStringToLocalDateTime(String dateStr, String pattern) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        LocalDate localDate = LocalDate.parse(dateStr, formatter);
+        return localDate.atStartOfDay();
     }
 }

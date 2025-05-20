@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -25,7 +26,7 @@ import java.util.List;
  */
 @RestController
 @Slf4j
-@Tag(name = "miPay 持卡人相关api", description = "miPay 持卡人相关api相关api")
+@Tag(name = "持卡人相关api", description = "持卡人相关api")
 @RequestMapping("/cardHolder")
 public class CardHolderController {
     @Autowired
@@ -36,7 +37,7 @@ public class CardHolderController {
      */
     @Operation(summary = "创建持卡人")
     @PostMapping("/add")
-    public ClientResponse addCardHolder(@RequestBody CardHolderDto cardHolderDto) {
+    public ClientResponse addCardHolder(@RequestBody @Valid CardHolderDto cardHolderDto) {
         if (ObjectUtils.isEmpty(cardHolderDto.getUserId())) {
             return ResultGenerator.genFailResult("dto不能为空");
         }

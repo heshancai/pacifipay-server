@@ -11,6 +11,7 @@ import com.starchain.common.entity.CardHolder;
 import com.starchain.common.entity.dto.CardHolderDto;
 import com.starchain.common.enums.CardCodeEnum;
 import com.starchain.common.exception.StarChainException;
+import com.starchain.common.util.DateUtil;
 import com.starchain.common.util.HttpUtils;
 import com.starchain.common.util.OrderIdGenerator;
 import com.starchain.dao.CardHolderMapper;
@@ -46,26 +47,38 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
 
 
         try {
+            // 每次获取不同的token
             String token = HttpUtils.getTokenByMiPay(pacificPayConfig.getBaseUrl(), pacificPayConfig.getId(), pacificPayConfig.getSecret(), pacificPayConfig.getPrivateKey());
-            System.out.println("token=>" + token);
+            log.info("token=>" + token);
             CardHolder cardHolder = new CardHolder();
+            // 下面的是必传参数
+            // 卡类型编码
             cardHolder.setCardCode(CardCodeEnum.TPY_MDN6.getCardCode());
-            //商户申请创建持卡人的唯一值
+            // 商户持卡人ID 相对于银卡端来说 我们是商户端
             String merchantCardHolderId = OrderIdGenerator.generateOrderId("", "", 6);
-
             cardHolder.setMerchantCardHolderId(merchantCardHolderId);
+            // 用户id
             cardHolder.setUserId(cardHolderDto.getUserId());
+            // 商家Id 相对于用户端来说  后续会接入不同的商户
             cardHolder.setBusinessId(cardHolderDto.getBusinessId());
-
+            // 名
             cardHolder.setFirstName(cardHolderDto.getFirstName());
+            // 姓
             cardHolder.setLastName(cardHolderDto.getLastName());
+            // 手机号国家
             cardHolder.setPhoneCountry(cardHolderDto.getPhoneCountry());
+            // 手机号
             cardHolder.setPhoneNumber(cardHolderDto.getPhoneNumber());
+            // 证件号
             cardHolder.setIdAccount(cardHolderDto.getIdAccount());
+            // 邮箱
             cardHolder.setEmail(cardHolderDto.getEmail());
+            // 地址
             cardHolder.setAddress(cardHolderDto.getAddress());
+            // 性别
             cardHolder.setGender(cardHolderDto.getGender());
-            cardHolder.setBirthday(cardHolderDto.getBirthday());
+            // 生日
+            cardHolder.setBirthday(DateUtil.convertStringToLocalDateTime(cardHolderDto.getBirthday(),DateUtil.YYYY_MM_DD_MM_HH_SS_Str));
             cardHolder.setStatus(0);
             cardHolder.setCreateTime(LocalDateTime.now());
             cardHolder.setUpdateTime(LocalDateTime.now());
@@ -75,6 +88,7 @@ public class CardHolderServiceImpl extends ServiceImpl<CardHolderMapper, CardHol
             String str = HttpUtils.doPostMiPay(pacificPayConfig.getBaseUrl() + CardUrlConstants.ADD_CARD_HOLDER,
                     token, JSONObject.toJSONString(cardHolder), pacificPayConfig.getId(), pacificPayConfig.getServerPublicKey(), pacificPayConfig.getPrivateKey());
             log.info("创建持卡人返回的数据：{}", str);
+            // 这里会响应一次数据 后续会有回调数据
             CardHolder returnCardHolder = JSON.parseObject(str, CardHolder.class);
             cardHolder.setTpyshCardHolderId(returnCardHolder.getTpyshCardHolderId());
             cardHolder.setUpdateTime(LocalDateTime.now());

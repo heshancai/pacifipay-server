@@ -23,6 +23,12 @@
             <artifactId>starchain-service</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <!--springboot中使用@NotNull@NotBlank注解无效解决方法-->
+        <!--springboot 2.3之后需要引入 spring-boot-starter-validation-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

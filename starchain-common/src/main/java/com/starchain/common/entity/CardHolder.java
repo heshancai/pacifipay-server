@@ -61,7 +61,7 @@ public class CardHolder implements Serializable {
     private String gender;
 
     @Schema(description = "生日", example = "1990-03-07")
-    private String birthday; // 生日
+    private LocalDateTime birthday; // 生日
 
     @Schema(description = "太平洋的持卡人唯一值-银行卡端返回", example = "TPY123456")
     private String tpyshCardHolderId;

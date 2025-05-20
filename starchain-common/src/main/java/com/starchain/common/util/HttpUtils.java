@@ -89,7 +89,7 @@ public class HttpUtils {
             httpPost.addHeader("Content-Type", "application/json");
             httpPost.addHeader("Authorization", "auth " + md5Str);
             httpPost.addHeader("TPYSH-APP-ID", appId);
-            System.out.println("md5Str==>:" + md5Str);
+            log.info("md5Str==>:" + md5Str);
             // 执行请求并获取响应
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 HttpEntity entity = response.getEntity();
@@ -103,11 +103,11 @@ public class HttpUtils {
                 }
 
                 String dataEncrypt = resultJson.getString("data");
-                System.out.println("速汇卡渠道返回未解密token=>" + dataEncrypt);
+                log.info("速汇卡渠道返回未解密token=>" + dataEncrypt);
                 // 私钥解密
                 String decrypt = RSA2048Encrypt.decrypt(dataEncrypt, RSA2048Encrypt.getPrivateKey(privateKey));
                 JSONObject res = JSON.parseObject(decrypt);
-                System.out.println("解密后数据" + res);
+                log.info("解密后数据" + res);
                 return res.getString("token");
             }
         }
@@ -140,7 +140,7 @@ public class HttpUtils {
                 HttpEntity entity = response.getEntity();
 
                 String resultJsonString = EntityUtils.toString(entity);
-                System.err.println("钱包服务返回--------------" + resultJsonString);
+                log.info("钱包服务返回--------------" + resultJsonString);
                 JSONObject resultJson = JSON.parseObject(resultJsonString);
                 if (!"200".equals(resultJson.getString("code"))) {
                     throw new StarChainException(resultJson.getString("message"));

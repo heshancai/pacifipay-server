@@ -35,11 +35,27 @@ dubbo:
     name: dubbo # 协议名称
     port: 20880 # 服务暴露端口
   registry:
-    address: nacos://127.0.0.1:8848
+    address: nacos://127.0.0.1:8848 # 使用nacos 作为注册中心
     parameters.registry-consumer: true # 是否将消费者注册到注册中心
   scan:
     base-packages: com.starchain.common.dubbo # 扫描 Dubbo 服务的包路径
 springdoc:
   api-docs:
     enabled: true # 启用OpenAPI文档
-    path: /swagger-ui.html # 自定义Swagger UI路径（可选）
+    path: /api-docs # 自定义 OpenAPI JSON 文档路径
+  swagger-ui:
+    path: /swagger-ui.html # 自定义 Swagger UI 访问路径（可选）
+  group-configs: # 分组配置 也可以通过代码 进行配置 @Configuration
+    - group: cardHolder
+      paths-to-match: /cardHolder/**  # api路径：/v3/api-docs/cardHolder
+      packages-to-scan: com.starchain.controller
+    - group: card
+      paths-to-match: /card/**  # api路径：/v3/api-docs/card
+      packages-to-scan: com.starchain.controller
+    - group: remit
+      paths-to-match: /remit/**  # api路径：/v3/api-docs/card
+      packages-to-scan: com.starchain.controller
+    - group: asset
+      paths-to-match: /asset/**  # api路径：/v3/api-docs/card
+      packages-to-scan: com.starchain.controller
+

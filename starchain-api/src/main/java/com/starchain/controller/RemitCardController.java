@@ -35,7 +35,7 @@ import java.util.Objects;
  * @date 2025-01-02
  * @Description 汇款Controller
  */
-@Tag(name = "PacificPay汇款相关api", description = "PacificPay汇款相关api")
+@Tag(name = "全球汇款相关api", description = "全球汇款相关api")
 @RestController
 @RequestMapping("/remit")
 @Slf4j
@@ -348,7 +348,6 @@ public class RemitCardController {
     /**
      * 获取汇款汇率
      */
-    @Operation(summary = "获取汇款汇率")
     @PostMapping("/getRemitRate")
     public ClientResponse getRemitRate(@RequestBody RemitRateDto remitRateDto) {
         if (ObjectUtils.isEmpty(remitRateDto.getRemitCode())) {

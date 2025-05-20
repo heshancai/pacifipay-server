@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @Slf4j
-@Tag(name = "pacificPay银行卡相关api")
+@Tag(name = "银行卡相关api")
 @RequestMapping("/card")
 public class CardController {
 

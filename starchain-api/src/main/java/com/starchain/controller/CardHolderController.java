@@ -6,17 +6,18 @@ import com.starchain.common.entity.dto.CardHolderDto;
 import com.starchain.common.result.ClientResponse;
 import com.starchain.common.result.ResultGenerator;
 import com.starchain.service.ICardHolderService;
+import com.starchain.common.validatedInterface.AddCardHolder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -37,13 +38,8 @@ public class CardHolderController {
      */
     @Operation(summary = "创建持卡人")
     @PostMapping("/add")
-    public ClientResponse addCardHolder(@RequestBody @Valid CardHolderDto cardHolderDto) {
-        if (ObjectUtils.isEmpty(cardHolderDto.getUserId())) {
-            return ResultGenerator.genFailResult("dto不能为空");
-        }
-        if (ObjectUtils.isEmpty(cardHolderDto.getBusinessId())) {
-            return ResultGenerator.genFailResult("dto不能为空");
-        }
+    public ClientResponse addCardHolder(@RequestBody @Validated({AddCardHolder.class}) CardHolderDto cardHolderDto) {
+        // 非空校验 使用注解校验 @Valid
         // 创建持卡人
         CardHolder cardHolder = cardHolderService.addCardHolder(cardHolderDto);
         return ResultGenerator.genSuccessResult(cardHolder);
